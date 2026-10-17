@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {newDb} from 'pg-mem';import request from 'supertest';
 import {migrate} from '../src/db.js';import {normalizeAnime,saveImported} from '../src/shikimori.js';import {saveEpisodeRelease,episodeFeed,syncEpisodeFeed,enqueueEpisodeSync} from '../src/episode-feed.js';import {runJob} from '../src/worker.js';import {createApp} from '../src/app.js';
 async function setup(t){const {Pool}=newDb().adapters.createPg(),db=new Pool();await migrate(db);t.after(()=>db.end());return db;}
-async function anime(db,id){const key=await saveImported(db,normalizeAnime({id,russian:'Anime '+id,name:'Anime '+id,genres:[]}));return (await db.query('SELECT * FROM anime WHERE id=$1',[key])).rows[0];}
+async function anime(db,id){const key=await saveImported(db,normalizeAnime({status:'released',id,russian:'Anime '+id,name:'Anime '+id,genres:[]}));return (await db.query('SELECT * FROM anime WHERE id=$1',[key])).rows[0];}
 function release(shiki,id,numbers=[1,2],fresh='2026-10-10T12:00:00Z'){return {id,shikimori:{id:shiki},fresh_at:fresh,is_blocked_by_geo:false,is_blocked_by_copyrights:false,episodes:numbers.map(n=>({id:`release-${id}-episode-${n}`,ordinal:n,name:'Episode '+n,updated_at:new Date(Date.UTC(2026,9,n,12)).toISOString(),hls_720:'https://cache.libria.fun/test.m3u8'}))};}
 
 test('episode imports are idempotent and metadata changes do not bump an old release',async t=>{
@@ -26,7 +26,7 @@ test('different editions keep their own episodes and older editions cannot repla
 test('latest sync imports missing Shikimori titles once and preserves existing manual names',async t=>{
  const db=await setup(t),a=await anime(db,4);await db.query('UPDATE anime SET name=$1,protected_fields=$2 WHERE id=$3',['Manual name',['name'],a.id]);let imported=0;
  const request=async path=>path.startsWith('anime/releases/latest')?[{id:401,shikimori:{id:4}},{id:501,shikimori:{id:5}},{id:502,shikimori:{id:5}}]:path.endsWith('/401')?release(4,401):release(5,501);
- const importer=async id=>{imported++;return normalizeAnime({id,russian:'New title',genres:[]});};
+ const importer=async id=>{imported++;return normalizeAnime({status:'released',id,russian:'New title',genres:[]});};
  const first=await syncEpisodeFeed(db,{request,importer});assert.equal(first.imported,1);assert.equal(first.inserted,4);assert.equal(first.skipped,1);assert.deepEqual(first.errors,[]);
  const second=await syncEpisodeFeed(db,{request,importer});assert.equal(second.inserted,0);assert.equal(imported,1);assert.equal((await db.query('SELECT name FROM anime WHERE id=$1',[a.id])).rows[0].name,'Manual name');
 });

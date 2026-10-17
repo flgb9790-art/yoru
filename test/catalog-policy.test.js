@@ -1,0 +1,31 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {newDb} from 'pg-mem';
+import {migrate} from '../src/db.js';
+import {removeUnreleased} from '../src/catalog-policy.js';
+import {saveImported,normalizeAnime} from '../src/shikimori.js';
+import {taskState,workerPulse,parserStatus} from '../src/task-status.js';
+import {defaults} from '../src/autoparse.js';
+test('unreleased imports are rejected; cleanup archives only unstarted announcements and is repeatable',async t=>{
+ const {Pool}=newDb().adapters.createPg(),db=new Pool();t.after(()=>db.end());await migrate(db);
+ await assert.rejects(saveImported(db,normalizeAnime({id:123,status:'anons'})),{code:'ANIME_NOT_AIRED'});
+ await db.query("INSERT INTO anime(id,name,status,aired) VALUES('future','Future','anons',0),('aired','Aired','anons',1),('finished','Finished','released',0),('watched','Watched','anons',0)");
+ await db.query("INSERT INTO users(id,name) VALUES('u','User')");
+ await db.query("INSERT INTO library(user_id,anime_id) VALUES('u','future')");
+ await db.query("INSERT INTO watch_history(id,user_id,anime_id,episode,position_seconds) VALUES('h','u','watched',1,60)");
+ assert.equal(await removeUnreleased(db),1);assert.equal(await removeUnreleased(db),0);
+ assert.equal((await db.query('SELECT * FROM anime')).rowCount,3);
+ const snapshot=(await db.query('SELECT snapshot FROM removed_announcements')).rows[0].snapshot;
+ assert.equal(snapshot.anime.id,'future');assert.equal(snapshot.related.library.length,1);
+ assert.equal((await db.query('SELECT * FROM library')).rowCount,0);
+});
+test('parser status distinguishes running, stale, queued, failed and disabled; heartbeat persists',async t=>{
+ const c=defaults(),now=Date.now(),worker={heartbeat_at:new Date(now)},job={kind:'auto_archive',status:'running'};
+ assert.equal(taskState('archive',c,[job],worker,now).code,'running');
+ assert.equal(taskState('archive',c,[job],worker,now+60000).code,'stale');
+ assert.equal(taskState('archive',c,[{...job,status:'pending'}],worker,now).code,'queued');
+ assert.equal(taskState('archive',c,[{...job,status:'failed'}],worker,now).code,'failed');
+ assert.equal(taskState('archive',{...c,enabled:false},[job],worker,now).code,'paused');
+ const {Pool}=newDb().adapters.createPg(),db=new Pool();t.after(()=>db.end());await migrate(db);await workerPulse(db,'auto_archive');
+ const status=await parserStatus(db);assert.equal(status.worker.current_kind,'auto_archive');assert.ok(status.worker.heartbeat_at);
+});

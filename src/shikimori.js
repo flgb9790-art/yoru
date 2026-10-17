@@ -1,3 +1,4 @@
+import {assertAired} from './catalog-policy.js';
 import {randomUUID} from 'node:crypto';
 let nextRequest=0;
 let queue=Promise.resolve();
@@ -35,6 +36,7 @@ export async function fetchAnime(id){
  return result;
 }
 export async function saveImported(db,item){
+ assertAired(item);
  const existing=(await db.query('SELECT * FROM anime WHERE shikimori_id=$1',[item.shikimori_id])).rows[0];
  if(existing){const protectedSet=new Set(existing.protected_fields||[]);const merged={...existing,...Object.fromEntries(Object.entries(item).filter(([k])=>!protectedSet.has(k)))};if(!protectedSet.has('metadata')){merged.metadata={...existing.metadata,...item.metadata};for(const key of protectedSet)if(key.startsWith('metadata.'))merged.metadata[key.slice(9)]=existing.metadata[key.slice(9)];}
   if(!protectedSet.has('poster')&&existing.metadata?.poster_source==='myanimelist-via-jikan'&&existing.poster)merged.poster=existing.poster;
