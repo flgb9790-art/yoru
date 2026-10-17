@@ -13,14 +13,15 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
   if(anime.blocked)return res.status(403).json({error:'Просмотр ограничен: '+(anime.block_reason||'по решению администратора')});
   if(!anime.shikimori_id)return res.status(404).json({error:'Для этого аниме ещё не указан Shikimori ID.'});
   try{
+   const pageOrigin=new URL(process.env.BASE_URL||'http://localhost:3000').origin;
    let cached=(await db.query('SELECT * FROM aniliberty_sources WHERE anime_id=$1',[anime.id])).rows[0],source=cached?.payload;
    const ttl=source?.available?10*60000:3*60000,key='aniliberty:'+anime.id;
-   if(!cached||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
+   if(!cached||cached.page_origin!==pageOrigin||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
     if(!pending.has(key))pending.set(key,(async()=>{
      const result=await libertyResolver(anime);
      if(result.restricted){result.available=false;result.episodes=[];}
      for(const item of result.episodes||[])for(const value of Object.values(item.streams||{}))validateStream(value);
-     await db.query('INSERT INTO aniliberty_sources(anime_id,payload) VALUES($1,$2) ON CONFLICT(anime_id) DO UPDATE SET payload=$2,checked_at=NOW()',[anime.id,JSON.stringify(result)]);return result;
+     await db.query('INSERT INTO aniliberty_sources(anime_id,payload,page_origin) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET payload=$2,page_origin=$3,checked_at=NOW()',[anime.id,JSON.stringify(result),pageOrigin]);return result;
     })().finally(()=>pending.delete(key)));
     source=await pending.get(key);
    }

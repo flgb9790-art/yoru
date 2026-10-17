@@ -1,6 +1,8 @@
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
+ try{const preferred=localStorage.getItem('yoru_player_source');if(['kodik','aniliberty'].includes(preferred))sourceSelect.value=preferred;}catch{}
+ qualityLabel.textContent=sourceSelect.value==='aniliberty'?'AniLiberty':'Kodik';
  let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false;
  const integer=(value,min,max)=>Number.isInteger(Number(value))&&Number(value)>=min&&Number(value)<=max?Number(value):null;
  function resetProgress(){position=0;duration=0;watched=0;started=false;ended=false;lastSaved=0;lastSent=-1;translation=null;}
@@ -57,7 +59,7 @@ if(playerHost){
   }catch(error){if(current===generation)note(error.message,true);}finally{if(current===generation)loading=false;}
  }
  playerHost.querySelector('[data-load-player]')?.addEventListener('click',()=>load());
- sourceSelect.addEventListener('change',()=>load());
+ sourceSelect.addEventListener('change',()=>{try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
  episodeSelect.addEventListener('change',()=>{const item=episodes.find(item=>item.number===Number(episodeSelect.value));if(item)playEpisode(item);});
  qualitySelect.addEventListener('change',()=>{qualitySelect.dataset.preferred=qualitySelect.value;const item=episodes.find(item=>item.number===episode);if(item)playEpisode(item,position,Boolean(video&&!video.paused),true);});
  document.querySelectorAll('a[href="#player"]').forEach(link=>link.addEventListener('click',()=>{if(!loading&&!iframe&&!video)load();}));
