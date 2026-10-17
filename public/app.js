@@ -25,3 +25,7 @@ document.querySelector('[data-shiki-fill]')?.addEventListener('click',async even
  status.textContent='Данные загружены. Проверь поля и сохрани аниме.';form.scrollIntoView({block:'start',behavior:'smooth'});
  }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
 });
+const frameDialog=document.querySelector('[data-frame-dialog]');
+document.querySelectorAll('[data-frame]').forEach(button=>button.addEventListener('click',()=>{const source=button.querySelector('img'),image=frameDialog.querySelector('img');image.src=source.src;image.alt=source.alt;frameDialog.showModal();}));
+document.querySelector('[data-close-frame]')?.addEventListener('click',()=>frameDialog.close());
+frameDialog?.addEventListener('click',event=>{if(event.target!==frameDialog)return;const r=frameDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)frameDialog.close();});

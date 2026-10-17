@@ -15,7 +15,7 @@ export async function saveEpisodeRelease(db,anime,raw,{now=new Date()}={}){
  const client=await db.connect();
  try{
   await client.query('BEGIN');
-  const lockedAnime=(await client.query('SELECT id,blocked FROM anime WHERE id=$1 FOR UPDATE',[anime.id])).rows[0];
+  const lockedAnime=(await client.query('SELECT id,blocked,status FROM anime WHERE id=$1 FOR UPDATE',[anime.id])).rows[0];
   const existing=(await client.query('SELECT episode FROM episode_releases WHERE anime_id=$1 AND release_id=$2',[anime.id,releaseId])).rows,seen=new Set(existing.map(e=>e.episode));
   await client.query("UPDATE episode_releases SET available=FALSE WHERE anime_id=$1 AND provider='aniliberty' AND release_id=$2",[anime.id,releaseId]);
   for(let offset=0;offset<items.length;offset+=100){
@@ -30,7 +30,7 @@ export async function saveEpisodeRelease(db,anime,raw,{now=new Date()}={}){
   if(!prior||newDate>oldDate||(newDate===oldDate&&releaseId>=prior.release_id))await client.query('INSERT INTO episode_feed_titles(anime_id,release_id,source_fresh_at) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET release_id=$2,source_fresh_at=$3,checked_at=NOW()',[anime.id,releaseId,fresh]);
   // A feed link must not open a stale playlist without the newly discovered episode.
   await client.query('DELETE FROM aniliberty_sources WHERE anime_id=$1',[anime.id]);
-  await notifyEpisodes(client,{...anime,blocked:lockedAnime.blocked},releaseId,items,{newEdition:!prior||prior.release_id!==releaseId});
+  await notifyEpisodes(client,{...anime,blocked:lockedAnime.blocked,status:lockedAnime.status},releaseId,items,{newEdition:!prior||prior.release_id!==releaseId});
   await client.query('COMMIT');
   return {inserted:items.filter(e=>!seen.has(e.number)).length,episodes:items.length,restricted:normalized.restricted};
  }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}

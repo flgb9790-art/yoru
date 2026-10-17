@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {requireUser} from './security.js';
 import {layout,esc,csrf,card,pagination} from './views.js';
 export async function notifyEpisodes(client,anime,releaseId,items,{newEdition=false}={}){
- if(anime.blocked||!items.length)return;
+ if(anime.blocked||anime.status!=='ongoing'||!items.length)return;
  const current=(await client.query('SELECT release_id FROM episode_feed_titles WHERE anime_id=$1',[anime.id])).rows[0];
  if(current?.release_id!==releaseId)return;
  const maximum=Math.max(...items.map(e=>e.number));
@@ -23,9 +23,9 @@ export function resumeCard(a){return `<div class="resume-card">${card(a)}<p clas
 export function mountFollows(app,db){
  app.use(async(req,res,next)=>{if(req.user)req.unreadNotifications=+(await db.query('SELECT COUNT(*) AS count FROM notifications WHERE user_id=$1 AND read_at IS NULL',[req.user.id])).rows[0].count;next();});
  app.post('/follow/:id',requireUser,async(req,res)=>{
-  const client=await db.connect();try{await client.query('BEGIN');const a=(await client.query('SELECT id FROM anime WHERE id=$1 FOR UPDATE',[req.params.id])).rows[0];if(!a){await client.query('ROLLBACK');return res.sendStatus(404);}
+  const client=await db.connect();try{await client.query('BEGIN');const a=(await client.query('SELECT id,status FROM anime WHERE id=$1 FOR UPDATE',[req.params.id])).rows[0];if(!a){await client.query('ROLLBACK');return res.sendStatus(404);}
    if(req.body.follow==='false')await client.query('DELETE FROM anime_follows WHERE user_id=$1 AND anime_id=$2',[req.user.id,a.id]);
-   else {const baseline=(await client.query('SELECT MAX(episode) AS maximum FROM episode_releases WHERE anime_id=$1',[a.id])).rows[0].maximum;await client.query('INSERT INTO anime_follows(user_id,anime_id,last_episode) VALUES($1,$2,$3) ON CONFLICT(user_id,anime_id) DO NOTHING',[req.user.id,a.id,baseline]);}
+   else {if(a.status!=='ongoing'){await client.query('ROLLBACK');return res.status(409).send('Отслеживать можно только аниме, которые сейчас выходят.');}const baseline=(await client.query('SELECT MAX(episode) AS maximum FROM episode_releases WHERE anime_id=$1',[a.id])).rows[0].maximum;await client.query('INSERT INTO anime_follows(user_id,anime_id,last_episode) VALUES($1,$2,$3) ON CONFLICT(user_id,anime_id) DO NOTHING',[req.user.id,a.id,baseline]);}
    await client.query('COMMIT');res.redirect('/anime/'+a.id);
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  });
