@@ -33,8 +33,8 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    if(!source.available)return res.status(404).json({error:'В AniLiberty пока нет доступных серий этого аниме. Попробуй Kodik.'});
    // Validate cached links too; media is fetched directly from the provider, never proxied.
    for(const item of source.episodes)for(const value of Object.values(item.streams))validateStream(value);
-   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,source_release_id FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND completed=FALSE AND (source_release_id IS NULL OR source_release_id=$3) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id,source.release_id||null])).rows[0]:null;
-   res.json({...source,resume:resume||null});
+   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,source_release_id,completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) AND (source_release_id IS NULL OR source_release_id=$3) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id,source.release_id||null])).rows[0]:null;
+   res.json({...source,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'aniliberty_lookup_error',anime_id:anime.id,message:'Release lookup failed'}));res.status(503).json({error:'AniLiberty временно недоступен. Попробуй позже или выбери Kodik.'});}
  });
  app.get('/api/player/:id/status',async(req,res)=>{
@@ -65,8 +65,8 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    // A title can be blocked while the remote request is in flight.
    const current=(await db.query('SELECT blocked FROM anime WHERE id=$1',[anime.id])).rows[0];if(!current||current.blocked)return res.status(403).json({error:'Просмотр ограничен администратором.'});
    if(!source.available)return res.status(404).json({error:'Kodik пока не предоставил плеер для этого аниме.'});
-   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,translation_id FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND completed=FALSE ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id])).rows[0]:null;
-   res.json({url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,resume:resume||null});
+   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,translation_id,completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id])).rows[0]:null;
+   res.json({url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'kodik_lookup_error',anime_id:anime.id,message:'Public player lookup failed'}));res.status(503).json({error:'Не удалось связаться с Kodik. Попробуй открыть плеер чуть позже.'});}
  });
  const watchLimit=rateLimit({windowMs:15*60000,limit:240,standardHeaders:'draft-8',legacyHeaders:false});
