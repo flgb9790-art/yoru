@@ -1,3 +1,4 @@
+import {scheduleView} from './schedule.js';
 import {mountProgress} from './progress.js';
 import {mountFollows,continueWatching,resumeCard} from './follows.js';
 import express from 'express';
@@ -55,7 +56,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  const saved=req.user?(await db.query('SELECT status,score FROM library WHERE anime_id=$1 AND user_id=$2',[a.id,req.user.id])).rows[0]:null;
  send(req,res,a.name,animePage(req,{a,comments,latest,random:all[Math.floor(Math.random()*all.length)],similar,parts,score,saved,following:req.user?!!(await db.query('SELECT user_id FROM anime_follows WHERE user_id=$1 AND anime_id=$2',[req.user.id,a.id])).rowCount:false}));
  });
- app.get('/schedule',async(req,res)=>{const page=pageOf(req.query.page),result=await catalogue({status:'ongoing',sort:'schedule'},24,(page-1)*24);send(req,res,'Расписание',`<h1>Расписание онгоингов</h1><p class="muted">Указано время оригинального эфира (МСК). Перевод может выйти позже.</p><div class="grid">${result.rows.map(a=>`<div>${card(a)}<div class="schedule-time">${a.metadata?.nextEpisode?esc(new Date(a.metadata.nextEpisode).toLocaleString('ru-RU',{timeZone:'Europe/Minsk'})):'Дата следующего эфира не указана'}</div></div>`).join('')||'<p>Онгоингов пока нет.</p>'}</div>${pagination(page,result.total,24,n=>'/schedule?page='+n)}`);});
+ app.get('/schedule',async(req,res)=>{const rows=(await db.query("SELECT * FROM anime WHERE status='ongoing'")).rows;rows.sort((a,b)=>(Date.parse(a.metadata?.nextEpisode)||Infinity)-(Date.parse(b.metadata?.nextEpisode)||Infinity)||a.id.localeCompare(b.id));send(req,res,'Расписание',scheduleView(rows,req.query));});
  const authLimiter=rateLimit({windowMs:15*60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false});
  async function signIn(req,res,user){const raw=token();await db.query('INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,$3,$4)',[hashToken(raw),user.id,token(),new Date(Date.now()+30*86400000)]);res.cookie('yoru_session',raw,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:30*86400000,path:'/'});res.redirect('/profile');}
  mountTelegram(app,db,signIn);
