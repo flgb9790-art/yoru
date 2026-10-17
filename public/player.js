@@ -1,3 +1,5 @@
+window.yoruPages.register((page)=>{
+const listen=page.listen,setInterval=page.interval;
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
@@ -70,7 +72,7 @@ if(playerHost){
  qualitySelect.addEventListener('change',()=>{qualitySelect.dataset.preferred=qualitySelect.value;const item=episodes.find(item=>item.number===episode);if(item)playEpisode(item,position,Boolean(video&&!video.paused),true);});
  document.querySelectorAll('a[href="#player"]').forEach(link=>link.addEventListener('click',()=>{if(!loading&&!iframe&&!video)load();}));
  if(location.hash==='#player')load();
- window.addEventListener('message',event=>{
+ listen(window,'message',event=>{
   if(provider!=='kodik'||!iframe||event.source!==iframe.contentWindow||event.origin!==origin)return;
   let data=event.data;if(typeof data==='string'){if(data.length>4096)return;try{data=JSON.parse(data);}catch{return;}}if(!data||typeof data!=='object')return;
   if(data.key==='kodik_player_current_episode'){
@@ -82,7 +84,9 @@ if(playerHost){
   }else if(data.key==='kodik_player_pause')save(true);
   else if(data.key==='kodik_player_video_ended'&&started&&position>0){ended=true;save(true);}
  });
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save(true);else checkPermission();});
- window.addEventListener('pagehide',()=>{save(true);clearInterval(permissionTimer);});
- window.addEventListener('pageshow',event=>{if(event.persisted){clearInterval(permissionTimer);permissionTimer=setInterval(checkPermission,60000);checkPermission();}});
+ listen(document,'visibilitychange',()=>{if(document.visibilityState==='hidden')save(true);else checkPermission();});
+ listen(window,'pagehide',()=>{save(true);clearInterval(permissionTimer);});
+ listen(window,'pageshow',event=>{if(event.persisted){clearInterval(permissionTimer);permissionTimer=setInterval(checkPermission,60000);checkPermission();}});
+return ()=>{save(true);generation++;destroy();};
 }
+});
