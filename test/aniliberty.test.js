@@ -14,3 +14,9 @@ test('AniLiberty restrictions discard playable sources; missing permissions fail
 test('AniLiberty stream validation preserves provider parameters and rejects foreign origins',()=>{
  assert.equal(validateStream(stream),stream);for(const value of ['http://cache.libria.fun/test.m3u8','https://libria.fun.evil.example/test.m3u8','https://evil.example/test.m3u8','https://user:pass@cache.libria.fun/test.m3u8'])assert.throws(()=>validateStream(value));
 });
+
+test('explicit feed release resolves exactly that edition and checks its Shikimori mapping',async()=>{
+ const calls=[],client=createAniLibertyClient(async address=>{calls.push(new URL(address).pathname);return Response.json(release);});
+ const result=await client({shikimori_id:57612,name:'Anime'},10301);assert.equal(result.release_id,10301);assert.deepEqual(calls,['/api/v1/anime/releases/10301']);
+ await assert.rejects(()=>client({shikimori_id:999,name:'Wrong anime'},10301));await assert.rejects(()=>client({shikimori_id:57612},10302));
+});

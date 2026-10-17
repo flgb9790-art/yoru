@@ -8,6 +8,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
  const lookupLimit=rateLimit({windowMs:3600000,limit:180,standardHeaders:'draft-8',legacyHeaders:false});
  app.get('/api/player/:id/aniliberty',lookupLimit,async(req,res)=>{
   res.set('Cache-Control','no-store');
+  const requestedRelease=z.coerce.number().int().positive().optional().parse(req.query.release||undefined);
   const anime=(await db.query('SELECT id,name,original_name,shikimori_id,blocked,block_reason FROM anime WHERE id=$1',[req.params.id])).rows[0];
   if(!anime)return res.status(404).json({error:'Аниме не найдено.'});
   if(anime.blocked)return res.status(403).json({error:'Просмотр ограничен: '+(anime.block_reason||'по решению администратора')});
@@ -15,10 +16,11 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
   try{
    const pageOrigin=new URL(process.env.BASE_URL||'http://localhost:3000').origin;
    let cached=(await db.query('SELECT * FROM aniliberty_sources WHERE anime_id=$1',[anime.id])).rows[0],source=cached?.payload;
-   const ttl=source?.available?10*60000:3*60000,key='aniliberty:'+anime.id;
-   if(!cached||cached.page_origin!==pageOrigin||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
+   const ttl=source?.available?10*60000:3*60000,key='aniliberty:'+anime.id+':'+(requestedRelease||'default');
+   if(!cached||cached.page_origin!==pageOrigin||(requestedRelease&&Number(source?.release_id)!==requestedRelease)||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
     if(!pending.has(key))pending.set(key,(async()=>{
-     const result=await libertyResolver(anime);
+     const result=await libertyResolver(anime,requestedRelease);
+     if(requestedRelease&&Number(result.release_id)!==requestedRelease)throw new Error('Release edition mismatch');
      if(result.restricted){result.available=false;result.episodes=[];}
      for(const item of result.episodes||[])for(const value of Object.values(item.streams||{}))validateStream(value);
      await db.query('INSERT INTO aniliberty_sources(anime_id,payload,page_origin) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET payload=$2,page_origin=$3,checked_at=NOW()',[anime.id,JSON.stringify(result),pageOrigin]);return result;
@@ -30,7 +32,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    if(!source.available)return res.status(404).json({error:'В AniLiberty пока нет доступных серий этого аниме. Попробуй Kodik.'});
    // Validate cached links too; media is fetched directly from the provider, never proxied.
    for(const item of source.episodes)for(const value of Object.values(item.streams))validateStream(value);
-   const resume=req.user?(await db.query('SELECT episode,season,position_seconds FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND completed=FALSE ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id])).rows[0]:null;
+   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,source_release_id FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND completed=FALSE AND (source_release_id IS NULL OR source_release_id=$3) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id,source.release_id||null])).rows[0]:null;
    res.json({...source,resume:resume||null});
   }catch(error){console.error(JSON.stringify({event:'aniliberty_lookup_error',anime_id:anime.id,message:'Release lookup failed'}));res.status(503).json({error:'AniLiberty временно недоступен. Попробуй позже или выбери Kodik.'});}
  });
@@ -69,10 +71,10 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
  const watchLimit=rateLimit({windowMs:15*60000,limit:240,standardHeaders:'draft-8',legacyHeaders:false});
  const authenticate=(req,res,next)=>req.user?next():req.is('application/json')?res.status(401).json({error:'Войди, чтобы сохранить историю.'}):res.redirect('/login');
  app.post('/watch/:id',authenticate,watchLimit,async(req,res)=>{
-  const input=z.object({episode:z.coerce.number().int().min(1).max(100000),season:z.coerce.number().int().min(0).max(10000).default(1),position:z.coerce.number().int().min(0).max(86400).default(0),completed:z.enum(['true','false']).default('false'),translation:z.coerce.number().int().min(1).max(10000000).optional(),provider:z.enum(['kodik','aniliberty']).default('kodik')}).parse(req.body);
+  const input=z.object({episode:z.coerce.number().int().min(1).max(100000),season:z.coerce.number().int().min(0).max(10000).default(1),position:z.coerce.number().int().min(0).max(86400).default(0),completed:z.enum(['true','false']).default('false'),translation:z.coerce.number().int().min(1).max(10000000).optional(),provider:z.enum(['kodik','aniliberty']).default('kodik'),release:z.coerce.number().int().positive().optional()}).parse(req.body);
   const anime=(await db.query('SELECT id,blocked FROM anime WHERE id=$1',[req.params.id])).rows[0];
   if(!anime||anime.blocked)return res.sendStatus(403);
-  await db.query('INSERT INTO watch_history(id,user_id,anime_id,episode,position_seconds,completed,translation_id,season,provider) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET position_seconds=$5,completed=watch_history.completed OR $6,translation_id=$7,provider=$9,updated_at=NOW()',[randomUUID(),req.user.id,anime.id,input.episode,input.position,input.completed==='true',input.translation||null,input.season,input.provider]);
+  await db.query('INSERT INTO watch_history(id,user_id,anime_id,episode,position_seconds,completed,translation_id,season,provider,source_release_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET position_seconds=$5,completed=watch_history.completed OR $6,translation_id=$7,provider=$9,source_release_id=$10,updated_at=NOW()',[randomUUID(),req.user.id,anime.id,input.episode,input.position,input.completed==='true',input.translation||null,input.season,input.provider,input.provider==='aniliberty'?(input.release||null):null]);
   if(req.is('application/json'))return res.json({ok:true});res.redirect('/history');
  });
 }

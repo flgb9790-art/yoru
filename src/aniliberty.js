@@ -1,4 +1,13 @@
 const API='https://api.anilibria.app/api/v1/';
+let nextRequest=0,queue=Promise.resolve();
+export function anilibertyRequest(path,fetcher=fetch){
+ const run=async()=>{
+  if(fetcher===fetch){const delay=Math.max(0,nextRequest-Date.now());if(delay)await new Promise(r=>setTimeout(r,delay));nextRequest=Date.now()+650;}
+  const response=await fetcher(new URL(path,API),{headers:{Accept:'application/json','User-Agent':'Yoru/0.3'},signal:AbortSignal.timeout(15000)});
+  if(!response.ok)throw new Error('AniLiberty API unavailable');return response.json();
+ };
+ const result=queue.then(run);queue=result.catch(()=>{});return result;
+}
 export function validateStream(value){
  const url=new URL(value);
  if(url.protocol!=='https:'||url.username||url.password||!(url.hostname==='libria.fun'||url.hostname.endsWith('.libria.fun'))||!url.pathname.endsWith('.m3u8'))throw new Error('Unexpected AniLiberty stream address');
@@ -17,11 +26,9 @@ export function normalizeRelease(raw,shikimoriId){
  return {available:episodes.length>0,restricted:false,release_id:raw.id,episodes};
 }
 export function createAniLibertyClient(fetcher=fetch){
- async function request(path){
-  const response=await fetcher(new URL(path,API),{headers:{Accept:'application/json','User-Agent':'Yoru/0.2'},signal:AbortSignal.timeout(20000)});
-  if(!response.ok)throw new Error('AniLiberty API unavailable');return response.json();
- }
- return async function resolve(anime){
+ const request=path=>anilibertyRequest(path,fetcher);
+ return async function resolve(anime,releaseId){
+  if(releaseId){if(!Number.isSafeInteger(+releaseId)||+releaseId<1)throw new Error('Invalid release ID');const raw=await request('anime/releases/'+Number(releaseId));if(Number(raw.id)!==Number(releaseId))throw new Error('Release edition mismatch');return normalizeRelease(raw,anime.shikimori_id);}
   for(const query of [...new Set([anime.original_name,anime.name].filter(Boolean))]){
    const params=new URLSearchParams({'f[search]':query.slice(0,200),limit:'30'});
    const response=await request('anime/catalog/releases?'+params),items=Array.isArray(response)?response:response.data;

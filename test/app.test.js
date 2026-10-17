@@ -93,3 +93,10 @@ test('AniLiberty provider restrictions never expose media URLs',async()=>{
  const response=await request(target).get('/api/player/'+id+'/aniliberty');assert.equal(response.status,403);assert.equal(response.body.episodes,undefined);
  const cached=(await db.query('SELECT payload FROM aniliberty_sources WHERE anime_id=$1',[id])).rows[0];assert.deepEqual(cached.payload.episodes,[]);
 });
+
+test('episode synchronization controls require admin and retain CSRF protection',async()=>{
+ assert.equal((await request(app).get('/new-episodes')).status,200);
+ assert.equal((await request(app).post('/admin/episodes/sync').send({})).status,403);
+ const {agent,csrf}=await login();const first=await agent.post('/admin/episodes/sync').type('form').send({_csrf:csrf}),second=await agent.post('/admin/episodes/sync').type('form').send({_csrf:csrf});assert.equal(first.status,302);assert.equal(second.status,302);assert.equal((await db.query("SELECT * FROM jobs WHERE kind='episodes'")).rowCount,1);
+ assert.match((await agent.get('/admin/jobs')).text,/Обновить серии AniLiberty/);
+});
