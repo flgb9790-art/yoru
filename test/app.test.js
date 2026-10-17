@@ -77,3 +77,19 @@ test('expired playback authentication returns JSON 401 rather than a successful 
  const agent=request.agent(app),loginPage=await agent.get('/login'),csrf=loginPage.text.match(/name="_csrf" value="([^"]+)/)[1];
  const response=await agent.post('/watch/unknown').set('x-csrf-token',csrf).send({episode:1,position:10,completed:'false'});assert.equal(response.status,401);assert.match(response.headers['content-type'],/application\/json/);
 });
+
+test('AniLiberty endpoint caches separately, respects block changes and supplies resumable media',async()=>{
+ const anime=(await db.query('SELECT id FROM anime WHERE shikimori_id=90001')).rows[0];let calls=0;
+ const target=createApp(db,{anilibertyResolver:async()=>{calls++;return {available:true,restricted:false,episodes:[{number:1,season:1,name:'One',duration:1400,streams:{'720':'https://cache.libria.fun/test.m3u8?isWithVideoAds=1'}}]};}});
+ let response=await request(target).get('/api/player/'+anime.id+'/aniliberty');assert.equal(response.status,200);assert.equal(response.body.episodes.length,1);assert.equal(response.body.resume,null);assert.match(response.body.episodes[0].streams['720'],/isWithVideoAds=1/);
+ await request(target).get('/api/player/'+anime.id+'/aniliberty');assert.equal(calls,1);
+ await db.query('UPDATE anime SET blocked=TRUE WHERE id=$1',[anime.id]);response=await request(target).get('/api/player/'+anime.id+'/aniliberty');assert.equal(response.status,403);assert.equal(response.body.episodes,undefined);assert.equal(calls,1);await db.query('UPDATE anime SET blocked=FALSE WHERE id=$1',[anime.id]);
+ const {agent,csrf}=await login(target);await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:1,position:90,completed:'false',provider:'aniliberty'});
+ response=await agent.get('/api/player/'+anime.id+'/aniliberty');assert.equal(response.body.resume.position_seconds,90);assert.equal((await db.query('SELECT provider FROM watch_history WHERE user_id=$1 AND anime_id=$2',['admin',anime.id])).rows[0].provider,'aniliberty');
+});
+
+test('AniLiberty provider restrictions never expose media URLs',async()=>{
+ const id=await saveImported(db,normalizeAnime({id:987654,russian:'Restricted release',genres:[]}));const target=createApp(db,{anilibertyResolver:async()=>({available:true,restricted:true,episodes:[{streams:{'720':'https://cache.libria.fun/test.m3u8'}}]})});
+ const response=await request(target).get('/api/player/'+id+'/aniliberty');assert.equal(response.status,403);assert.equal(response.body.episodes,undefined);
+ const cached=(await db.query('SELECT payload FROM aniliberty_sources WHERE anime_id=$1',[id])).rows[0];assert.deepEqual(cached.payload.episodes,[]);
+});

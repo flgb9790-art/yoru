@@ -14,10 +14,11 @@ import {animePage,sidebar} from './anime-page.js';
 import {enqueueImport} from './worker.js';
 import {mountPlayback} from './playback.js';
 const uuid=()=>randomUUID();
-export function createApp(db,{importer=fetchAnime,playerResolver}={}){
+export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver}={}){
  const app=express();app.set('trust proxy',1);
- app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
+ app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  app.use(express.urlencoded({extended:true,limit:'300kb'}));app.use(express.json({limit:'300kb'}));
+ app.get('/vendor/hls.min.js',(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
  app.use(express.static(fileURLToPath(new URL('../public',import.meta.url))));
  app.get('/health',async(req,res)=>{await db.query('SELECT 1');res.json({ok:true});});
  app.use(async(req,res,next)=>{const raw=cookie(req,'yoru_session');if(raw){const s=(await db.query('SELECT * FROM sessions WHERE token_hash=$1 AND expires_at>NOW()',[hashToken(raw)])).rows[0];if(s){req.session=s;if(s.user_id)req.user=(await db.query('SELECT id,email,name,role,verified,avatar,cover FROM users WHERE id=$1',[s.user_id])).rows[0];}}
@@ -27,7 +28,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver}={}){
  app.use((req,res,next)=>{let csrfToken=cookie(req,'yoru_csrf');if(!csrfToken||!/^[a-f0-9]{64}$/.test(csrfToken)){csrfToken=token();res.cookie('yoru_csrf',csrfToken,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'});}req.session.csrf=csrfToken;
   if(['POST','PUT','PATCH','DELETE'].includes(req.method)&&(req.body?._csrf||req.get('x-csrf-token'))!==csrfToken)return res.status(403).send('Форма устарела. Обнови страницу.');next();});
  mountCommunity(app,db);
- mountPlayback(app,db,playerResolver);
+ mountPlayback(app,db,playerResolver,anilibertyResolver);
  const send=(req,res,title,body,status=200)=>res.status(status).send(layout(title,body,req));
  async function catalogue(query,size=24,offset=0){const clauses=[],values=[];const add=(sql,value)=>{values.push(value);clauses.push(sql.replace('?',`$${values.length}`));};if(query.q)add('name ILIKE ?',`%${String(query.q).slice(0,200)}%`);if(query.country)add('country=?',query.country);if(query.kind)add('kind=?',query.kind);if(['ongoing','released','anons'].includes(query.status))add('status=?',query.status);if(query.blocked==='1')clauses.push('blocked=TRUE');if(query.year&&/^\d{4}$/.test(query.year))add('year=?',+query.year);for(const g of [].concat(query.genre||[]).slice(0,40))add('? = ANY(genres)',g);const where=clauses.length?' WHERE '+clauses.join(' AND '):'';const order={rating:'rating DESC',popular:'views DESC',year:'year DESC NULLS LAST',updated:'updated_at DESC',schedule:"metadata->>'nextEpisode' ASC NULLS LAST"}[query.sort]||'updated_at DESC';const total=+(await db.query('SELECT COUNT(*) AS count FROM anime'+where,values)).rows[0].count;const rows=(await db.query(`SELECT * FROM anime${where} ORDER BY ${order},id LIMIT $${values.length+1} OFFSET $${values.length+2}`,[...values,size,offset])).rows;return {total,rows};}
  const pageOf=q=>Math.max(1,Math.min(100000,parseInt(q,10)||1));
