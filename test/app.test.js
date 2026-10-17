@@ -19,3 +19,31 @@ test('catalog genre intersection, country and pagination',async()=>{const result
 test('background import job persists result and status',async()=>{await db.query('INSERT INTO jobs(id,kind,payload) VALUES($1,$2,$3)',['job1','import',JSON.stringify({id:123})]);await runJob(db,async()=>normalizeAnime({id:123,russian:'Импорт из очереди',name:'Queue',genres:[]}));assert.equal((await db.query('SELECT status FROM jobs WHERE id=$1',['job1'])).rows[0].status,'done');});
 test('profile uploads validate bytes and persist media in database',async()=>{const {agent,csrf}=await login();const invalid=await agent.post('/profile/image/avatar').set('x-csrf-token',csrf).attach('image',Buffer.from('<svg/>'),'bad.png');assert.equal(invalid.status,400);const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1cAAAAASUVORK5CYII=','base64');const response=await agent.post('/profile/image/avatar').set('x-csrf-token',csrf).attach('image',png,'avatar.png');assert.equal(response.status,200);const user=(await db.query('SELECT avatar FROM users WHERE id=$1',['admin'])).rows[0];assert.match(user.avatar,/^\/media\//);const media=await agent.get(user.avatar);assert.equal(media.status,200);assert.equal(media.headers['content-type'],'image/png');});
 test('watch history belongs to the authenticated user and rejects blocked anime',async()=>{const {agent,csrf}=await login();const open=(await db.query('SELECT id FROM anime WHERE shikimori_id=123')).rows[0];assert.equal((await agent.post('/watch/'+open.id).type('form').send({_csrf:csrf,episode:1,completed:'true'})).status,302);assert.match((await agent.get('/history')).text,/Импорт из очереди/);const blocked=(await db.query('SELECT id FROM anime WHERE shikimori_id=52991')).rows[0];assert.equal((await agent.post('/watch/'+blocked.id).type('form').send({_csrf:csrf,episode:1})).status,403);});
+
+test('library supports personal ratings, status filtering and removal',async()=>{
+ const {agent,csrf}=await login();const a=(await db.query('SELECT id FROM anime WHERE shikimori_id=123')).rows[0];
+ assert.equal((await agent.post('/anime/'+a.id+'/score').type('form').send({_csrf:csrf,score:8})).status,302);
+ assert.equal((await agent.post('/library/'+a.id).type('form').send({_csrf:csrf,status:'favorite'})).status,302);
+ assert.match((await agent.get('/library?status=favorite')).text,/Импорт из очереди/);
+ assert.doesNotMatch((await agent.get('/library?status=dropped')).text,/Импорт из очереди/);
+ assert.equal((await db.query('SELECT score FROM library WHERE user_id=$1 AND anime_id=$2',['admin',a.id])).rows[0].score,8);
+ await agent.post('/library/'+a.id+'/remove').type('form').send({_csrf:csrf});
+ assert.equal((await db.query('SELECT * FROM library WHERE user_id=$1 AND anime_id=$2',['admin',a.id])).rowCount,0);
+});
+
+test('moderation roles cannot grant administrator rights; owner cannot remove own rights',async()=>{
+ const {agent,csrf}=await login();assert.equal((await agent.post('/admin/users/admin/role').type('form').send({_csrf:csrf,role:'user'})).status,400);
+ await db.query('INSERT INTO users(id,email,name,password_hash,role,verified) VALUES($1,$2,$3,$4,$5,TRUE)',['mod','mod@example.com','Moderator',await hashPassword('test-password-123'),'moderator']);
+ const mod=request.agent(app),page=await mod.get('/login'),key=page.text.match(/name="_csrf" value="([^"]+)/)[1];
+ await mod.post('/login').type('form').send({_csrf:key,email:'mod@example.com',password:'test-password-123'});
+ assert.equal((await mod.get('/moderation')).status,200);assert.equal((await mod.get('/admin/users')).status,403);
+ assert.equal((await mod.post('/admin/users/admin/role').type('form').send({_csrf:key,role:'user'})).status,403);
+});
+
+test('metadata edits preserve unrelated imported fields and do not freeze episode updates',async()=>{
+ const {agent,csrf}=await login();const item={...normalizeAnime({id:90001,russian:'Metadata',genres:[]}),metadata:{authors:['Original'],directors:['Director'],studios:['Studio'],duration:24,screenshots:[],nextEpisode:null,related:[{id:1,name:'Part',relation:'Sequel'}],airDate:'2026-01-01'}};
+ const id=await saveImported(db,item);
+ const response=await agent.post('/admin/anime/'+id).type('form').send({_csrf:csrf,name:item.name,kind:'tv',status:'anons',country:'Япония',authors:'Manual',directors:'Director',studios:'Studio',duration:24,protect:'on'});assert.equal(response.status,302);
+ await saveImported(db,{...item,aired:3,metadata:{...item.metadata,authors:['Changed'],directors:['New director']}});
+ const row=(await db.query('SELECT * FROM anime WHERE id=$1',[id])).rows[0];assert.deepEqual(row.metadata.authors,['Manual']);assert.deepEqual(row.metadata.directors,['New director']);assert.equal(row.metadata.related.length,1);assert.equal(row.aired,3);
+});

@@ -5,3 +5,23 @@ document.querySelectorAll('[data-countdown]').forEach(element=>{
 });
 document.querySelectorAll('[data-cover]').forEach(element=>{element.style.backgroundImage=`linear-gradient(0deg,#e7e0f0dd,#d9cbea44),url("${element.dataset.cover}")`;});
 document.querySelectorAll('[data-upload]').forEach(input=>input.addEventListener('change',async()=>{const file=input.files[0];if(!file)return;const message=document.getElementById('upload-message');if(file.size>3*1024*1024){message.textContent='Выбери изображение до 3 МБ.';return;}const form=new FormData();form.append('image',file);message.textContent='Сохраняем изображение…';try{const response=await fetch('/profile/image/'+input.dataset.upload,{method:'POST',headers:{'x-csrf-token':input.dataset.csrf},body:form});if(!response.ok)throw Error('Не удалось загрузить изображение. Разрешены PNG, JPEG и WebP до 3 МБ.');location.reload();}catch(error){message.textContent=error.message;}}));
+
+const authDialog=document.getElementById('auth-dialog');
+document.querySelectorAll('[data-auth]').forEach(link=>link.addEventListener('click',event=>{if(!authDialog)return;event.preventDefault();authDialog.showModal();}));
+document.querySelector('[data-close-auth]')?.addEventListener('click',()=>authDialog.close());
+authDialog?.addEventListener('click',event=>{if(event.target!==authDialog)return;const rect=authDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)authDialog.close();});
+document.querySelectorAll('[data-backdrop]').forEach(el=>{const url=el.dataset.backdrop;if(/^https:\/\//.test(url))el.style.backgroundImage=`linear-gradient(100deg,#f5f1f8ef,#f3f5fae6),url("${url.replace(/["\\\n\r]/g,'')}")`;});
+document.querySelectorAll('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const carousel=button.closest('section').querySelector('.carousel');carousel.scrollBy({left:Number(button.dataset.slide)*carousel.clientWidth*.8,behavior:'smooth'});}));
+document.querySelectorAll('.card-info').forEach(button=>button.addEventListener('click',event=>event.preventDefault()));
+document.querySelector('[data-random]')?.addEventListener('click',()=>location.reload());
+document.querySelector('[data-shiki-fill]')?.addEventListener('click',async event=>{
+ const id=document.querySelector('[data-shiki-id]').value,status=document.querySelector('[data-import-status]'),button=event.currentTarget;
+ if(!/^\d+$/.test(id)||Number(id)<1){status.textContent='Введи числовой Shikimori ID.';return;}
+ button.disabled=true;status.textContent='Получаем данные Shikimori…';
+ try{const response=await fetch('/admin/shikimori/'+id);if(!response.ok)throw Error('Не удалось получить данные. Проверь ID и попробуй снова.');const anime=await response.json(),form=document.querySelector('form[action="/admin/manual"]');
+ form.elements.metadata_import.value=JSON.stringify({related:anime.metadata.related,airDate:anime.metadata.airDate,endDate:anime.metadata.endDate});
+ const fields={...anime,...anime.metadata,genres:anime.genres.join(', ')};
+ for(const [key,value]of Object.entries(fields)){const input=form.elements.namedItem(key);if(input)input.value=Array.isArray(value)?value.join(', '):value??'';}
+ status.textContent='Данные загружены. Проверь поля и сохрани аниме.';form.scrollIntoView({block:'start',behavior:'smooth'});
+ }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+});
