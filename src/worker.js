@@ -1,13 +1,19 @@
 import {randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {database,migrate} from './db.js';
-import {fetchAnime,saveImported} from './shikimori.js';
+import {fetchAnime,saveImported,shikiRequest} from './shikimori.js';
 export async function runJob(db,importer=fetchAnime){
  const job=(await db.query("SELECT * FROM jobs WHERE status='pending' AND run_at<=NOW() ORDER BY created_at LIMIT 1")).rows[0];if(!job)return false;
  const claimed=await db.query("UPDATE jobs SET status='running',attempts=attempts+1,locked_at=NOW() WHERE id=$1 AND status='pending' RETURNING *",[job.id]);if(!claimed.rowCount)return false;
- try{const item=await importer(job.payload.id);await saveImported(db,item);await db.query("UPDATE jobs SET status='done',error='' WHERE id=$1",[job.id]);}
+ try{if(job.kind==='discover'){
+   const list=await shikiRequest('/api/animes?limit=20&order=ranked&page='+Math.max(1,Number(job.payload.page)||1));
+   for(const item of list){if(!Number.isSafeInteger(item.id))continue;const existing=(await db.query('SELECT id FROM anime WHERE shikimori_id=$1',[item.id])).rowCount;if(!existing)await enqueueImport(db,item.id);}
+  }else{const item=await importer(job.payload.id);await saveImported(db,item);}
+  await db.query("UPDATE jobs SET status='done',error='' WHERE id=$1",[job.id]);}
  catch(error){const attempt=claimed.rows[0].attempts;await db.query('UPDATE jobs SET status=$1,error=$2,run_at=$3 WHERE id=$4',[attempt<3?'pending':'failed',error.message.slice(0,500),new Date(Date.now()+attempt*60000),job.id]);}
  return true;
 }
-export function startWorker(db){let stopped=false,busy=false;const tick=async()=>{if(stopped||busy)return;busy=true;try{await runJob(db);}catch(error){console.error(JSON.stringify({event:'worker_error',message:error.message}));}finally{busy=false;}};const timer=setInterval(tick,5000);timer.unref();tick();return ()=>{stopped=true;clearInterval(timer);};}
+export async function enqueueImport(db,id){const exists=await db.query("SELECT id FROM jobs WHERE kind='import' AND status IN ('pending','running') AND payload->>'id'=$1",[String(id)]);if(!exists.rowCount)await db.query('INSERT INTO jobs(id,kind,payload) VALUES($1,$2,$3)',[randomUUID(),'import',JSON.stringify({id})]);}
+export async function scheduleSync(db){const rows=(await db.query("SELECT shikimori_id FROM anime WHERE shikimori_id IS NOT NULL AND (synced_at IS NULL OR synced_at < NOW() - INTERVAL '6 hours') ORDER BY synced_at NULLS FIRST LIMIT 20")).rows;for(const row of rows)await enqueueImport(db,row.shikimori_id);}
+export function startWorker(db){let stopped=false,busy=false,lastSchedule=0;const tick=async()=>{if(stopped||busy)return;busy=true;try{if(process.env.AUTO_SYNC==='true'&&Date.now()-lastSchedule>3600000){await scheduleSync(db);lastSchedule=Date.now();}await runJob(db);}catch(error){console.error(JSON.stringify({event:'worker_error',message:error.message}));}finally{busy=false;}};const timer=setInterval(tick,5000);timer.unref();tick();return ()=>{stopped=true;clearInterval(timer);};}
 if(process.argv[1]===fileURLToPath(import.meta.url)){const db=database();await migrate(db);startWorker(db);setInterval(()=>{},3600000);}
