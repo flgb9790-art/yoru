@@ -47,3 +47,8 @@ test('metadata edits preserve unrelated imported fields and do not freeze episod
  await saveImported(db,{...item,aired:3,metadata:{...item.metadata,authors:['Changed'],directors:['New director']}});
  const row=(await db.query('SELECT * FROM anime WHERE id=$1',[id])).rows[0];assert.deepEqual(row.metadata.authors,['Manual']);assert.deepEqual(row.metadata.directors,['New director']);assert.equal(row.metadata.related.length,1);assert.equal(row.aired,3);
 });
+
+test('home information controls are present on every full card',async()=>{
+ const response=await request(app).get('/');assert.equal(response.status,200);
+ const cards=(response.text.match(/class="anime-card"/g)||[]).length,buttons=(response.text.match(/class="card-info"/g)||[]).length;assert.ok(cards>0);assert.equal(buttons,cards);
+});
