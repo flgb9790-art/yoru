@@ -1,7 +1,6 @@
 import {randomUUID} from 'node:crypto';
 import rateLimit from 'express-rate-limit';
 import {z} from 'zod';
-import {requireUser} from './security.js';
 import {resolveKodik,validatePlayerUrl} from './kodik.js';
 export function mountPlayback(app,db,resolver=resolveKodik){
  const pending=new Map();
@@ -39,7 +38,8 @@ export function mountPlayback(app,db,resolver=resolveKodik){
   }catch(error){console.error(JSON.stringify({event:'kodik_lookup_error',anime_id:anime.id,message:'Public player lookup failed'}));res.status(503).json({error:'Не удалось связаться с Kodik. Попробуй открыть плеер чуть позже.'});}
  });
  const watchLimit=rateLimit({windowMs:15*60000,limit:240,standardHeaders:'draft-8',legacyHeaders:false});
- app.post('/watch/:id',requireUser,watchLimit,async(req,res)=>{
+ const authenticate=(req,res,next)=>req.user?next():req.is('application/json')?res.status(401).json({error:'Войди, чтобы сохранить историю.'}):res.redirect('/login');
+ app.post('/watch/:id',authenticate,watchLimit,async(req,res)=>{
   const input=z.object({episode:z.coerce.number().int().min(1).max(100000),season:z.coerce.number().int().min(0).max(10000).default(1),position:z.coerce.number().int().min(0).max(86400).default(0),completed:z.enum(['true','false']).default('false'),translation:z.coerce.number().int().min(1).max(10000000).optional()}).parse(req.body);
   const anime=(await db.query('SELECT id,blocked FROM anime WHERE id=$1',[req.params.id])).rows[0];
   if(!anime||anime.blocked)return res.sendStatus(403);
