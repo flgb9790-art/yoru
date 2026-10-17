@@ -83,3 +83,6 @@ body:is([data-page=home],[data-page=catalog]) .anime-card{padding-bottom:8px}
 .anime-title,body:is([data-page=home],[data-page=catalog]) .anime-title{margin-top:8px}
 .carousel{scrollbar-width:none;-ms-overflow-style:none}.carousel::-webkit-scrollbar{display:none;width:0;height:0}
 body[data-page=home] .carousel{padding-bottom:3px}
+/* Single-line titles keep every card compact and aligned. */
+.anime-card .anime-title,body:is([data-page=home],[data-page=catalog]) .anime-card .anime-title{display:block;height:19px;min-height:0;line-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
+.anime-card>.meta,body:is([data-page=home],[data-page=catalog]) .anime-card>.meta{margin-top:2px}
