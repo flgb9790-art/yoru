@@ -3,6 +3,10 @@ if(playerHost){
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
  try{const preferred=localStorage.getItem('yoru_player_source');if(['kodik','aniliberty'].includes(preferred))sourceSelect.value=preferred;}catch{}
  const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');
+ const providerButtons=[...section.querySelectorAll('[data-provider]')];
+ function syncProviderButtons(){for(const button of providerButtons){button.setAttribute('aria-pressed',String(button.dataset.provider===sourceSelect.value));button.disabled=sourceSelect.disabled;}}
+ for(const button of providerButtons)button.addEventListener('click',()=>{if(sourceSelect.disabled||sourceSelect.value===button.dataset.provider)return;sourceSelect.value=button.dataset.provider;sourceSelect.dispatchEvent(new Event('change'));});
+ syncProviderButtons();
  let requestedEpisode=/^[1-9][0-9]{0,5}$/.test(navigation.get('episode')||'')?Number(navigation.get('episode')):null;const requestedRelease=/^[1-9][0-9]{0,9}$/.test(navigation.get('release')||'')?Number(navigation.get('release')):null;
  qualityLabel.textContent=sourceSelect.value==='aniliberty'?'AniLiberty':'Kodik';
  let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null;
@@ -21,7 +25,7 @@ if(playerHost){
  }
  async function checkPermission(){
   if(!iframe&&!video)return;
-  try{const response=await fetch('/api/player/'+playerHost.dataset.anime+'/status');if(response.status!==403&&response.status!==404)return;const data=await response.json();blocked=true;generation++;destroy();started=false;sourceSelect.disabled=true;episodeSelect.disabled=true;qualitySelect.disabled=true;note(data.error||'Просмотр ограничен.');status.textContent='';}catch{}
+  try{const response=await fetch('/api/player/'+playerHost.dataset.anime+'/status');if(response.status!==403&&response.status!==404)return;const data=await response.json();blocked=true;generation++;destroy();started=false;sourceSelect.disabled=true;syncProviderButtons();episodeSelect.disabled=true;qualitySelect.disabled=true;note(data.error||'Просмотр ограничен.');status.textContent='';}catch{}
  }
  let permissionTimer=setInterval(checkPermission,60000);
  function streamUrl(value){const url=new URL(value);if(url.protocol!=='https:'||!(url.hostname==='libria.fun'||url.hostname.endsWith('.libria.fun'))||!url.pathname.endsWith('.m3u8'))throw Error('Поток временно недоступен.');return url.href;}
@@ -61,7 +65,7 @@ if(playerHost){
   }catch(error){if(current===generation)note(error.message,true);}finally{if(current===generation)loading=false;}
  }
  playerHost.querySelector('[data-load-player]')?.addEventListener('click',()=>load());
- sourceSelect.addEventListener('change',()=>{try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
+ sourceSelect.addEventListener('change',()=>{syncProviderButtons();try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
  episodeSelect.addEventListener('change',()=>{requestedEpisode=null;const item=episodes.find(item=>item.number===Number(episodeSelect.value));if(item)playEpisode(item);});
  qualitySelect.addEventListener('change',()=>{qualitySelect.dataset.preferred=qualitySelect.value;const item=episodes.find(item=>item.number===episode);if(item)playEpisode(item,position,Boolean(video&&!video.paused),true);});
  document.querySelectorAll('a[href="#player"]').forEach(link=>link.addEventListener('click',()=>{if(!loading&&!iframe&&!video)load();}));

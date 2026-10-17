@@ -23,7 +23,7 @@ export function resumeCard(a){const label=`${a.resume_season>1?a.resume_season+'
 export function mountFollows(app,db){
  app.get('/continue',requireUser,async(req,res)=>{const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),rows=await continueWatching(db,req.user.id);res.send(layout('Продолжить просмотр',`<div class="browse-heading"><h1>Продолжить просмотр</h1><a href="/library?status=watching">Мой список →</a></div><div class="grid resume-grid">${rows.slice((page-1)*24,page*24).map(a=>resumeCard(a)).join('')||'<p class="muted">Пока нет незавершённых серий.</p>'}</div>${pagination(page,rows.length,24,n=>'/continue?page='+n)}`,req));});
 
- app.use(async(req,res,next)=>{if(req.user)req.unreadNotifications=+(await db.query('SELECT COUNT(*) AS count FROM notifications WHERE user_id=$1 AND read_at IS NULL',[req.user.id])).rows[0].count;next();});
+ app.use(async(req,res,next)=>{if(req.user){req.unreadNotifications=+(await db.query('SELECT COUNT(*) AS count FROM notifications WHERE user_id=$1 AND read_at IS NULL',[req.user.id])).rows[0].count;req.notificationPreview=(await db.query('SELECT n.*,a.name,a.poster FROM notifications n JOIN anime a ON a.id=n.anime_id WHERE n.user_id=$1 AND n.read_at IS NULL ORDER BY n.created_at DESC LIMIT 5',[req.user.id])).rows;}next();});
  app.post('/follow/:id',requireUser,async(req,res)=>{
   const client=await db.connect();try{await client.query('BEGIN');const a=(await client.query('SELECT id,status FROM anime WHERE id=$1 FOR UPDATE',[req.params.id])).rows[0];if(!a){await client.query('ROLLBACK');return res.sendStatus(404);}
    if(req.body.follow==='false')await client.query('DELETE FROM anime_follows WHERE user_id=$1 AND anime_id=$2',[req.user.id,a.id]);

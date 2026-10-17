@@ -7,7 +7,7 @@ export function shikiRequest(path,fetcher=fetch,body){
   nextRequest=Date.now()+1200;
   const base=process.env.SHIKIMORI_BASE_URL||'https://shikimori.one';
   const response=await fetcher(new URL(path,base),{...(body?{method:'POST',body:JSON.stringify(body)}:{}),headers:{...(body?{'Content-Type':'application/json'}:{}),'User-Agent':process.env.SHIKIMORI_USER_AGENT||'Yoru/0.1',Accept:'application/json',...(process.env.SHIKIMORI_TOKEN?{Authorization:`Bearer ${process.env.SHIKIMORI_TOKEN}`}:{})},signal:AbortSignal.timeout(20000)});
-  if(!response.ok){const error=new Error(`Shikimori returned ${response.status}`);error.status=502;throw error;}
+  if(!response.ok){const error=new Error(`Shikimori returned ${response.status}`);error.status=502;error.upstreamStatus=response.status;throw error;}
   return response.json();
  };const result=queue.then(run);queue=result.catch(()=>{});return result;
 }

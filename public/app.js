@@ -11,15 +11,15 @@ document.querySelectorAll('[data-auth]').forEach(link=>link.addEventListener('cl
 document.querySelector('[data-close-auth]')?.addEventListener('click',()=>authDialog.close());
 authDialog?.addEventListener('click',event=>{if(event.target!==authDialog)return;const rect=authDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)authDialog.close();});
 document.querySelectorAll('[data-backdrop]').forEach(el=>{const url=el.dataset.backdrop;if(/^https:\/\//.test(url))el.style.backgroundImage=`linear-gradient(100deg,#f5f1f8ef,#f3f5fae6),url("${url.replace(/["\\\n\r]/g,'')}")`;});
-document.querySelectorAll('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const carousel=button.closest('section').querySelector('.carousel');carousel.scrollBy({left:Number(button.dataset.slide)*carousel.clientWidth*.8,behavior:'smooth'});}));
+document.querySelectorAll('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const carousel=button.closest('section').querySelector('.carousel'),end=carousel.scrollWidth-carousel.clientWidth,dir=Number(button.dataset.slide);carousel.scrollTo({left:dir>0?(carousel.scrollLeft>=end-2?0:Math.min(end,carousel.scrollLeft+carousel.clientWidth*.8)):(carousel.scrollLeft<=2?end:Math.max(0,carousel.scrollLeft-carousel.clientWidth*.8)),behavior:'smooth'});}));
 document.querySelectorAll('.card-info').forEach(button=>button.addEventListener('click',event=>event.preventDefault()));
 document.querySelector('[data-random]')?.addEventListener('click',()=>location.reload());
 document.querySelector('[data-shiki-fill]')?.addEventListener('click',async event=>{
  const id=document.querySelector('[data-shiki-id]').value,status=document.querySelector('[data-import-status]'),button=event.currentTarget;
  if(!/^\d+$/.test(id)||Number(id)<1){status.textContent='Введи числовой Shikimori ID.';return;}
  button.disabled=true;status.textContent='Получаем данные Shikimori…';
- try{const response=await fetch('/admin/shikimori/'+id);if(!response.ok)throw Error('Не удалось получить данные. Проверь ID и попробуй снова.');const anime=await response.json(),form=document.querySelector('form[action="/admin/manual"]');
- form.elements.metadata_import.value=JSON.stringify({related:anime.metadata.related,airDate:anime.metadata.airDate,endDate:anime.metadata.endDate});
+ try{const response=await fetch('/admin/shikimori/'+id);const anime=await response.json();if(!response.ok)throw Error(anime.error||'Не удалось получить данные Shikimori.');const form=document.querySelector('.anime-editor');
+ form.elements.metadata_import.value=JSON.stringify({related:anime.metadata.related,chronology:anime.metadata.chronology,airDate:anime.metadata.airDate,endDate:anime.metadata.endDate});
  const fields={...anime,...anime.metadata,genres:anime.genres.join(', ')};
  for(const [key,value]of Object.entries(fields)){const input=form.elements.namedItem(key);if(input)input.value=Array.isArray(value)?value.join(', '):value??'';}
  status.textContent='Данные загружены. Проверь поля и сохрани аниме.';form.scrollIntoView({block:'start',behavior:'smooth'});
@@ -36,7 +36,7 @@ if(genreCount){const form=genreCount.closest('form');form.addEventListener('chan
 const filterShell=document.querySelector('.catalog-filter-shell');
 if(filterShell){const narrow=matchMedia('(max-width:650px)');const setFilterLayout=()=>{filterShell.open=!narrow.matches||new URLSearchParams(location.search).size>0;};setFilterLayout();narrow.addEventListener('change',setFilterLayout);}
 const carouselSections=new Set(Array.from(document.querySelectorAll('[data-slide]'),button=>button.closest('section')));
-for(const section of carouselSections){const carousel=section.querySelector('.carousel');if(!carousel)continue;const updateArrows=()=>{const end=carousel.scrollWidth-carousel.clientWidth;for(const button of section.querySelectorAll('[data-slide]'))button.disabled=Number(button.dataset.slide)<0?carousel.scrollLeft<=2:carousel.scrollLeft>=end-2;};carousel.addEventListener('scroll',updateArrows,{passive:true});window.addEventListener('resize',updateArrows);requestAnimationFrame(updateArrows);}
+for(const section of carouselSections){const carousel=section.querySelector('.carousel');if(!carousel)continue;const updateArrows=()=>{const end=carousel.scrollWidth-carousel.clientWidth;for(const button of section.querySelectorAll('[data-slide]'))button.disabled=end<=2;};carousel.addEventListener('scroll',updateArrows,{passive:true});window.addEventListener('resize',updateArrows);requestAnimationFrame(updateArrows);}
 // One detached information window avoids carousel clipping and never resizes cards.
 const infoWindow=document.createElement('div');infoWindow.className='anime-info-window';infoWindow.id='anime-info-window';infoWindow.setAttribute('role','tooltip');infoWindow.hidden=true;document.body.append(infoWindow);
 let infoTrigger=null,infoTimer;
@@ -48,3 +48,13 @@ function deferAnimeInfo(){clearTimeout(infoTimer);infoTimer=setTimeout(closeAnim
 for(const button of document.querySelectorAll('.card-info')){button.addEventListener('mouseenter',()=>openAnimeInfo(button));button.addEventListener('mouseleave',deferAnimeInfo);button.addEventListener('focus',()=>openAnimeInfo(button));button.addEventListener('blur',deferAnimeInfo);}
 infoWindow.addEventListener('mouseenter',()=>clearTimeout(infoTimer));infoWindow.addEventListener('mouseleave',deferAnimeInfo);
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeAnimeInfo();});window.addEventListener('resize',closeAnimeInfo);document.addEventListener('scroll',closeAnimeInfo,{capture:true,passive:true});desktopInfo.addEventListener('change',closeAnimeInfo);
+const notificationDrawer=document.querySelector('[data-notification-drawer]');
+document.querySelector('[data-notifications]')?.addEventListener('click',()=>notificationDrawer.showModal());
+document.querySelector('[data-close-notifications]')?.addEventListener('click',()=>notificationDrawer.close());
+notificationDrawer?.addEventListener('click',event=>{if(event.target!==notificationDrawer)return;const r=notificationDrawer.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)notificationDrawer.close();});
+for(const carousel of document.querySelectorAll('.carousel')){let dragging=false,startX=0,startScroll=0,moved=false,suppressUntil=0;
+ carousel.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0||(event.target.closest('input,select')||(event.target.closest('button')&&!event.target.closest('[data-frame]'))))return;dragging=true;moved=false;startX=event.clientX;startScroll=carousel.scrollLeft;});
+ window.addEventListener('pointermove',event=>{if(!dragging)return;const delta=event.clientX-startX;if(!moved&&Math.abs(delta)<6)return;moved=true;carousel.classList.add('is-dragging');carousel.scrollLeft=startScroll-delta;event.preventDefault();});
+ const finish=()=>{if(moved)suppressUntil=Date.now()+250;dragging=false;carousel.classList.remove('is-dragging');};window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',finish);window.addEventListener('blur',finish);
+ carousel.addEventListener('dragstart',event=>event.preventDefault());carousel.addEventListener('click',event=>{if(Date.now()<suppressUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
+}
