@@ -30,15 +30,16 @@ export async function fetchAnime(id){
  const screenshots=await shikiRequest(`/api/animes/${id}/screenshots`);
  const related=await shikiRequest(`/api/animes/${id}/related`);
  const result=normalizeAnime(anime,roles,screenshots,related);
- const extra=await shikiRequest('/api/graphql',fetch,{query:'{ animes(ids: "'+id+'", limit: 1) { id nextEpisodeAt poster { originalUrl } chronology { id name russian kind airedOn { date } } } }'});
+ const extra=await shikiRequest('/api/graphql',fetch,{query:'{ animes(ids: "'+id+'", limit: 1) { id genres { name russian } nextEpisodeAt poster { originalUrl } chronology { id name russian kind airedOn { date } } } }'});
  if(extra.errors?.length)throw new Error('Shikimori GraphQL: '+extra.errors[0].message);
- const enriched=extra.data?.animes?.[0];if(enriched){result.metadata.nextEpisode=enriched.nextEpisodeAt||null;result.metadata.chronology=(enriched.chronology||[]).filter(a=>!['music','pv','cm'].includes(a.kind)).map(a=>({id:Number(a.id),name:a.russian||a.name,date:a.airedOn?.date||null})).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));if(enriched.poster?.originalUrl)result.poster=enriched.poster.originalUrl;}
+ const enriched=extra.data?.animes?.[0];if(enriched){if(Array.isArray(enriched.genres)&&enriched.genres.length)result.genres=[...new Set(enriched.genres.map(g=>g.russian||g.name).filter(Boolean))];result.metadata.nextEpisode=enriched.nextEpisodeAt||null;result.metadata.chronology=(enriched.chronology||[]).filter(a=>!['music','pv','cm'].includes(a.kind)).map(a=>({id:Number(a.id),name:a.russian||a.name,date:a.airedOn?.date||null})).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));if(enriched.poster?.originalUrl)result.poster=enriched.poster.originalUrl;}
  return result;
 }
 export async function saveImported(db,item){
  assertAired(item);
  const existing=(await db.query('SELECT * FROM anime WHERE shikimori_id=$1',[item.shikimori_id])).rows[0];
  if(existing){const protectedSet=new Set(existing.protected_fields||[]);const merged={...existing,...Object.fromEntries(Object.entries(item).filter(([k])=>!protectedSet.has(k)))};if(!protectedSet.has('metadata')){merged.metadata={...existing.metadata,...item.metadata};for(const key of protectedSet)if(key.startsWith('metadata.'))merged.metadata[key.slice(9)]=existing.metadata[key.slice(9)];}
+  if(!item.genres?.length&&existing.genres?.length)merged.genres=existing.genres;
   if(!protectedSet.has('poster')&&existing.metadata?.poster_source==='myanimelist-via-jikan'&&existing.poster)merged.poster=existing.poster;
   await db.query('UPDATE anime SET name=$1,original_name=$2,year=$3,country=$4,kind=$5,status=$6,rating=$7,episodes=$8,aired=$9,genres=$10,description=$11,poster=$12,metadata=$13,updated_at=CASE WHEN aired<>$9 OR status<>$6 THEN NOW() ELSE updated_at END,synced_at=NOW() WHERE id=$14',[merged.name,merged.original_name,merged.year,merged.country,merged.kind,merged.status,merged.rating,merged.episodes,merged.aired,merged.genres,merged.description,merged.poster,JSON.stringify(merged.metadata),existing.id]);return existing.id;
  }
