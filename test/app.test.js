@@ -10,7 +10,7 @@ import {runJob} from '../src/worker.js';
 let db,app;
 before(async()=>{const memory=newDb();const {Pool}=memory.adapters.createPg();db=new Pool();await migrate(db);app=createApp(db);await db.query('INSERT INTO users(id,email,name,password_hash,role,verified) VALUES($1,$2,$3,$4,$5,$6)',['admin','owner@example.com','Owner',await hashPassword('test-password-123'),'admin',true]);});
 after(async()=>db.end());
-async function login(){const agent=request.agent(app);let page=await agent.get('/login');const csrf=page.text.match(/name="_csrf" value="([^"]+)/)[1];const response=await agent.post('/login').type('form').send({_csrf:csrf,email:'owner@example.com',password:'test-password-123'});assert.equal(response.status,302);return {agent,csrf};}
+async function login(target=app){const agent=request.agent(target);let page=await agent.get('/login');const csrf=page.text.match(/name="_csrf" value="([^"]+)/)[1];const response=await agent.post('/login').type('form').send({_csrf:csrf,email:'owner@example.com',password:'test-password-123'});assert.equal(response.status,302);return {agent,csrf};}
 test('health and static assets',async()=>{assert.equal((await request(app).get('/health')).status,200);assert.equal((await request(app).get('/style.css')).status,200);});
 test('unauthorized admin is denied and CSRF is enforced',async()=>{assert.equal((await request(app).get('/admin')).status,403);assert.equal((await request(app).post('/admin/manual').send({name:'x'})).status,403);});
 test('import preserves manual fields and block; duplicate imports are idempotent',async()=>{const item=normalizeAnime({id:52991,russian:'Фрирен',name:'Frieren',score:'9.1',episodes:28,episodes_aired:28,aired_on:'2023-09-29',genres:[{russian:'Фэнтези'}],image:{original:'/test.jpg'}});const id=await saveImported(db,item);await db.query('UPDATE anime SET blocked=TRUE,name=$1,protected_fields=$2 WHERE id=$3',['Ручное название',['name'],id]);await saveImported(db,{...item,name:'Новое имя',rating:9.2});const result=(await db.query('SELECT * FROM anime WHERE id=$1',[id])).rows[0];assert.equal(result.name,'Ручное название');assert.equal(result.blocked,true);assert.equal(result.rating,9.2);assert.equal(+(await db.query('SELECT COUNT(*) AS count FROM anime')).rows[0].count,1);});
@@ -51,4 +51,24 @@ test('metadata edits preserve unrelated imported fields and do not freeze episod
 test('home information controls are present on every full card',async()=>{
  const response=await request(app).get('/');assert.equal(response.status,200);
  const cards=(response.text.match(/class="anime-card"/g)||[]).length,buttons=(response.text.match(/class="card-info"/g)||[]).length;assert.ok(cards>0);assert.equal(buttons,cards);
+});
+
+test('public player lookup is cached, does not create views, and respects later blocking',async()=>{
+ const anime=(await db.query('SELECT id FROM anime WHERE shikimori_id=90001')).rows[0];let calls=0;
+ const target=createApp(db,{playerResolver:async()=>{calls++;return {available:true,link:'https://kodikplayer.com/serial/123/abcdef123456/720p',quality:'720p',translation:'Test'};}});
+ const response=await request(target).get('/api/player/'+anime.id);assert.equal(response.status,200);assert.match(response.body.url,/^https:\/\/kodikplayer.com\/serial\//);assert.equal(response.body.resume,null);
+ await request(target).get('/api/player/'+anime.id);assert.equal(calls,1);assert.equal((await db.query('SELECT * FROM watch_history WHERE anime_id=$1',[anime.id])).rowCount,0);
+ await db.query('UPDATE anime SET blocked=TRUE WHERE id=$1',[anime.id]);const denied=await request(target).get('/api/player/'+anime.id);assert.equal(denied.status,403);assert.equal(denied.body.url,undefined);assert.equal(calls,1);
+ assert.equal((await request(target).get('/api/player/'+anime.id+'/status')).status,403);await db.query('UPDATE anime SET blocked=FALSE WHERE id=$1',[anime.id]);
+});
+
+test('playback history separates seasons and keeps completion after a rewatch begins',async()=>{
+ const {agent,csrf}=await login(),anime=(await db.query('SELECT id FROM anime WHERE shikimori_id=123')).rows[0];
+ for(const season of [1,2]){const response=await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:2,season,position:120,translation:910,completed:'false'});assert.equal(response.status,200);}
+ assert.equal((await db.query('SELECT * FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND episode=2',['admin',anime.id])).rowCount,2);
+ await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:2,season:2,position:1400,completed:'true'});
+ await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:2,season:2,position:20,completed:'false'});
+ const row=(await db.query('SELECT * FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND episode=2 AND season=2',['admin',anime.id])).rows[0];assert.equal(row.completed,true);assert.equal(row.position_seconds,20);
+ assert.equal((await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:0})).status,400);
+ const home=await agent.get('/');assert.equal(home.status,200);assert.match(home.text,/Продолжить просмотр/);
 });

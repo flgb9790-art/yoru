@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS watch_history (
  anime_id TEXT NOT NULL REFERENCES anime(id) ON DELETE CASCADE,
  episode INTEGER NOT NULL, position_seconds INTEGER NOT NULL DEFAULT 0,
  completed BOOLEAN NOT NULL DEFAULT FALSE, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
- UNIQUE(user_id,anime_id,episode)
+ CONSTRAINT watch_history_user_id_anime_id_episode_key UNIQUE(user_id,anime_id,episode)
 );
 CREATE TABLE IF NOT EXISTS comments (
  id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), anime_id TEXT NOT NULL REFERENCES anime(id),
