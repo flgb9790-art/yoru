@@ -16,11 +16,13 @@ export async function notifyEpisodes(client,anime,releaseId,items,{newEdition=fa
 }
 export async function continueWatching(db,userId){
  const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 AND (position_seconds>0 OR manual_mark=FALSE) GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
- const seen=new Set();return rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return !a.completed&&a.resume_position>0;}).slice(0,14);
+ const seen=new Set();return rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return !a.completed&&a.resume_position>0;});
 }
 export function resumeLink(a){const params=new URLSearchParams({source:a.resume_provider||'kodik',episode:a.resume_episode,season:a.resume_season,resume:'1'});if(a.resume_provider==='aniliberty'&&a.resume_release)params.set('release',a.resume_release);return '/anime/'+a.id+'?'+params+'#player';}
-export function resumeCard(a){return `<div class="resume-card">${card(a)}<p class="meta">${a.resume_season>1?a.resume_season+' сезон · ':''}${a.resume_episode} серия · ${Math.floor(a.resume_position/60)}:${String(a.resume_position%60).padStart(2,'0')}</p><a class="button secondary" href="${esc(resumeLink(a))}">Продолжить →</a></div>`;}
+export function resumeCard(a){const label=`${a.resume_season>1?a.resume_season+' сезон · ':''}${a.resume_episode} серия · ${Math.floor(a.resume_position/60)}:${String(a.resume_position%60).padStart(2,'0')}`;return `<div class="resume-card">${card(a,false,{href:resumeLink(a),episodeLabel:label})}</div>`;}
 export function mountFollows(app,db){
+ app.get('/continue',requireUser,async(req,res)=>{const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),rows=await continueWatching(db,req.user.id);res.send(layout('Продолжить просмотр',`<div class="browse-heading"><h1>Продолжить просмотр</h1><a href="/library?status=watching">Мой список →</a></div><div class="grid resume-grid">${rows.slice((page-1)*24,page*24).map(a=>resumeCard(a)).join('')||'<p class="muted">Пока нет незавершённых серий.</p>'}</div>${pagination(page,rows.length,24,n=>'/continue?page='+n)}`,req));});
+
  app.use(async(req,res,next)=>{if(req.user)req.unreadNotifications=+(await db.query('SELECT COUNT(*) AS count FROM notifications WHERE user_id=$1 AND read_at IS NULL',[req.user.id])).rows[0].count;next();});
  app.post('/follow/:id',requireUser,async(req,res)=>{
   const client=await db.connect();try{await client.query('BEGIN');const a=(await client.query('SELECT id,status FROM anime WHERE id=$1 FOR UPDATE',[req.params.id])).rows[0];if(!a){await client.query('ROLLBACK');return res.sendStatus(404);}

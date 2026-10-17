@@ -93,8 +93,6 @@ body[data-page=home] .carousel{padding-bottom:3px}
 [data-card=compact]>.meta{margin-left:3px;margin-right:3px;font-size:10px;color:#82738f}
 [data-card=compact] .card-info{top:18px;right:18px;width:24px;height:24px}
 .release-sidebar [data-card=compact] .anime-title{height:19px;min-height:0}
-.similar-carousel [data-card=similar] .anime-title{white-space:normal;height:38px;line-height:19px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.similar-carousel [data-card=similar]>.meta{white-space:normal;height:38px;line-height:19px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-top:7px}
 @media(max-width:650px){[data-card=compact]{padding:6px 6px 8px;border-radius:12px}[data-card=compact]>.meta{font-size:9px}}
 /* Edge-to-edge posters; the text keeps its existing inset. */
 .anime-card[data-card=compact],body:is([data-page=home],[data-page=catalog]) .anime-card[data-card=compact]{padding:0 0 8px}
@@ -108,3 +106,11 @@ body[data-page=home] .carousel{padding-bottom:3px}
 .anime-info-window[hidden]{display:none}.anime-info-window strong{display:block;font-size:15px;line-height:1.5;color:#34283f}.anime-info-window p{margin:12px 0 0}.anime-info-window p:first-of-type{font-size:11px;color:#8a6ba6}
 @media(max-width:650px){.anime-card[data-card=compact]>.poster,body:is([data-page=home],[data-page=catalog]) .anime-card[data-card=compact]>.poster{border-radius:11px 11px 0 0}.anime-card[data-card=compact]>.anime-title,.anime-card[data-card=compact]>.meta,body:is([data-page=home],[data-page=catalog]) .anime-card[data-card=compact]>.anime-title,body:is([data-page=home],[data-page=catalog]) .anime-card[data-card=compact]>.meta{margin-left:9px;margin-right:9px}.anime-info-window{display:none}}
 @media(hover:none){.anime-info-window{display:none}}
+/* A short, smaller strip for actual unfinished viewing sessions. */
+.continue-section{padding:20px;border:1px solid #ded6e8;border-radius:14px;background:linear-gradient(120deg,#faf6ff,#f4f6fc)}
+.continue-section .section-heading{margin-bottom:18px}.continue-section .section-heading h2{font-size:18px}.continue-all{font-size:11px;padding:8px 12px;white-space:nowrap;min-height:36px}
+body[data-page=home] .continue-carousel>.resume-card{flex:0 0 128px}
+.continue-carousel .resume-card .poster{aspect-ratio:2/2.7}.continue-carousel .anime-card .anime-title{font-size:11px}.continue-carousel .anime-card>.meta{font-size:9px}
+.resume-card .anime-card .episode{font-size:9px;left:6px;bottom:7px;max-width:calc(100% - 12px);white-space:normal}
+.resume-grid{align-items:start}.resume-grid>.resume-card{min-width:0}
+@media(max-width:650px){.continue-section{padding:16px 12px}.continue-section .section-heading{gap:12px;align-items:center}.continue-section .section-heading h2{font-size:16px}.continue-all{font-size:10px;padding:7px 9px;min-height:34px}body[data-page=home] .continue-carousel>.resume-card{flex-basis:112px}}
