@@ -61,12 +61,13 @@ export async function syncEpisodeFeed(db,{limit=40,request=anilibertyRequest,imp
 }
 const relation=` FROM anime a JOIN episode_feed_titles f ON f.anime_id=a.id JOIN (SELECT anime_id,release_id,MAX(episode) AS last_episode FROM episode_releases WHERE provider='aniliberty' AND available=TRUE AND season=1 GROUP BY anime_id,release_id) latest ON latest.anime_id=a.id AND latest.release_id=f.release_id JOIN episode_releases e ON e.anime_id=a.id AND e.release_id=f.release_id AND e.episode=latest.last_episode AND e.season=1 AND e.provider='aniliberty' WHERE a.blocked=FALSE AND e.available=TRUE`;
 export async function episodeFeed(db,size=20,offset=0){
- const total=+(await db.query('SELECT COUNT(*) AS count'+relation)).rows[0].count;
- const rows=(await db.query('SELECT a.*,e.episode AS release_episode,e.release_id AS source_release_id,e.provider AS release_provider,e.listed_at AS release_date,e.date_kind AS release_date_kind,e.name AS episode_name'+relation+' ORDER BY e.listed_at DESC,a.id LIMIT $1 OFFSET $2',[size,offset])).rows;
- return {rows,total};
+ const translated=(await db.query('SELECT a.*,e.episode AS release_episode,e.release_id AS source_release_id,e.provider AS release_provider,e.listed_at AS release_date,e.date_kind AS release_date_kind,e.name AS episode_name'+relation)).rows;
+ const others=(await db.query("SELECT a.*,s.episode AS release_episode,s.provider AS release_provider,s.observed_at AS release_date FROM anime a JOIN source_updates s ON s.anime_id=a.id WHERE a.blocked=FALSE")).rows;
+ const byTitle=new Map();for(const a of [...translated,...others]){const before=byTitle.get(a.id);if(!before||Number(a.release_episode)>Number(before.release_episode)||(a.release_episode===before.release_episode&&({aniliberty:3,kodik:2,shikimori:1}[a.release_provider]||0)>({aniliberty:3,kodik:2,shikimori:1}[before.release_provider]||0)))byTitle.set(a.id,a);}
+ const all=[...byTitle.values()].sort((a,b)=>new Date(b.release_date)-new Date(a.release_date)||a.id.localeCompare(b.id));return {total:all.length,rows:all.slice(offset,offset+size)};
 }
-export async function enqueueEpisodeSync(db,{force=false}={}){
+export async function enqueueEpisodeSync(db,{force=false,auto=false}={}){
  const active=await db.query("SELECT id FROM jobs WHERE kind='episodes' AND status IN ('pending','running') LIMIT 1");if(active.rowCount)return active.rows[0].id;
  if(!force&&(await db.query("SELECT id FROM jobs WHERE kind='episodes' AND created_at>NOW()-INTERVAL '15 minutes' LIMIT 1")).rowCount)return null;
- const id=randomUUID();await db.query('INSERT INTO jobs(id,kind,payload) VALUES($1,$2,$3)',[id,'episodes',JSON.stringify({limit:40})]);return id;
+ const id=randomUUID();await db.query('INSERT INTO jobs(id,kind,payload) VALUES($1,$2,$3)',[id,'episodes',JSON.stringify({limit:40,...(auto?{auto:true}:{})})]);return id;
 }

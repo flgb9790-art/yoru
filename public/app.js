@@ -58,3 +58,5 @@ for(const carousel of document.querySelectorAll('.carousel')){let dragging=false
  const finish=()=>{if(moved)suppressUntil=Date.now()+250;dragging=false;carousel.classList.remove('is-dragging');};window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',finish);window.addEventListener('blur',finish);
  carousel.addEventListener('dragstart',event=>event.preventDefault());carousel.addEventListener('click',event=>{if(Date.now()<suppressUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
 }
+// Broken image responses are replaced without changing card geometry.
+for(const image of document.querySelectorAll('.poster img')){const missing=()=>{if(!image.isConnected)return;const label=document.createElement('span');label.className='poster-fallback';label.textContent='Постер ожидается';image.replaceWith(label);};image.addEventListener('error',missing,{once:true});if(image.complete&&image.naturalWidth===0||/\/missing[_/.]|\/404[_.]/i.test(image.src))missing();}

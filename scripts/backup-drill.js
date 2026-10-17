@@ -46,6 +46,8 @@ export async function verify(file,{connectionString=process.env.DATABASE_URL}={}
   const restored=await fingerprint(target);
   if(JSON.stringify(restored.tables)!==JSON.stringify(manifest.tables)||restored.schemaSha256!==manifest.schemaSha256)throw Error('Restored tables or schema differ from the exported snapshot');
   // Run real route rendering on the recovered copy; no worker/importer is started.
+  // Compare the restored snapshot first; then upgrade its schema for the current app.
+  const {migrate}=await import('../src/db.js');await migrate(target);
   const {createApp}=await import('../src/app.js'),{episodeFeed}=await import('../src/episode-feed.js');
   const feed=await episodeFeed(target,20);const server=createApp(target).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
   try{for(const path of ['/health','/','/catalog','/new-episodes']){const response=await fetch('http://127.0.0.1:'+server.address().port+path);await response.text();if(response.status!==200)throw Error('Recovered route failed: '+path);}}finally{await new Promise(r=>server.close(r));}
