@@ -15,7 +15,7 @@ export async function notifyEpisodes(client,anime,releaseId,items,{newEdition=fa
  }
 }
 export async function continueWatching(db,userId){
- const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
+ const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 AND (position_seconds>0 OR manual_mark=FALSE) GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
  const seen=new Set();return rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return !a.completed&&a.resume_position>0;}).slice(0,14);
 }
 export function resumeLink(a){const params=new URLSearchParams({source:a.resume_provider||'kodik',episode:a.resume_episode,season:a.resume_season,resume:'1'});if(a.resume_provider==='aniliberty'&&a.resume_release)params.set('release',a.resume_release);return '/anime/'+a.id+'?'+params+'#player';}

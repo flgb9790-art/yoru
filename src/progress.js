@@ -46,7 +46,7 @@ export function mountProgress(app,db){
     else await client.query('DELETE FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season=$3 AND episode=$4',[req.user.id,a.id,input.season,input.episode]);
    }else for(let offset=0;offset<numbers.length;offset+=100){
     const values=[],tuples=numbers.slice(offset,offset+100).map(n=>'('+[randomUUID(),req.user.id,a.id,input.season,n,true,true].map(v=>{values.push(v);return '$'+values.length;}).join(',')+')');
-    await client.query(`INSERT INTO watch_history(id,user_id,anime_id,season,episode,completed,manual_mark) VALUES ${tuples.join(',')} ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET completed=TRUE,manual_mark=TRUE,updated_at=CASE WHEN watch_history.completed THEN watch_history.updated_at ELSE NOW() END`,values);
+    await client.query(`INSERT INTO watch_history(id,user_id,anime_id,season,episode,completed,manual_mark) VALUES ${tuples.join(',')} ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET completed=TRUE,manual_mark=TRUE,updated_at=watch_history.updated_at`,values);
    }
    await syncLibraryProgress(client,req.user.id,a);await client.query('COMMIT');res.redirect('/anime/'+a.id+'/progress?season='+input.season+'&page='+input.page);
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
