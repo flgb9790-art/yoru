@@ -8,6 +8,7 @@ import {token,hashToken,hashPassword,verifyPassword,cookie,requireUser,requireAd
 import {layout,esc,csrf,card,pagination,filters,animeForm} from './views.js';
 import {fetchAnime,saveImported} from './shikimori.js';
 import {mountAccounts,profileView,sendAccountEmail} from './accounts.js';
+import {mountTelegram} from './telegram.js';
 const uuid=()=>randomUUID();
 export function createApp(db,{importer=fetchAnime}={}){
  const app=express();app.set('trust proxy',1);
@@ -33,6 +34,8 @@ export function createApp(db,{importer=fetchAnime}={}){
  app.get('/schedule',async(req,res)=>{const rows=(await db.query("SELECT * FROM anime WHERE status='ongoing' ORDER BY name LIMIT 100")).rows;send(req,res,'Расписание',`<h1>Расписание онгоингов</h1><p class="muted">Точное расписание появится при подключении источника дат эфира.</p><div class="grid">${rows.map(card).join('')}</div>`);});
  const authLimiter=rateLimit({windowMs:15*60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false});
  async function signIn(req,res,user){const raw=token();await db.query('INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,$3,$4)',[hashToken(raw),user.id,token(),new Date(Date.now()+30*86400000)]);res.cookie('yoru_session',raw,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:30*86400000,path:'/'});res.redirect('/profile');}
+ mountTelegram(app,db,signIn);
+ app.use((req,res,next)=>{if(process.env.AUTH_MODE!=='telegram')return next();if(req.path==='/login'&&req.method==='GET')return send(req,res,'Вход через Telegram','<section class="panel auth"><h1>С возвращением</h1><p>Вход и регистрация через Telegram.</p><a class="button" href="/auth/telegram">Войти через Telegram →</a><p class="muted">Номер телефона и доступ к сообщениям не запрашиваются.</p></section>');if(['/login','/register','/forgot','/reset','/verify','/verify/resend'].includes(req.path))return res.redirect('/login');next();});
  mountAccounts(app,db);
  app.get('/login',(req,res)=>send(req,res,'Вход',`<section class="panel auth"><h1>С возвращением</h1><form method="post" action="/login">${csrf(req)}<label>Почта<input type="email" name="email" required></label><label>Пароль<input type="password" name="password" required></label><button>Войти</button></form><p><a href="/register">Регистрация по почте</a> · <a href="/forgot">Забыли пароль?</a></p><p class="muted">Telegram-вход будет подключён после настройки бота.</p></section>`));
  app.get('/register',(req,res)=>send(req,res,'Регистрация',`<section class="panel auth"><h1>Создать аккаунт</h1><form method="post" action="/register">${csrf(req)}<label>Имя<input name="name" required maxlength="60"></label><label>Почта<input name="email" type="email" required></label><label>Пароль<input name="password" type="password" minlength="10" maxlength="200" required></label><button>Зарегистрироваться</button></form></section>`));
