@@ -76,3 +76,10 @@ body:is([data-page=home],[data-page=catalog]) .pagination a.selected{background:
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 .catalog-filter-shell>summary{display:none}.catalog-filter-shell{margin-bottom:28px}.catalog-filter-shell .catalog-filters{margin-bottom:0}
 @media(max-width:650px){body[data-page=home] .featured-section .carousel>.anime-card{flex-basis:calc((100% - 20px)/2.35)}.catalog-filter-shell{margin-bottom:22px}.catalog-filter-shell>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;background:#fdfaff;border:1px solid var(--line);border-radius:12px;list-style:none;font-size:12px;color:#5e4875}.catalog-filter-shell>summary::-webkit-details-marker{display:none}.filter-toggle-label{display:inline-flex;align-items:center;gap:12px;font-size:10px;color:#937ba8}.filter-toggle-label>span{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px}.catalog-filter-shell[open]>summary{border-radius:12px 12px 0 0;border-bottom:0}.catalog-filter-shell[open] .catalog-filters{border-radius:0 0 12px 12px}.catalog-filter-shell[open] .filter-toggle-label>span{transform:rotate(180deg)}}
+
+/* Compact cards: one metadata line, no empty release footer. */
+.anime-card>.meta,body:is([data-page=home],[data-page=catalog]) .anime-card>.meta{display:block;height:18px;line-height:18px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;-webkit-line-clamp:unset;margin-top:5px}
+body:is([data-page=home],[data-page=catalog]) .anime-card{padding-bottom:8px}
+.anime-title,body:is([data-page=home],[data-page=catalog]) .anime-title{margin-top:8px}
+.carousel{scrollbar-width:none;-ms-overflow-style:none}.carousel::-webkit-scrollbar{display:none;width:0;height:0}
+body[data-page=home] .carousel{padding-bottom:3px}

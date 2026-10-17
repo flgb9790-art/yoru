@@ -34,7 +34,7 @@ test('latest sync imports missing Shikimori titles once and preserves existing m
 test('home and release archive paginate distinct titles at 20 and 24 cards',async t=>{
  const db=await setup(t);for(let i=1;i<=25;i++){const a=await anime(db,i+100);await saveEpisodeRelease(db,a,release(i+100,i+1000));}
  const first=await episodeFeed(db,20,0),second=await episodeFeed(db,20,20);assert.equal(first.total,25);assert.equal(first.rows.length,20);assert.equal(second.rows.length,5);assert.equal(new Set([...first.rows,...second.rows].map(a=>a.id)).size,25);
- const app=createApp(db);for(const [path,count] of [['/',20],['/?page=2',5],['/new-episodes',24],['/new-episodes?page=2',1]]){const response=await request(app).get(path);assert.equal(response.status,200);assert.equal((response.text.match(/class="episode-release-meta"/g)||[]).length,count);assert.match(response.text,/source=aniliberty&amp;release=/);assert.match(response.text,/Обновлено/);assert.doesNotMatch(response.text,/Пока показаны обновления каталога/);}
+ const app=createApp(db);for(const [path,count] of [['/',20],['/?page=2',5],['/new-episodes',24],['/new-episodes?page=2',1]]){const response=await request(app).get(path);assert.equal(response.status,200);assert.equal((response.text.match(/data-release-card/g)||[]).length,count);assert.match(response.text,/source=aniliberty&amp;release=/);assert.doesNotMatch(response.text,/class="episode-release-meta"|class="episode-watch"/);assert.doesNotMatch(response.text,/Пока показаны обновления каталога/);}
 });
 
 test('episode scheduling deduplicates jobs; partial failures preserve counters and are retried',async t=>{
