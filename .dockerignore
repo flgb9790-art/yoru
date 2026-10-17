@@ -7,3 +7,7 @@ test
 test-results
 coverage
 *.log
+
+.backup-tools/
+backups/
+__pycache__/
