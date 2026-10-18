@@ -62,11 +62,13 @@ export async function syncEpisodeFeed(db,{limit=40,request=anilibertyRequest,imp
  }
  return result;
 }
-const relation=` FROM anime a JOIN episode_feed_titles f ON f.anime_id=a.id JOIN (SELECT anime_id,release_id,MAX(episode) AS last_episode FROM episode_releases WHERE provider='aniliberty' AND available=TRUE AND season=1 GROUP BY anime_id,release_id) latest ON latest.anime_id=a.id AND latest.release_id=f.release_id JOIN episode_releases e ON e.anime_id=a.id AND e.release_id=f.release_id AND e.episode=latest.last_episode AND e.season=1 AND e.provider='aniliberty' WHERE a.blocked=FALSE AND e.available=TRUE`;
+const relation=` FROM anime a JOIN episode_feed_titles f ON f.anime_id=a.id JOIN (SELECT anime_id,release_id,MAX(episode) AS last_episode FROM episode_releases WHERE provider='aniliberty' AND available=TRUE AND season=1 GROUP BY anime_id,release_id) latest ON latest.anime_id=a.id AND latest.release_id=f.release_id JOIN episode_releases e ON e.anime_id=a.id AND e.release_id=f.release_id AND e.episode=latest.last_episode AND e.season=1 AND e.provider='aniliberty' WHERE a.blocked=FALSE AND a.status<>'anons' AND e.available=TRUE`;
 export async function episodeFeed(db,size=20,offset=0){
  const translated=(await db.query('SELECT a.*,e.episode AS release_episode,e.release_id AS source_release_id,e.provider AS release_provider,e.listed_at AS release_date,e.date_kind AS release_date_kind,e.name AS episode_name'+relation)).rows;
- const others=(await db.query("SELECT a.*,s.episode AS release_episode,s.provider AS release_provider,s.observed_at AS release_date FROM anime a JOIN source_updates s ON s.anime_id=a.id WHERE a.blocked=FALSE")).rows;
+ const others=(await db.query("SELECT a.*,s.episode AS release_episode,s.provider AS release_provider,s.observed_at AS release_date FROM anime a JOIN source_updates s ON s.anime_id=a.id WHERE a.blocked=FALSE AND a.status<>'anons'")).rows;
  const byTitle=new Map();for(const a of [...translated,...others]){const before=byTitle.get(a.id);if(!before||Number(a.release_episode)>Number(before.release_episode)||(a.release_episode===before.release_episode&&({aniliberty:3,kodik:2,shikimori:1}[a.release_provider]||0)>({aniliberty:3,kodik:2,shikimori:1}[before.release_provider]||0)))byTitle.set(a.id,a);}
+ const ongoing=(await db.query("SELECT * FROM anime WHERE blocked=FALSE AND status='ongoing'")).rows;
+ for(const a of ongoing)if(!byTitle.has(a.id))byTitle.set(a.id,{...a,release_episode:Number(a.aired)||0,release_provider:'catalogue',release_date:a.updated_at||a.created_at,release_date_kind:'catalogue'});
  const all=[...byTitle.values()].sort((a,b)=>new Date(b.release_date)-new Date(a.release_date)||a.id.localeCompare(b.id));return {total:all.length,rows:all.slice(offset,offset+size)};
 }
 export async function enqueueEpisodeSync(db,{force=false,auto=false}={}){
