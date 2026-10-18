@@ -1,7 +1,8 @@
 window.yoruPages.register(page=>{
  const root=document.querySelector('[data-messenger]');if(!root)return;
  const drafts=new Map();let visit=0,listVisit=0,animeVisit=0,searchTimer,animeTimer,refreshing=false,lastTyping=0;
- const fit=()=>{root.style.minHeight='0';root.style.height=Math.max(200,((window.visualViewport?.height||innerHeight)-root.getBoundingClientRect().top-16)/(root.getBoundingClientRect().width/root.offsetWidth||1))+'px';};fit();page.listen(window,'resize',fit);if(window.visualViewport)page.listen(window.visualViewport,'resize',fit);
+ const fit=()=>{const viewport=window.visualViewport,keyboard=matchMedia('(max-width:760px)').matches&&viewport&&viewport.scale<1.05&&viewport.height<innerHeight*.78;document.body.classList.toggle('is-chat-keyboard',!!keyboard);const zoom=root.getBoundingClientRect().width/root.offsetWidth||1,height=Math.max(120,((viewport?viewport.height+viewport.offsetTop:innerHeight)-root.getBoundingClientRect().top-16)/zoom);root.style.minHeight='0';root.style.height=height+'px';root.style.setProperty('--messenger-height',height+'px');};fit();page.listen(window,'resize',fit);if(window.visualViewport){page.listen(window.visualViewport,'resize',fit);page.listen(window.visualViewport,'scroll',fit);}
+
  const newId=()=>{if(crypto.randomUUID)return crypto.randomUUID();const bytes=crypto.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;const hex=[...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);};
  const getChat=()=>root.querySelector('[data-chat]'),getForm=()=>root.querySelector('[data-message-form]');
  const request=(url,options={})=>fetch(url,{...options,signal:page.signal,headers:{Accept:'application/json',...options.headers}});
@@ -31,5 +32,5 @@ window.yoruPages.register(page=>{
  page.listen(root,'scroll',event=>{if(event.target.matches('[data-chat-scroll]')&&event.target.scrollHeight-event.target.scrollTop-event.target.clientHeight<40)refresh();},{capture:true});
  page.listen(document,'visibilitychange',()=>{if(!document.hidden){refresh();updateList();}});
  page.interval(()=>refresh(),1500);page.interval(()=>{if(!document.hidden)updateList();},5000);restore();
- return ()=>{visit++;listVisit++;animeVisit++;};
+ return ()=>{visit++;listVisit++;animeVisit++;document.body.classList.remove('is-chat-keyboard');};
 });

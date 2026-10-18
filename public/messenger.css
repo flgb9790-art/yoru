@@ -1,4 +1,13 @@
 /* One workspace for conversations, contacts and discovery. */
+.messenger-page main{padding-bottom:16px;min-height:0}
+.messenger .anime-picker{max-height:calc(var(--messenger-height,600px) - 100px);display:flex;flex-direction:column;overflow:hidden}.messenger .anime-picker[hidden]{display:none}.messenger .anime-picker [data-anime-results]{min-height:0;flex:1;overflow:auto}
+@media(max-width:760px){.messenger-page.is-chat-keyboard>header,.messenger-page.is-chat-keyboard>.subnav{display:none}.messenger-page.is-chat-keyboard main{padding-top:8px}}
+.messenger .messenger-tabs a,.messenger .messenger-tabs a:is(:hover,:focus-visible,:active,[aria-current]){border-radius:0!important;background:transparent!important;box-shadow:none!important;filter:none;text-decoration:none!important}
+.messenger .messenger-tabs a:is(:hover,:focus-visible,:active,[aria-current]){border-bottom-color:var(--chat-accent)}
+.messenger .anime-picker [data-anime-results] button{justify-content:flex-start!important;align-items:center;gap:11px;text-align:left;white-space:normal;min-height:58px;line-height:1.5}
+.messenger .anime-picker [data-anime-results] button>img{width:32px;height:44px;object-fit:cover;flex:none;margin:0}
+.messenger .anime-picker [data-anime-results] button>span{min-width:0;flex:1;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+@media(max-width:760px),(pointer:coarse){.messenger :is(input,textarea){font-size:16px!important}.messenger .message-composer textarea{line-height:22px;min-height:42px}.messenger .anime-picker input{width:100%;min-width:0}}
 .messenger :is(input,textarea)::placeholder{color:var(--chat-muted);opacity:.9}
 .messenger-page main{padding-top:24px}.messenger-page .activity-nav{display:none}.messenger-page footer{display:none}
 .panel.messenger{--chat-bg:#f3f1f8;--chat-surface:#fff;--chat-line:#e6dfed;--chat-muted:#9a8ba9;--chat-hover:#f4eff9;--chat-selected:#eae0f4;--chat-own:#e9def4;--chat-accent:#8b6ab0;display:grid;grid-template-columns:300px minmax(0,1fr);height:calc(100dvh - 185px);min-height:440px;max-height:1000px;padding:0;overflow:hidden;margin:0;border-radius:16px;background:var(--chat-surface);color:var(--ink);box-shadow:0 10px 45px #31204708}
