@@ -14,8 +14,8 @@ export async function messengerList(db,userId,{q='',tab='dialogs',page=1}={}){
   const rows=(await db.query('SELECT u.id AS peer_id,u.name,u.avatar,u.chat_active_at'+from+' ORDER BY u.name,u.id LIMIT 20 OFFSET $'+(params.length+1),[...params,(page-1)*20])).rows;
   return {rows:rows.map(r=>({...r,contact:contacts.includes(r.peer_id)})),total,page,q,tab};
  }
- const rows=(await db.query('SELECT d.*,u.name,u.avatar FROM (SELECT DISTINCT ON(peer_id) * FROM (SELECT m.*,CASE WHEN m.sender_id=$1 THEN m.recipient_id ELSE m.sender_id END AS peer_id FROM direct_messages m WHERE m.sender_id=$1 OR m.recipient_id=$1) scoped ORDER BY peer_id,created_at DESC,id DESC) d JOIN users u ON u.id=d.peer_id',[userId])).rows;
- const counts=(await db.query('SELECT sender_id,COUNT(*) AS count FROM direct_messages WHERE recipient_id=$1 AND read_at IS NULL GROUP BY sender_id',[userId])).rows;
+ const rows=(await db.query('SELECT d.*,u.name,u.avatar FROM (SELECT DISTINCT ON(peer_id) * FROM (SELECT m.*,CASE WHEN m.sender_id=$1 THEN m.recipient_id ELSE m.sender_id END AS peer_id FROM direct_messages m WHERE m.deleted_at IS NULL AND ((m.sender_id=$1 AND m.sender_hidden=FALSE) OR (m.recipient_id=$1 AND m.recipient_hidden=FALSE))) scoped ORDER BY peer_id,created_at DESC,id DESC) d JOIN users u ON u.id=d.peer_id',[userId])).rows;
+ const counts=(await db.query('SELECT sender_id,COUNT(*) AS count FROM direct_messages WHERE recipient_id=$1 AND recipient_hidden=FALSE AND deleted_at IS NULL AND read_at IS NULL GROUP BY sender_id',[userId])).rows;
  rows.sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at)||b.id.localeCompare(a.id));
  return {rows:rows.slice((page-1)*20,page*20).map(m=>({...m,own:m.sender_id===userId,unread:Number(counts.find(c=>c.sender_id===m.peer_id)?.count)||0,contact:contacts.includes(m.peer_id)})),total:rows.length,page,q,tab};
 }
