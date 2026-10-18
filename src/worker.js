@@ -1,3 +1,4 @@
+import {isImportSkip} from './import-policy.js';
 import {workerPulse} from './task-status.js';
 import {getConfig,queueImport,scheduleAuto,runAutoTask,importTracked} from './autoparse.js';
 import {syncKodikUpdates} from './kodik-feed.js';
@@ -20,10 +21,10 @@ export async function runJob(db,importer=fetchAnime,{episodeSync=syncEpisodeFeed
   }else if(job.kind==='discover'){
    const status=['ongoing','released'].includes(job.payload.status)?'&status='+job.payload.status:'';
    const list=await shikiRequest('/api/animes?limit=20&order='+(['ranked','aired_on'].includes(job.payload.order)?job.payload.order:'ranked')+status+'&page='+Math.max(1,Number(job.payload.page)||1));
-   for(const item of list){if(!Number.isSafeInteger(item.id))continue;const existing=(await db.query('SELECT id FROM anime WHERE shikimori_id=$1',[item.id])).rowCount;if(!existing)await enqueueImport(db,item.id);}
-  }else{const config=await getConfig(db);await importTracked(db,job.payload.id,importer,{track:config.shikimori});}
+   for(const item of list){if(!Number.isSafeInteger(item.id))continue;const existing=(await db.query('SELECT id FROM anime WHERE shikimori_id=$1',[item.id])).rowCount;if(!existing)await queueImport(db,item.id,{auto:true});}
+  }else{const config=await getConfig(db);await importTracked(db,job.payload.id,importer,{track:config.shikimori,selection:job.payload.auto?config:null});}
   await db.query("UPDATE jobs SET status='done',error='' WHERE id=$1",[job.id]);await db.query('DELETE FROM auto_job_keys WHERE job_id=$1',[job.id]);await db.query('UPDATE jobs SET finished_at=NOW() WHERE id=$1',[job.id]);}
- catch(error){if(['ANIME_NOT_AIRED','ANIME_REMOVED'].includes(error.code)){await db.query("UPDATE jobs SET status='done',result=$1,finished_at=NOW(),error='' WHERE id=$2",[JSON.stringify({skipped:true,reason:error.code==='ANIME_REMOVED'?'Тайтл удалён администратором':'Анонс ещё не выходил'}),job.id]);await db.query('DELETE FROM auto_job_keys WHERE job_id=$1',[job.id]);}else{const attempt=claimed.rows[0].attempts;await db.query('UPDATE jobs SET status=$1,error=$2,run_at=$3 WHERE id=$4',[attempt<3?'pending':'failed',error.message.slice(0,500),new Date(Date.now()+attempt*60000),job.id]);if(attempt>=3)await db.query('DELETE FROM auto_job_keys WHERE job_id=$1',[job.id]);}}finally{clearInterval(pulse);if(taskName)await db.query('UPDATE auto_tasks SET finished_at=NOW(),heartbeat_at=NOW() WHERE name=$1',[taskName]);await workerPulse(db);}
+ catch(error){if(isImportSkip(error)){await db.query("UPDATE jobs SET status='done',result=$1,finished_at=NOW(),error='' WHERE id=$2",[JSON.stringify({skipped:true,reason:error.message}),job.id]);await db.query('DELETE FROM auto_job_keys WHERE job_id=$1',[job.id]);}else{const attempt=claimed.rows[0].attempts;await db.query('UPDATE jobs SET status=$1,error=$2,run_at=$3 WHERE id=$4',[attempt<3?'pending':'failed',error.message.slice(0,500),new Date(Date.now()+attempt*60000),job.id]);if(attempt>=3)await db.query('DELETE FROM auto_job_keys WHERE job_id=$1',[job.id]);}}finally{clearInterval(pulse);if(taskName)await db.query('UPDATE auto_tasks SET finished_at=NOW(),heartbeat_at=NOW() WHERE name=$1',[taskName]);await workerPulse(db);}
  return true;
 }
 export async function enqueueImport(db,id){return queueImport(db,id);}

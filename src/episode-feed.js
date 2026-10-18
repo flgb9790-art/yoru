@@ -1,3 +1,6 @@
+import {getConfig as getParserConfig} from './parser-config.js';
+import {assertSelected} from './parser-candidates.js';
+import {isImportSkip} from './import-policy.js';
 import {notifyEpisodes} from './follows.js';
 import {randomUUID} from 'node:crypto';
 import {anilibertyRequest,normalizeRelease} from './aniliberty.js';
@@ -50,12 +53,12 @@ export async function syncEpisodeFeed(db,{limit=40,request=anilibertyRequest,imp
    if(!anime){
     if(raw.is_blocked_by_geo!==false||raw.is_blocked_by_copyrights!==false){result.restricted++;continue;}
     const imported=await importer(shiki);if(Number(imported.shikimori_id)!==shiki)throw new Error('Imported mapping mismatch');
-    const id=await saveImported(db,imported);anime=(await db.query('SELECT * FROM anime WHERE id=$1',[id])).rows[0];result.imported++;
+    assertSelected(imported,await getParserConfig(db));const id=await saveImported(db,imported);anime=(await db.query('SELECT * FROM anime WHERE id=$1',[id])).rows[0];result.imported++;
    }
    const saved=await saveEpisodeRelease(db,anime,raw);result.releases++;result.inserted+=saved.inserted;if(saved.restricted)result.restricted++;
    onProgress({...result});
    consecutiveErrors=0;
-  }catch(error){result.errors.push({release:releaseId,message:'Не удалось обновить релиз'});if(++consecutiveErrors>=3)break;}
+  }catch(error){if(isImportSkip(error)){result.skipped++;continue;}result.errors.push({release:releaseId,message:'Не удалось обновить релиз'});if(++consecutiveErrors>=3)break;}
  }
  return result;
 }

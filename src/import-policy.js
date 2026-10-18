@@ -1,0 +1,22 @@
+export const bannedGenres=['Детское','Авангард','Антропоморфизм','Хентай','Яой'];
+const key=s=>String(s||'').normalize('NFKC').trim().toLowerCase().replace(/[ё]/g,'е').replace(/[-_–—]/g,' ').replace(/\s+/g,' ');
+const aliases=[['детское','детский','для детей','kids'],['авангард','avant garde','avantgarde'],['антропоморфизм','anthropomorphic','anthropomorphism'],['хентай','hentai'],['яой','yaoi']];
+export function forbiddenGenre(a){const values=[...(a.genres||[]),...(a.metadata?.source_genres||[]).flatMap(g=>[g.name,g.russian])];for(let i=0;i<aliases.length;i++)if(values.some(g=>aliases[i].includes(key(g))))return bannedGenres[i];return '';}
+export const policyError=(code,message)=>Object.assign(Error(message),{code,status:409});
+export const isImportSkip=e=>['ANIME_NOT_AIRED','ANIME_REMOVED','ANIME_NO_RUSSIAN','ANIME_FORBIDDEN_GENRE','ANIME_FILTERED'].includes(e.code);
+export function assertAllowedGenres(a){const genre=forbiddenGenre(a);if(genre)throw policyError('ANIME_FORBIDDEN_GENRE','Исключённый жанр: '+genre);}
+export function assertRussianTitle(a){if(!String(a.name||'').trim()||a.metadata?.russian_title===false||a.metadata?.russian_title!==true&&!/[а-яё]/i.test(String(a.name||'')))throw policyError('ANIME_NO_RUSSIAN','Нет русского названия в Shikimori');}
+export function sourceCountry(value){const code=String(value||'').toUpperCase();if(!/^[A-Z]{2}$/.test(code))return 'Не определена';return ({JP:'Япония',CN:'Китай',KR:'Южная Корея'})[code]||'Другие страны';}
+export function selectionReason(a,c){
+ if(c.countries?.length&&!c.countries.includes(a.country))return a.country==='Не определена'?'Страна не подтверждена':'Страна';
+ const genres=(a.genres||[]).map(key),wanted=(c.genres||[]).map(key);
+ if(wanted.length&&!(c.genreMatch==='all'?wanted.every(g=>genres.includes(g)):wanted.some(g=>genres.includes(g))))return 'Выбранные жанры';
+ if((c.excludedGenres||[]).some(g=>genres.includes(key(g))))return 'Исключённые жанры';
+ if(c.minRating&&Number(a.rating||0)<c.minRating)return 'Рейтинг';
+ if(c.minEpisodes&&Number(a.episodes||0)<c.minEpisodes||c.maxEpisodes&&(!a.episodes||a.episodes>c.maxEpisodes))return 'Количество серий';
+ const duration=Number(a.metadata?.duration||0);if(c.minDuration&&duration<c.minDuration||c.maxDuration&&(!duration||duration>c.maxDuration))return 'Длительность';
+ if(c.ageRatings?.length&&!c.ageRatings.includes(a.metadata?.age_rating))return 'Возрастной рейтинг';
+ if(c.search&&!key(a.name).includes(key(c.search))&&!key(a.original_name).includes(key(c.search)))return 'Поиск по названию';
+ if(c.studios?.length&&!c.studios.some(s=>(a.metadata?.studios||[]).some(v=>key(v)===key(s))))return 'Студия';
+ return '';
+}
