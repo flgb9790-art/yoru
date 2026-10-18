@@ -26,7 +26,7 @@ test('different editions keep their own episodes and older editions cannot repla
 test('latest sync imports missing Shikimori titles once and preserves existing manual names',async t=>{
  const db=await setup(t),a=await anime(db,4);await db.query('UPDATE anime SET name=$1,protected_fields=$2 WHERE id=$3',['Manual name',['name'],a.id]);let imported=0;
  const request=async path=>path.startsWith('anime/releases/latest')?[{id:401,shikimori:{id:4}},{id:501,shikimori:{id:5}},{id:502,shikimori:{id:5}}]:path.endsWith('/401')?release(4,401):release(5,501);
- const importer=async id=>{imported++;return normalizeAnime({status:'released',kind:'tv',aired_on:'2020-01-01',id,russian:'Новый тайтл',genres:[]});};
+ const importer=async id=>{imported++;return normalizeAnime({status:'released',kind:'tv',aired_on:'2020-01-01',id,russian:'Новый тайтл',score:8,image:{original:'/system/animes/original/5.jpg'},genres:[]});};
  const first=await syncEpisodeFeed(db,{request,importer});assert.equal(first.imported,1);assert.equal(first.inserted,4);assert.equal(first.skipped,1);assert.deepEqual(first.errors,[]);
  const second=await syncEpisodeFeed(db,{request,importer});assert.equal(second.inserted,0);assert.equal(imported,1);assert.equal((await db.query('SELECT name FROM anime WHERE id=$1',[a.id])).rows[0].name,'Manual name');
 });

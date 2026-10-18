@@ -8,6 +8,8 @@ export function assertAllowedGenres(a){const genre=forbiddenGenre(a);if(genre)th
 export function assertRussianTitle(a){if(!String(a.name||'').trim()||a.metadata?.russian_title===false||a.metadata?.russian_title!==true&&!/[а-яё]/i.test(String(a.name||'')))throw policyError('ANIME_NO_RUSSIAN','Нет русского названия в Shikimori');}
 export function sourceCountry(value){const code=String(value||'').toUpperCase();if(!/^[A-Z]{2}$/.test(code))return 'Не определена';return ({JP:'Япония',CN:'Китай',KR:'Южная Корея'})[code]||'Другие страны';}
 export function selectionReason(a,c){
+ if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';
+ if(c.requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';
  if(c.countries?.length&&!c.countries.includes(a.country))return a.country==='Не определена'?'Страна не подтверждена':'Страна';
  const genres=(a.genres||[]).map(key),wanted=(c.genres||[]).map(key);
  if(wanted.length&&!(c.genreMatch==='all'?wanted.every(g=>genres.includes(g)):wanted.some(g=>genres.includes(g))))return 'Выбранные жанры';
@@ -20,3 +22,6 @@ export function selectionReason(a,c){
  if(c.studios?.length&&!c.studios.some(s=>(a.metadata?.studios||[]).some(v=>key(v)===key(s))))return 'Студия';
  return '';
 }
+
+export function hasRealPoster(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)&&!/(?:missing|no[_-]?(?:image|poster)|placeholder|questionmark|default[_-]?(?:image|poster)|\/404(?:[._/-]|$))/i.test(u.pathname);}catch{return false;}}
+export function catalogueQualityReason(a){try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';return '';}
