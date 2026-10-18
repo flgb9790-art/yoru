@@ -7,7 +7,7 @@
   const dispose=mount(page);cleanups.push(()=>{dispose?.();controller.abort();timers.forEach(id=>{clearInterval(id);clearTimeout(id);});});
  }
  let request,visit=0;
- const eligible=url=>url.origin===location.origin&&/^https?:$/.test(url.protocol)&&!/^\/(auth|logout|api|media|vendor)(\/|$)/.test(url.pathname)&&! /\.(?:js|css|png|jpe?g|webp|svg|zip|json|mp4|m3u8)$/i.test(url.pathname);
+ const eligible=url=>url.origin===location.origin&&/^https?:$/.test(url.protocol)&&!/^\/(auth|logout|api|media|vendor)(\/|$)/.test(url.pathname)&&!/^\/admin\/design(?:\/|$)/.test(url.pathname)&&! /\.(?:js|css|png|jpe?g|webp|svg|zip|json|mp4|m3u8)$/i.test(url.pathname);
  function position(url,scroll){if(scroll===false)return;const target=url.hash&&document.getElementById(decodeURIComponent(url.hash.slice(1)));if(target)target.scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});}
  function message(text){let box=document.querySelector('[data-navigation-error]');if(!box){box=document.createElement('p');box.dataset.navigationError='';box.setAttribute('role','alert');document.querySelector('main').prepend(box);}box.textContent=text;}
  async function navigate(input,{replace=false,scroll=true,method='GET',body,fromHistory=false,fragment}={}){

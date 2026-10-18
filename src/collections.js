@@ -1,4 +1,5 @@
-import {layout,esc,card,pagination} from './views.js';
+import {layout} from './views.js';
+import {collectionsView,collectionView} from './collection-view.js';
 export const collections=[
  {slug:'adventures',title:'Навстречу приключениям',description:'Путешествия, открытия и большие истории.',genres:['Приключения']},
  {slug:'fantasy',title:'По ту сторону реальности',description:'Магия и миры, в которых всё возможно.',genres:['Фэнтези','Исекай']},
@@ -18,6 +19,6 @@ export async function collectionEntries(db,collection,size=24,offset=0){const cl
  const rows=(await db.query('SELECT * FROM anime'+where+' ORDER BY rating DESC,id LIMIT $'+(values.length+1)+' OFFSET $'+(values.length+2),[...values,size,offset])).rows;return {total,rows};
 }
 export function mountCollections(app,db){
- app.get('/collections',async(req,res)=>{const cards=await Promise.all(collections.map(async c=>({c,...await collectionEntries(db,c,3)})));res.send(layout('Подборки аниме',`<section class="panel page-controls"><div class="eyebrow">Выбирай настроение</div><h1>Подборки аниме</h1><p class="muted">Тематические коллекции из доступного каталога. Они пополняются вместе с сайтом.</p></section><div class="collection-grid">${cards.map(({c,total,rows},index)=>`<a class="panel collection-card" href="/collections/${c.slug}"><div class="collection-art collection-art-${index%5}">${rows.map(a=>a.poster?`<img src="${esc(a.poster)}" alt="" loading="lazy">`:'<span>YORU.</span>').join('')||'<span>YORU.</span>'}<span class="collection-count">${total} аниме</span></div><h2>${esc(c.title)}</h2><p>${esc(c.description)}</p></a>`).join('')}</div>`,req));});
- app.get('/collections/:slug',async(req,res)=>{const c=collections.find(c=>c.slug===req.params.slug);if(!c)return res.sendStatus(404);const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),{rows,total}=await collectionEntries(db,c,24,(page-1)*24);res.send(layout(c.title,`<section class="panel page-controls"><a href="/collections" class="collection-back">← Все подборки</a><h1>${esc(c.title)}</h1><p class="muted">${esc(c.description)}</p><div class="catalog-results">${total} аниме</div></section><div class="grid">${rows.map(a=>card(a)).join('')||'<div class="panel empty-catalog"><h2>Подборка пополняется</h2><p class="muted">Тайтлы появятся после загрузки соответствующих жанров и сведений.</p><a href="/catalog">Открыть каталог →</a></div>'}</div>${pagination(page,total,24,n=>'/collections/'+c.slug+'?page='+n)}`,req));});
+ app.get('/collections',async(req,res)=>{const cards=await Promise.all(collections.map(async c=>({c,...await collectionEntries(db,c,3)})));res.send(layout('Подборки аниме',collectionsView(cards),req));});
+ app.get('/collections/:slug',async(req,res)=>{const c=collections.find(c=>c.slug===req.params.slug);if(!c)return res.sendStatus(404);const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),{rows,total}=await collectionEntries(db,c,24,(page-1)*24);res.send(layout(c.title,collectionView(c,rows,total,page),req));});
 }
