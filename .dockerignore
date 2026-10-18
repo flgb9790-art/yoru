@@ -11,3 +11,12 @@ coverage
 .backup-tools/
 backups/
 __pycache__/
+
+android/
+artifacts/
+
+*firebase-adminsdk*.json
+.secrets/
+
+**/*service-account*.json
+**/*service_account*.json

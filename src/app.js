@@ -1,3 +1,4 @@
+import {mountAndroidPush} from './android-push.js';
 import {mountLegal} from './legal.js';
 import {profileData} from './profile-data.js';
 import {assertAllowedGenres} from './import-policy.js';
@@ -42,6 +43,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  // Double-submit CSRF cookie also covers anonymous registration/login forms.
  app.use((req,res,next)=>{let csrfToken=cookie(req,'yoru_csrf');if(!csrfToken||!/^[a-f0-9]{64}$/.test(csrfToken)){csrfToken=token();res.cookie('yoru_csrf',csrfToken,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'});}req.session.csrf=csrfToken;
   if(['POST','PUT','PATCH','DELETE'].includes(req.method)&&(req.body?._csrf||req.get('x-csrf-token'))!==csrfToken)return res.status(403).send('Форма устарела. Обнови страницу.');next();});
+ mountAndroidPush(app,db);
  mountGenreMenu(app,db);
  mountLegal(app,db);
  mountAnimeRemoval(app,db);

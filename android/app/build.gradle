@@ -1,0 +1,38 @@
+import groovy.json.JsonSlurper
+plugins { id 'com.android.application' }
+def firebaseFile = file('google-services.json')
+def firebase = firebaseFile.exists() ? new JsonSlurper().parse(firebaseFile) : null
+def firebaseClient = firebase?.client?.find { it.client_info.android_client_info.package_name == 'app.yoru.android' }
+if (firebase && (!firebaseClient?.client_info?.mobilesdk_app_id || !firebaseClient?.api_key?.getAt(0)?.current_key || !firebase?.project_info?.project_id || !firebase?.project_info?.project_number)) throw new GradleException('google-services.json must contain complete Firebase configuration for app.yoru.android')
+def quoted = { value -> groovy.json.JsonOutput.toJson(value ?: '') }
+def siteOrigin = new URI(providers.gradleProperty('yoruUrl').getOrElse('https://web-production-6bc5ed.up.railway.app'))
+if(siteOrigin.scheme != 'https' || !siteOrigin.host || siteOrigin.rawUserInfo || siteOrigin.rawQuery || siteOrigin.rawFragment || siteOrigin.rawPath) throw new GradleException('yoruUrl must be an HTTPS origin without a path or credentials')
+def signingFile = rootProject.file('keystore.properties')
+def signingProps = new Properties()
+if (signingFile.exists()) signingFile.withInputStream { signingProps.load(it) }
+android {
+ namespace 'app.yoru.android'
+ compileSdk 35
+ defaultConfig {
+  applicationId 'app.yoru.android'; minSdk 26; targetSdk 35
+  versionCode 1; versionName '0.1.0'
+  buildConfigField 'String', 'SITE_ORIGIN', quoted(providers.gradleProperty('yoruUrl').getOrElse('https://web-production-6bc5ed.up.railway.app'))
+  buildConfigField 'String', 'FIREBASE_APP_ID', quoted(firebaseClient?.client_info?.mobilesdk_app_id)
+  buildConfigField 'String', 'FIREBASE_PROJECT_ID', quoted(firebase?.project_info?.project_id)
+  buildConfigField 'String', 'FIREBASE_API_KEY', quoted(firebaseClient?.api_key?.getAt(0)?.current_key)
+  buildConfigField 'String', 'FIREBASE_SENDER_ID', quoted(firebase?.project_info?.project_number)
+ }
+ buildFeatures { buildConfig true }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ signingConfigs { if(signingFile.exists()) { release { storeFile rootProject.file(signingProps['storeFile']); storePassword signingProps['storePassword']; keyAlias signingProps['keyAlias']; keyPassword signingProps['keyPassword'] } } }
+ buildTypes { release { minifyEnabled false; if(signingFile.exists()) signingConfig signingConfigs.release } }
+}
+dependencies {
+ testImplementation 'junit:junit:4.13.2'
+ implementation 'androidx.webkit:webkit:1.12.1'
+ implementation platform('com.google.firebase:firebase-bom:34.6.0')
+ implementation 'com.google.firebase:firebase-messaging'
+}
+
+// Keep source encoding explicit; Gradle/JVM native argument files retain the Windows locale.
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
