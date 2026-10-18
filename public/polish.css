@@ -60,3 +60,5 @@ footer.site-footer{grid-template-columns:minmax(160px,1fr) minmax(0,auto) auto;c
 
 @media(min-width:761px){header .header-icon+.header-icon,header .header-icon+.account{margin-left:-10px}header .search+.theme-toggle{margin-left:12px}}
 @media(min-width:761px) and (max-width:1100px){header .header-icon+.header-icon,header .header-icon+.account{margin-left:-4px}}
+
+.profile-settings .notification-sound-setting{display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;margin:14px 0 22px;line-height:1.6}.profile-settings .notification-sound-setting input{width:16px!important;height:16px;min-width:16px;flex:0 0 16px;margin:2px 0 0}.profile-settings .notification-sound-setting span{flex:1;min-width:0}
