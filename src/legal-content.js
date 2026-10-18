@@ -1,6 +1,6 @@
 export const legalVersion='2026-10-18';
 const stamp='<p class="legal-date">Редакция от 18 октября 2026 года</p>';
-export const legalDraft='<aside class="legal-draft"><strong>Тестовые реквизиты</strong><p>Оператор: Администрация YORU, Республика Беларусь. Имя и адрес оператора пока не заполнены. Почта <span>legal@yoru.example</span> — демонстрационная и не принимает письма. Для связи используйте <a href="/contact">форму обращения</a>. Перед публичным запуском реквизиты и условия обработки данных будут уточнены.</p></aside>';
+export const legalDraft='<aside class="legal-draft"><strong>Связь с администрацией</strong><p>Оператор: Администрация YORU, Республика Беларусь. Почта <span>legal@yoru.example</span> — демонстрационная и не принимает письма. Для связи используйте <a href="/contact">форму обращения</a>.</p></aside>';
 export function legalDocument(title,body){return `<article class="panel legal-document"><div class="eyebrow">YORU · Информация</div><h1>${title}</h1>${stamp}${legalDraft}${body}</article>`;}
 export const terms=()=>legalDocument('Пользовательское соглашение',`
 <h2>1. Что предлагает YORU</h2><p>YORU помогает находить аниме, следить за сериями, вести свой список и общаться. В каталоге доступны поиск, жанры, страны, подборки и расписание. Аккаунт добавляет историю просмотра, оценки, комментарии, контакты и личные сообщения. Эти условия относятся к функциям YORU; условия сторонних видеосервисов действуют отдельно.</p>
