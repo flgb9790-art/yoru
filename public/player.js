@@ -3,7 +3,7 @@ const listen=page.listen,setInterval=page.interval;
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
- try{const preferred=localStorage.getItem('yoru_player_source');if(['kodik','aniliberty'].includes(preferred))sourceSelect.value=preferred;}catch{}
+ sourceSelect.value='kodik';
  const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');
  const providerButtons=[...section.querySelectorAll('[data-provider]')];
  function syncProviderButtons(){for(const button of providerButtons){button.setAttribute('aria-pressed',String(button.dataset.provider===sourceSelect.value));button.disabled=sourceSelect.disabled;}}
