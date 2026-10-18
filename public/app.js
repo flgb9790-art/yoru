@@ -1,5 +1,7 @@
 window.yoruPages.register((page)=>{
 const listen=page.listen,setInterval=page.interval,setTimeout=page.timeout;
+const genreMenu=document.querySelector('.nav-genres');
+if(genreMenu){listen(document,'pointerdown',event=>{if(genreMenu.open&&!genreMenu.contains(event.target))genreMenu.open=false;});listen(document,'keydown',event=>{if(event.key==='Escape'&&genreMenu.open){genreMenu.open=false;genreMenu.querySelector('summary')?.focus();}});listen(genreMenu,'click',event=>{if(event.target.closest('a'))genreMenu.open=false;});}
 const fetch=(input,options={})=>window.fetch(input,{...options,signal:options.signal||page.signal});
 document.querySelectorAll('[data-countdown]').forEach(element=>{
  const date=new Date(element.dataset.countdown);if(Number.isNaN(date.valueOf()))return;
