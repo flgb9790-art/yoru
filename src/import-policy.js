@@ -10,6 +10,7 @@ export function sourceCountry(value){const code=String(value||'').toUpperCase();
 export function selectionReason(a,c){
  if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';
  if(c.requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';
+ if(c.requireEpisodes&&!hasEpisodes(a))return 'Нет серий';
  if(c.countries?.length&&!c.countries.includes(a.country))return a.country==='Не определена'?'Страна не подтверждена':'Страна';
  const genres=(a.genres||[]).map(key),wanted=(c.genres||[]).map(key);
  if(wanted.length&&!(c.genreMatch==='all'?wanted.every(g=>genres.includes(g)):wanted.some(g=>genres.includes(g))))return 'Выбранные жанры';
@@ -24,4 +25,5 @@ export function selectionReason(a,c){
 }
 
 export function hasRealPoster(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)&&!/(?:missing|no[_-]?(?:image|poster)|placeholder|questionmark|default[_-]?(?:image|poster)|\/404(?:[._/-]|$))/i.test(u.pathname);}catch{return false;}}
-export function catalogueQualityReason(a){try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';return '';}
+export function hasEpisodes(a){return Number(a.episodes)>0||Number(a.aired)>0;}
+export function catalogueQualityReason(a,{requirePoster=true,requireEpisodes=true}={}){try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';if(requireEpisodes&&!hasEpisodes(a))return 'Нет серий';return '';}
