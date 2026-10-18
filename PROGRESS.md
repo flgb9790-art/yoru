@@ -152,3 +152,11 @@ Railway e2a539af-6253-4dfd-a0c1-8ef37ca726d8 SUCCESS. Публичная QA вс
 Для poster именно внутри anime-card установлено общее aspect-ratio 4/5 вместо 2/2.85 (примерно12% меньше высота), включая continue и random/related. object-fit cover сохраняет пропорции изображения; большой постер страницы и маленькие постеры строк не менялись.
 
 Браузерный аудит computed backgrounds в dark на /catalog,/admin/autoparse,/admin/new,/library,/anime/a,/profile,/schedule,/notifications,/anime/a/progress больше не находит светлых UI-поверхностей среди видимых элементов fixture. Проверены AJAX/theme/профиль и размеры320/390/768/1440/2560. Отдельно проверены 5 видимых related и poster ratio1.25 на1440/2560, равные размеры рейтинга, визуально просмотрен скрин dark-cards-refined.png. QA запускает реальные route handlers с pg-mem, HTTP-ответы подставлены; рабочий сайт не изменён. Синтаксис views.js и git diff --check пройдены. Для этих CSS/SVG правок полный HTTP-набор не повторялся, деплой не выполнен.
+
+## 18.10.2026 — плоские вкладки, фильтры и заставка в тёмной теме
+
+Убраны заливки active/hover/focus у library-tabs/schedule-days/admin-nav/activity-nav: остаётся линия, в том числе клавиатурный фокус. Фильтры внутри page-controls, summary, календарная навигация, auto-config check/fieldset и auto-options прозрачные. Убрано общее фоновое правило для .check; тёмные цвета легенд/разделителей и progress в админке согласованы.
+
+Белый countdown исправлен через background целиком, а не только background-color, чтобы стереть старый светлый background-image. Заставка аниме теперь задаёт только CSS custom property --anime-backdrop; тематический градиент управляется CSS. В dark непрозрачность тёмного слоя93–96%, в light прежний едва заметный фон. Убран background-blend-mode soft-light, усиливавший яркость. Смена темы работает без повторного выполнения JS/перехода.
+
+qa-dark-flat.mjs с реальными handlers/pg-mem и подставленным HTTP проверил прозрачные фоны вкладок/фильтров/check, тёмный countdown, адрес фонового SVG в CSS property, переход dark->light на том же anime hero, размеры320–2560 и повторный аудит 9 страниц без светлых UI-фонов. Отдельно просмотрены dark-fixed-hero.png и dark-fixed-autoparse.png. Syntax app.js и diffcheck пройдены; полный HTTP-набор не повторялся для CSS/рендеринга, рабочая БД/деплой не изменялись.
