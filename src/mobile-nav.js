@@ -1,7 +1,7 @@
 // Mobile destinations live in one bottom bar and an accessible menu sheet.
 export function mobileNavigation(req,esc){
  const path=req.path||'/',user=req.user;
- const icons={home:'<path d="m3 10 9-7 9 7v10H6V10m3 10v-7h6v7"/>',catalog:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',chat:'<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5a9.5 9.5 0 0 1 19 0Z"/>',library:'<path d="M6 3h12v18l-6-4-6 4Z"/>',more:'<path d="M4 6h16M4 12h16M4 18h16"/>'};
+ const icons={home:'<path d="M3 10 12 3l9 7M5 8.5V21h5v-7h4v7h5V8.5"/>',catalog:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',chat:'<path d="M21 12a9 9 0 0 1-13.2 7.95L3 21l1.05-4.8A9 9 0 1 1 21 12Z"/>',library:'<path d="M6 3h12v18l-6-4-6 4V3Z"/>',more:'<path d="M4 6h16M4 12h16M4 18h16"/>'};
  const icon=name=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
  const selected=href=>path===href||(href==='/messages'&&path.startsWith('/messages/'));
  const link=(href,label,extra='')=>`<a href="${esc(href)}" ${selected(href)?'aria-current="page"':''} ${extra}>${label}</a>`;

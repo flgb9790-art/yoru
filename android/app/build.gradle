@@ -15,7 +15,7 @@ android {
  compileSdk 35
  defaultConfig {
   applicationId 'app.yoru.android'; minSdk 26; targetSdk 35
-  versionCode 1; versionName '0.1.0'
+  versionCode 2; versionName '0.1.1'
   buildConfigField 'String', 'SITE_ORIGIN', quoted(providers.gradleProperty('yoruUrl').getOrElse('https://web-production-6bc5ed.up.railway.app'))
   buildConfigField 'String', 'FIREBASE_APP_ID', quoted(firebaseClient?.client_info?.mobilesdk_app_id)
   buildConfigField 'String', 'FIREBASE_PROJECT_ID', quoted(firebase?.project_info?.project_id)

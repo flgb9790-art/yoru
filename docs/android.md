@@ -64,3 +64,10 @@ Node-тесты `test/android-push.test.js`: регистрация/ротаци
 Создан подписанный release APK0.1.0 (versionCode1), 2.6MiB, локальный путь artifacts/YORU-release.apk. Клиент Firebase yoru-73e86 подключён из файла владельца (package проверен, настройки присутствуют). APK Signature Scheme v2 проверена apksigner; minimum26/target35 проверены aapt. Полная чистая сборка assembleRelease + testDebugUnitTest + lintDebug прошла:2 JVM-теста,0 lint errors. Два предупреждения lint относятся к пустой старой папке mipmap-v26 и дополнительному legacy fullBackupContent при уже отключённом allowBackup. Серверные push-тесты7 и итоговый набор20 DB/route прошли, ранее полный выбранный набор75; browserQA обычного сайта и native bridge прошли.
 
 Серверный service account и production-деплой ещё не подключены, реальный Android/доставка FCM не проверены. Наличие клиентского google-services.json само по себе не включает отправку с Railway. Не распространяйте как проверенную на устройствах финальную версию до двухаккаунтной проверки на телефоне.
+
+
+## Обновление 0.1.1 (versionCode2)
+
+Иконки launcher/monochrome/notification теперь векторные: симметричный знак YO/RU из favicon, по центру adaptive safe area. APK подписан прежним локальным ключом и устанавливается поверх0.1.0, без удаления приложения. Защита backup явно настроена и для Android8–11. Чистая сборка assembleRelease/testDebugUnitTest/lintDebug прошла,2 JVM tests, lint No issues found; apksigner v2 и aapt version/minSDK проверены. Новый файл artifacts/YORU-release.apk, 2745230bytes, SHA256 8590c07c29a25594a088f31c6b195ce92e48bf35291a23b84742f8a4acdf23c7.
+
+Иконки нижнего меню, карточки/подписи/16px промежутки и обработка неработающих кадров относятся к сайту: нужны деплой и полное обновление страницы/перезапуск приложения. Сама иконка launcher требует установки нового APK. Реальная доставка FCM в этом обновлении не перепроверялась; состояние серверного Firebase-ключа не проверено.
