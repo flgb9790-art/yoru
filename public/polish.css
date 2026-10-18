@@ -1,4 +1,5 @@
 /* Profile: a clear cover, identity and a quiet set of personal shortcuts. */
+.nav-genres>div{max-height:min(65dvh,520px);overflow-y:auto;overscroll-behavior:contain}.nav-genres>div>a{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.5}.nav-genres-empty{grid-column:1/-1;font-size:12px;line-height:1.7;color:var(--theme-muted)}
 .catalog-filter-shell[open] .filter-toggle-label>[data-filter-state]{transform:none}
 .profile-dashboard .profile-header{padding:0;overflow:hidden;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:16px}
 .profile-dashboard .profile-cover.profile-banner{display:block;position:relative;height:200px;min-height:0;margin:0;padding:0;border:0;border-radius:0;background-color:#9680b5;background-image:linear-gradient(120deg,#9a7ab7,#757fa7 55%,#b7c4d3);background-position:center 45%;background-size:cover;box-shadow:none;overflow:hidden}
