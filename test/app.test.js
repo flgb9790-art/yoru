@@ -41,7 +41,7 @@ test('moderation roles cannot grant administrator rights; owner cannot remove ow
 });
 
 test('metadata edits preserve unrelated imported fields and do not freeze episode updates',async()=>{
- const {agent,csrf}=await login();const item={...normalizeAnime({status:'released',id:90001,russian:'Metadata',genres:[]}),metadata:{authors:['Original'],directors:['Director'],studios:['Studio'],duration:24,screenshots:[],nextEpisode:null,related:[{id:1,name:'Part',relation:'Sequel'}],airDate:'2026-01-01'}};
+ const {agent,csrf}=await login();const item=normalizeAnime({status:'released',id:90001,russian:'Тест метаданных',name:'Metadata',genres:[]});Object.assign(item.metadata,{authors:['Original'],directors:['Director'],studios:['Studio'],duration:24,screenshots:[],nextEpisode:null,related:[{id:1,name:'Part',relation:'Sequel'}],airDate:'2026-01-01'});
  const id=await saveImported(db,item);
  const response=await agent.post('/admin/anime/'+id).type('form').send({_csrf:csrf,name:item.name,kind:'tv',status:'released',country:'Япония',authors:'Manual',directors:'Director',studios:'Studio',duration:24,protect:'on'});assert.equal(response.status,302);
  await saveImported(db,{...item,aired:3,metadata:{...item.metadata,authors:['Changed'],directors:['New director']}});
