@@ -88,7 +88,7 @@ footer.site-footer{grid-template-columns:minmax(160px,1fr) minmax(0,auto) auto;c
  body :is(.featured-section,.continue-section,.similar-section,.frames-section) .carousel>:is(.anime-card,.resume-card,.anime-frame){flex:0 0 var(--mobile-card-width)!important;min-width:0;scroll-snap-align:start!important;scroll-snap-stop:normal}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card{display:flex;flex-direction:column;width:100%;height:auto;min-width:0;padding:0;border-radius:9px;overflow:hidden}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card>.poster{display:block;flex:none;width:100%;aspect-ratio:4/5;border-radius:8px 8px 0 0}
- body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card>.anime-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;flex:none;white-space:normal;overflow:hidden;height:2.8em;max-height:2.8em;min-height:0;padding:0;font-size:11px;line-height:1.4;margin:6px 6px 8px;overflow-wrap:anywhere;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+ body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card>.anime-title{display:block;-webkit-box-orient:initial;-webkit-line-clamp:unset;flex:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;height:1.4em;max-height:1.4em;min-height:0;padding:0;font-size:10px;line-height:1.4;margin:6px 6px 8px;overflow-wrap:normal;word-break:normal;-webkit-text-size-adjust:100%;text-size-adjust:100%}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card>:is(.meta,.card-info,.card-popover){display:none}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .rating{font-size:9px;line-height:13px;padding:1px 4px;top:4px;left:4px;border-radius:4px}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .episode{left:4px;bottom:4px;max-width:calc(100% - 8px);font-size:8px;line-height:11px;padding:2px 4px;border-radius:4px;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
@@ -108,7 +108,8 @@ footer.site-footer{grid-template-columns:minmax(160px,1fr) minmax(0,auto) auto;c
  body[data-page=home] .home-columns>div>section+section{margin-top:16px}
  body .anime-content>.anime-story-player,body .anime-content>.similar-section,body .anime-content>.discussion{margin-top:16px}
  body .anime-story-player .frames-section,body .anime-story-player #player+.frames-section{margin-top:16px}
- body :is(.featured-section,.continue-section,.similar-section) .carousel>.resume-card{display:flex;align-items:stretch}
+ body :is(.featured-section,.continue-section,.similar-section) .carousel>.resume-card{display:block}
+ body .continue-section .carousel>.resume-card>.anime-card{flex:none;width:100%;max-width:100%}
  body :is(.featured-section,.continue-section,.similar-section) .carousel .anime-card>.poster img{display:block;width:100%;height:100%;object-fit:cover}
  body .screenshots .anime-frame{position:relative}
  body .screenshots .anime-frame img{font-size:0}
