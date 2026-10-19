@@ -11,4 +11,9 @@ test('empty menus have no dead links; HTML requests receive the same genre list 
  await db.query('INSERT INTO anime(id,name,status,genres) VALUES($1,$2,$3,$4)',['a','A','released',['Школа','Школа','']]);assert.deepEqual(await catalogueGenres(db,{refresh:true}),['Школа']);await middleware(req,{},()=>{});assert.deepEqual(req.menuGenres,['Школа']);const api={method:'GET',path:'/api/inbox-state'};await middleware(api,{},()=>{});assert.equal(api.menuGenres,undefined);
 });
 
-test('header and filter genres follow parser includes and exclusions immediately; settings retain all choices',async t=>{const db=await setup(t);await db.query('INSERT INTO anime(id,name,status,genres) VALUES($1,$2,$3,$4)',['a','Тайтл','released',['Экшен','Школа','Музыка','Хентай']]);assert.deepEqual(await catalogueGenres(db),['Музыка','Школа','Экшен']);await db.query('UPDATE auto_settings SET config=$1 WHERE id=1',[{genres:['Экшен','Школа'],excludedGenres:['Школа']}]);assert.deepEqual(await catalogueGenres(db),['Экшен']);assert.deepEqual(await catalogueGenres(db,{respectSettings:false}),['Музыка','Школа','Экшен']);assert.deepEqual(await catalogueGenres(db),['Экшен']);await db.query('UPDATE auto_settings SET config=$1 WHERE id=1',[{genres:[],excludedGenres:['Экшен']}]);assert.deepEqual(await catalogueGenres(db),['Музыка','Школа']);});
+test('public genres reflect actual catalogue regardless of either parser selection',async t=>{
+ const db=await setup(t);await db.query('INSERT INTO anime(id,name,status,genres) VALUES($1,$2,$3,$4)',['a','Тайтл','released',['Экшен','Школа','Музыка','Хентай']]);
+ const all=['Музыка','Школа','Экшен'];assert.deepEqual(await catalogueGenres(db),all);
+ await db.query('UPDATE auto_settings SET config=$1 WHERE id=1',[{genres:['Экшен'],excludedGenres:['Школа']}]);assert.deepEqual(await catalogueGenres(db,{refresh:true}),all);
+ await db.query('INSERT INTO anime(id,name,status,genres) VALUES($1,$2,$3,$4)',['new','Новый тайтл','released',['Исэкай']]);assert.deepEqual(await catalogueGenres(db,{refresh:true}),['Исэкай',...all]);
+});
