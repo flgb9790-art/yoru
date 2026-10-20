@@ -8,7 +8,7 @@ body .audience-controls{display:flex;align-items:center;gap:6px;flex-shrink:0}
 body .audience-hero .audience-controls button{display:grid;place-items:center;width:30px;height:30px;min-width:30px;min-height:30px;padding:0;margin:0;border-radius:9px;border:1px solid #ffffff32;background:#ffffff10;color:#fff;line-height:1;box-shadow:none}
 body .audience-controls button:hover{background:#ffffff25}
 body .audience-controls svg{display:block;flex:none;max-width:16px;max-height:16px}
-body .audience-stage{position:relative;min-width:0}
+body .audience-stage{position:static;min-width:0}
 body .audience-slide{position:static;margin:0;padding:0;border:0;touch-action:pan-y}
 body .audience-slide .audience-backdrop{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:cover;object-position:65% 35%;opacity:.48;filter:blur(1px);pointer-events:none}
 body .audience-hero::after{content:'';position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#191624ed 0%,#191624ba 48%,#19162448 100%),linear-gradient(0deg,#191624ee,transparent 85%);pointer-events:none}
@@ -59,3 +59,19 @@ body .continue-mini:hover{border-color:#a184bb;color:var(--accent)}
 body .audience-controls button:focus-visible{outline:2px solid #dbc2f5!important;outline-offset:2px;background:#ffffff28!important;color:#fff}
 body .audience-watch:focus-visible,body .audience-timeline button:focus-visible{outline:2px solid #dbc2f5;outline-offset:3px}
 body .audience-slide-content:not(:has(.audience-cover:not([hidden]))){grid-template-columns:minmax(0,1fr)}
+
+/* Backdrops are positioned against the whole hero, including its heading and timeline. */
+@media(min-width:761px){
+ body .audience-slide-content{min-height:380px;grid-template-columns:minmax(0,1fr) 160px;padding:36px 40px 30px;gap:40px}
+ body .audience-cover{width:160px;height:224px}
+}
+body .audience-hero .audience-timeline button:is(:hover,:active,:focus,:focus-visible){background:transparent!important;box-shadow:none!important;border:0!important}
+body .audience-hero .audience-timeline button:focus-visible{outline:1px solid #dbc2f5!important;outline-offset:2px}
+@media(max-width:760px){
+ body .continue-section .continue-mini{display:flex;width:100%;gap:11px;min-height:52px;padding:10px 13px;border-radius:11px}
+ body .continue-mini .continue-mini-icon{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:8px;background:var(--theme-bg);color:var(--accent)}
+ body .continue-mini .continue-mini-copy{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+ body .continue-mini-copy strong{font-size:12px;font-weight:500;line-height:1.4}
+ body .continue-mini-copy small{font-size:10px;color:var(--theme-muted);line-height:1.4}
+ body .continue-mini>svg{margin-left:auto}
+}
