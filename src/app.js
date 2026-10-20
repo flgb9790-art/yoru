@@ -1,3 +1,4 @@
+import {mountWatchRooms} from './watch-rooms.js';
 import {audienceHero} from './audience-card.js';
 import {mountAndroidPush} from './android-push.js';
 import {mountLegal} from './legal.js';
@@ -56,6 +57,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  mountProgress(app,db);
  mountCommunity(app,db);
  mountPlayback(app,db,playerResolver,anilibertyResolver);
+ mountWatchRooms(app,db,anilibertyResolver);
  const send=(req,res,title,body,status=200)=>res.status(status).send(layout(title,body,req));
  async function catalogue(query,size=24,offset=0){const clauses=[],values=[];const add=(sql,value)=>{values.push(value);clauses.push(sql.replace('?',`$${values.length}`));};if(query.q)add('name ILIKE ?',`%${String(query.q).slice(0,200)}%`);if(query.country)add('country=?',query.country);if(query.kind)add('kind=?',query.kind);if(['ongoing','released','anons'].includes(query.status))add('status=?',query.status);if(query.blocked==='1')clauses.push('blocked=TRUE');if(query.year&&/^\d{4}$/.test(query.year))add('year=?',+query.year);for(const g of [].concat(query.genre||[]).slice(0,40))add('? = ANY(genres)',g);const where=clauses.length?' WHERE '+clauses.join(' AND '):'';const order={rating:'rating DESC',popular:'views DESC',year:'year DESC NULLS LAST',updated:'updated_at DESC',schedule:"metadata->>'nextEpisode' ASC NULLS LAST"}[query.sort]||'updated_at DESC';const total=+(await db.query('SELECT COUNT(*) AS count FROM anime'+where,values)).rows[0].count;const rows=(await db.query(`SELECT * FROM anime${where} ORDER BY ${order},id LIMIT $${values.length+1} OFFSET $${values.length+2}`,[...values,size,offset])).rows;return {total,rows};}
  const pageOf=q=>Math.max(1,Math.min(100000,parseInt(q,10)||1));
