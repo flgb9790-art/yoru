@@ -1,16 +1,17 @@
+import {prepareCollectionEntry,collectionScore} from './collection-matching.js';
 import {layout} from './views.js';
 import {collectionsView,collectionView} from './collection-view.js';
 export const collections=[
  {slug:'adventures',title:'Навстречу приключениям',description:'Путешествия, открытия и большие истории.',genres:['Приключения']},
- {slug:'fantasy',title:'По ту сторону реальности',description:'Магия и миры, в которых всё возможно.',genres:['Фэнтези','Исекай']},
+ {slug:'fantasy',title:'По ту сторону реальности',description:'Магия и миры, в которых всё возможно.',genres:['Фэнтези','Исэкай','Реинкарнация']},
  {slug:'mystery',title:'Разгадать тайну',description:'Детективы, загадки и напряжённые расследования.',genres:['Детектив','Триллер']},
  {slug:'quiet-days',title:'Неспешные вечера',description:'Повседневность и спокойные истории для отдыха.',genres:['Повседневность','Иясикэй']},
  {slug:'romance',title:'Истории о чувствах',description:'Встречи и отношения, которые меняют героев.',genres:['Романтика']},
- {slug:'science-fiction',title:'За пределами возможного',description:'Будущее, технологии и другие грани фантастики.',genres:['Фантастика','Меха']},
+ {slug:'science-fiction',title:'За пределами возможного',description:'Будущее, технологии и другие грани фантастики.',genres:['Фантастика','Меха','Космос']},
  {slug:'movies',title:'На один вечер',description:'Полнометражные аниме для вечернего просмотра.',kind:'movie'},
  {slug:'classics',title:'Возвращаясь к классике',description:'Уже вышедшие истории с 1998 по 2010 год.',maxYear:2010},
  {slug:'ongoing',title:'Смотрим вместе',description:'Истории, новые серии которых ещё выходят.',status:'ongoing'},
- {slug: 'isekai', title: 'Жизнь в другом мире', description: 'Попаданцы, перерождение и приключения за пределами привычного.', genres: ['Исекай', 'Попаданцы']},
+ {slug: 'isekai', title: 'Жизнь в другом мире', description: 'Попаданцы, перерождение и приключения за пределами привычного.', genres: ['Исэкай', 'Попаданцы', 'Реинкарнация']},
  {slug: 'vampires', title: 'После заката', description: 'Вампиры и их тайны.', genres: ['Вампиры']},
  {slug: 'school', title: 'Школьные истории', description: 'Дружба, взросление и события после звонка.', genres: ['Школа', 'Школьная жизнь']},
  {slug: 'music', title: 'В своём ритме', description: 'Музыка, сцена и мечта быть услышанным.', genres: ['Музыка']},
@@ -24,13 +25,13 @@ export const collections=[
  {slug: 'magic', title: 'Когда оживает магия', description: 'Заклинания, волшебники и необычные способности.', genres: ['Магия']},
  {slug:'china',title:'Мир дунхуа',description:'Китайская анимация из каталога YORU.',country:'Китай'}
 ];
-export async function collectionEntries(db,collection,size=24,offset=0){const clauses=["blocked=FALSE","status<>'anons'"],values=[];const add=(sql,value)=>{values.push(value);clauses.push(sql.replace('?',`$${values.length}`));};
- if(collection.genres?.length){const parts=collection.genres.map(genre=>{values.push(genre);return '$'+values.length+' = ANY(genres)';});clauses.push('('+parts.join(' OR ')+')');}
- if(collection.kind)add('kind=?',collection.kind);if(collection.country)add('country=?',collection.country);if(collection.status)add('status=?',collection.status);if(collection.maxYear){add('year>=?',1998);add('year<=?',collection.maxYear);}
- const where=' WHERE '+clauses.join(' AND '),total=+(await db.query('SELECT COUNT(*) AS count FROM anime'+where,values)).rows[0].count;
- const rows=(await db.query('SELECT * FROM anime'+where+' ORDER BY rating DESC,id LIMIT $'+(values.length+1)+' OFFSET $'+(values.length+2),[...values,size,offset])).rows;return {total,rows};
+async function collectionCatalogue(db){return (await db.query("SELECT * FROM anime WHERE blocked=FALSE AND status<>'anons' ORDER BY rating DESC,id")).rows.map(prepareCollectionEntry);}
+export async function collectionEntries(db,collection,size=24,offset=0,catalogue=null){
+ const entries=catalogue||await collectionCatalogue(db),matches=entries.map(entry=>({a:entry.a,score:collectionScore(entry,collection)})).filter(row=>row.score>0);
+ matches.sort((a,b)=>b.score-a.score||Number(b.a.rating)-Number(a.a.rating)||a.a.id.localeCompare(b.a.id));
+ return {total:matches.length,rows:matches.slice(offset,offset+size).map(row=>row.a)};
 }
 export function mountCollections(app,db){
- app.get('/collections',async(req,res)=>{const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),cards=await Promise.all(collections.slice((page-1)*12,page*12).map(async c=>({c,...await collectionEntries(db,c,3)})));res.send(layout('Подборки аниме',collectionsView(cards,page,collections.length),req));});
+ app.get('/collections',async(req,res)=>{const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),catalogue=await collectionCatalogue(db),cards=await Promise.all(collections.slice((page-1)*12,page*12).map(async c=>({c,...await collectionEntries(db,c,3,0,catalogue)})));res.send(layout('Подборки аниме',collectionsView(cards,page,collections.length),req));});
  app.get('/collections/:slug',async(req,res)=>{const c=collections.find(c=>c.slug===req.params.slug);if(!c)return res.sendStatus(404);const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),{rows,total}=await collectionEntries(db,c,24,(page-1)*24);res.send(layout(c.title,collectionView(c,rows,total,page),req));});
 }
