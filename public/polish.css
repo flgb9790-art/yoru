@@ -116,20 +116,3 @@ footer.site-footer{grid-template-columns:minmax(160px,1fr) minmax(0,auto) auto;c
 }
 
 .frames-section .carousel-buttons[hidden]{display:none}
-.audience-copy{display:none}.continue-tabs{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
-@media(max-width:760px){
- body .featured-section .carousel{gap:10px;padding:2px 0 6px;scroll-snap-type:x mandatory}
- body .featured-section .carousel>.anime-card{flex:0 0 calc(100% - 12px)!important;display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:start;padding:10px;height:150px;min-width:0;border-radius:12px;background:var(--theme-surface);border:1px solid var(--theme-border);scroll-snap-align:start!important}
- body .featured-section .carousel>.anime-card>.poster{width:84px;height:128px;aspect-ratio:auto;border-radius:8px;grid-column:1;grid-row:1}
- body .featured-section .carousel>.anime-card>.anime-title{display:none}
- body .featured-section .carousel>.anime-card>.audience-copy{display:flex;flex-direction:column;gap:5px;min-width:0;height:128px;grid-column:2;grid-row:1;color:var(--theme-text);text-decoration:none;overflow:hidden}
- .audience-copy>strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.35;font-weight:600;flex-shrink:0}
- .audience-copy>small{font-size:9px;color:var(--theme-muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex-shrink:0}
- .audience-copy>p{font-size:11px;line-height:1.45;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--theme-muted)}
- .audience-copy>span{font-size:10px;color:var(--accent);margin-top:auto;flex-shrink:0}
- body .continue-section.mobile-continue{display:block;padding:0;background:var(--theme-surface);border:1px solid var(--theme-border);border-radius:12px}
- .continue-shortcut{display:flex;align-items:center;gap:12px;padding:14px;color:var(--theme-text);text-decoration:none!important;min-width:0}
- .continue-shortcut>span:nth-child(2){flex:1;min-width:0}.continue-shortcut strong{display:block;font-size:13px;font-weight:500}.continue-shortcut small{display:block;font-size:10px;color:var(--theme-muted);margin-top:2px}.continue-shortcut-icon{width:32px;height:32px;border-radius:10px;background:var(--theme-bg);color:var(--accent);display:grid;place-items:center;font-size:23px;flex-shrink:0}.continue-shortcut>svg{width:19px;height:19px;flex-shrink:0;color:var(--accent)}
-}
-@media(min-width:560px) and (max-width:760px){body .featured-section .carousel>.anime-card{flex-basis:calc((100% - 10px)/2)!important;grid-template-columns:72px minmax(0,1fr);gap:10px}body .featured-section .carousel>.anime-card>.poster{width:72px}}
-.continue-shortcut-icon svg{width:18px;height:18px;display:block}
