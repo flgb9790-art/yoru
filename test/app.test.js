@@ -70,7 +70,7 @@ test('playback history separates seasons and keeps completion after a rewatch be
  await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:2,season:2,position:20,completed:'false'});
  const row=(await db.query('SELECT * FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND episode=2 AND season=2',['admin',anime.id])).rows[0];assert.equal(row.completed,true);assert.equal(row.position_seconds,20);
  assert.equal((await agent.post('/watch/'+anime.id).set('x-csrf-token',csrf).send({episode:0})).status,400);
- const home=await agent.get('/');assert.equal(home.status,200);assert.doesNotMatch(home.text,/continue-section/);
+ const home=await agent.get('/');assert.equal(home.status,200);assert.match(home.text,/class="continue-shortcut" href="\/continue\?all=1"/);
 });
 
 test('expired playback authentication returns JSON 401 rather than a successful login page',async()=>{
