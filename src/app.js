@@ -1,3 +1,4 @@
+import {mountShowcase} from './showcase.js';
 import {mountTop} from './top.js';
 import {loadFranchiseParts} from './franchise.js';
 import {mountWatchRooms} from './watch-rooms.js';
@@ -53,6 +54,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  mountAnimeRemoval(app,db);
  mountCollections(app,db);
  mountTop(app,db);
+ mountShowcase(app,db);
  mountFollows(app,db);
  mountMessages(app,db);
  mountDiscussion(app,db);
