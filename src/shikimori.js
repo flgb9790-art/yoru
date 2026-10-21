@@ -24,7 +24,7 @@ export function normalizeAnime(raw,roles=[],screenshots=[],related=[]){
  country:sourceCountry(raw.country_code),kind:raw.kind||'tv',status:raw.status||'anons',rating:Number(raw.score)||0,
  episodes:Number(raw.episodes)||0,aired:raw.status==='released'?(Number(raw.episodes)||Number(raw.episodes_aired)||0):(Number(raw.episodes_aired)||0),genres:(raw.genres||[]).map(g=>g.russian||g.name),description:plainDescription(raw.description||''),poster:absolute(raw.image?.original),
  metadata:{shikimori_score:Number(raw.score)||0,russian_title:Boolean(String(raw.russian||'').trim()),source_material:raw.origin||null,country_code:raw.country_code||null,country_source:raw.country_source||null,source_genres:raw.genres||[],age_rating:raw.rating||null,duration:raw.duration||0,studios:(raw.studios||[]).map(s=>s.name),authors:names('Original Creator'),directors:names('Director'),
- screenshots:screenshots.map(s=>absolute(s.original)),related:related.filter(r=>r.anime).map(r=>({id:r.anime.id,name:r.anime.russian||r.anime.name,relation:r.relation_russian||r.relation})),airDate:raw.aired_on,endDate:raw.released_on,nextEpisode:raw.next_episode_at||null,source:base}};
+ screenshots:screenshots.map(s=>absolute(s.original)),related:related.filter(r=>r.anime).map(r=>({id:r.anime.id,name:r.anime.russian||r.anime.name,relation:r.relation_russian||r.relation,relation_key:r.relation})),airDate:raw.aired_on,endDate:raw.released_on,nextEpisode:raw.next_episode_at||null,source:base}};
 }
 export async function fetchAnime(id,{countryLookup=lookupCountries}={}){
  if(!Number.isSafeInteger(+id)||+id<1)throw Object.assign(new Error('Некорректный Shikimori ID'),{status:400});

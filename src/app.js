@@ -1,3 +1,5 @@
+import {mountTop} from './top.js';
+import {loadFranchiseParts} from './franchise.js';
 import {mountWatchRooms} from './watch-rooms.js';
 import {audienceHero} from './audience-card.js';
 import {mountAndroidPush} from './android-push.js';
@@ -50,6 +52,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  mountLegal(app,db);
  mountAnimeRemoval(app,db);
  mountCollections(app,db);
+ mountTop(app,db);
  mountFollows(app,db);
  mountMessages(app,db);
  mountDiscussion(app,db);
@@ -73,9 +76,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  const comments=await loadDiscussion(db,a.id,req.user?.id,req.query);
  const latest=(await episodeFeed(db,6)).rows,all=(await db.query('SELECT * FROM anime WHERE id<>$1 ORDER BY rating DESC LIMIT 100',[a.id])).rows;
  const similar=all.sort((x,y)=>y.genres.filter(g=>a.genres.includes(g)).length-x.genres.filter(g=>a.genres.includes(g)).length).slice(0,14);
- const entries=[...(a.metadata?.chronology||[]),...(a.metadata?.related||[])],partIds=[...new Set([a.shikimori_id,...entries.map(r=>Number(r.id))].filter(Number.isSafeInteger))];
- const parts=[];if(entries.length&&partIds.length){const available=(await db.query('SELECT id,name,year,metadata,blocked,shikimori_id FROM anime WHERE shikimori_id IN ('+partIds.map((_,i)=>'$'+(i+1)).join(',')+')',partIds)).rows;for(const linked of available){if(linked.blocked)continue;const source=entries.find(r=>Number(r.id)===linked.shikimori_id&&r.date),date=source?.date||linked.metadata?.airDate||null;parts.push({id:linked.id,name:linked.name,date,year:linked.year,current:linked.id===a.id});}}
- parts.sort((x,y)=>String(x.date||(x.year?x.year+'-01-01':'9999')).localeCompare(String(y.date||(y.year?y.year+'-01-01':'9999')))||x.id.localeCompare(y.id));
+ const parts=await loadFranchiseParts(db,a);
  const score=(await db.query('SELECT AVG(score) AS average,COUNT(score) AS count FROM library WHERE anime_id=$1',[a.id])).rows[0];
  const saved=req.user?(await db.query('SELECT status,score FROM library WHERE anime_id=$1 AND user_id=$2',[a.id,req.user.id])).rows[0]:null;
  send(req,res,a.name,animePage(req,{a,comments,latest,random:all[Math.floor(Math.random()*all.length)],similar,parts,score,saved,continuing:req.user?await continueWatching(db,req.user.id):[],following:req.user?!!(await db.query('SELECT user_id FROM anime_follows WHERE user_id=$1 AND anime_id=$2',[req.user.id,a.id])).rowCount:false}));
