@@ -13,6 +13,6 @@ test('franchise follows only explicit season edges transitively and backwards, e
  assert.deepEqual(franchiseParts(rows[0],rows).map(a=>a.id),['1','2','3','7']);assert.deepEqual(franchiseParts(rows[2],rows).map(a=>a.id),['1','2','3','7']);assert.equal(franchiseParts(rows[2],rows).filter(a=>a.current).length,1);
 });
 test('empty ranking and isolated franchise render safely, dates sort before undated parts',async t=>{
- const db=await setup(t);assert.match(topView(await topAnime(db)),/пока нет аниме/);
+ const db=await setup(t);assert.match(topView(await topAnime(db)),/пока нет аниме/);assert.equal((await topAnime(db,'rating',5)).page,1);await db.query("INSERT INTO anime(id,name,shikimori_id,status,aired,rating) VALUES('only','One',1,'released',12,8)");const bounded=await topAnime(db,'rating',5);assert.equal(bounded.page,1);assert.equal(bounded.rows.length,1);
  const a={id:'a',shikimori_id:1,name:'One',year:null,metadata:{related:[{id:2,relation:'Sequel'}]}},b={id:'b',shikimori_id:2,name:'Two',metadata:{airDate:'2023-05-01'}};assert.deepEqual(franchiseParts(a,[a,b]).map(x=>x.id),['b','a']);assert.equal(franchiseParts(a,[a]).length,1);assert.deepEqual(franchiseParts({...a,shikimori_id:null},[a]),[]);
 });

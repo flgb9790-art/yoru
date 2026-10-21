@@ -12,6 +12,7 @@ test('HTTP showcase requires auth/CSRF, cannot change another user, and exposes 
  const add=await request(app).post('/profile/showcase/add').set('Cookie',cookie('u')).type('form').send({_csrf:csrf,animeId:'a00',userId:'v'});assert.equal(add.status,302);assert.equal((await showcaseData(db,'v')).total,0);
  const profile=await request(app).get('/users/u').set('Cookie',cookie('v'));assert.equal(profile.status,200);assert.match(profile.text,/data-showcase/);assert.doesNotMatch(profile.text,/showcase-settings-link|Настроить витрину/);
  assert.equal((await request(app).get('/users/u/showcase').set('Cookie',cookie('v'))).status,200);assert.equal((await request(app).get('/api/users/u/showcase?page=1').set('Cookie',cookie('v'))).body.rows.length,1);assert.equal((await request(app).get('/api/users/missing/showcase').set('Cookie',cookie('v'))).status,404);
+ assert.match((await request(app).get('/profile/showcase/edit?page=2&q=Тайтл').set('Cookie',cookie('u'))).headers.location,/page=1$/);assert.match((await request(app).get('/users/u/showcase?page=2').set('Cookie',cookie('v'))).headers.location,/page=1$/);
  const editor=await request(app).get('/profile/showcase/edit?q=Тайтл').set('Cookie',cookie('u'));assert.equal(editor.status,200);assert.match(editor.text,/Добавлено/);assert.doesNotMatch(editor.text,/<script> &/);
  await request(app).post('/profile/showcase/remove').set('Cookie',cookie('v')).type('form').send({_csrf:csrf,animeId:'a00'});assert.equal((await showcaseData(db,'u')).total,1);
 });
