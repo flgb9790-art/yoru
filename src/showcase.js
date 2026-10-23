@@ -1,3 +1,4 @@
+import {animeSearch} from './anime-search.js';
 import {refreshAchievements} from './achievements.js';
 import {requireUser} from './security.js';
 import {layout,esc,csrf,card,pagination} from './views.js';
@@ -21,7 +22,7 @@ export function mountShowcase(app,db){
  app.get('/profile/showcase/edit',requireUser,async(req,res)=>{
  const page=pageOf(req.query.page),q=String(req.query.q||'').trim().slice(0,100),data=await showcaseData(db,req.user.id,{offset:(page-1)*20,limit:20});
  if(page>Math.max(1,Math.ceil(data.total/20)))return res.redirect('/profile/showcase/edit?q='+encodeURIComponent(q)+'&page='+Math.max(1,Math.ceil(data.total/20)));
- const matches=q.length>=2?(await db.query("SELECT id,name,poster FROM anime WHERE blocked=FALSE AND (name ILIKE $1 OR original_name ILIKE $1) ORDER BY name,id LIMIT 12",['%'+q+'%'])).rows:[];
+ const values=[],search=animeSearch(q,values);const matches=q.length>=2?(await db.query("SELECT id,name,poster FROM anime WHERE blocked=FALSE AND "+search+" ORDER BY name,id LIMIT 12",values)).rows:[];
  const selected=new Set(matches.length?(await db.query('SELECT anime_id FROM profile_showcase WHERE user_id=$1 AND anime_id IN ('+matches.map((_,i)=>'$'+(i+2)).join(',')+')',[req.user.id,...matches.map(a=>a.id)])).rows.map(a=>a.anime_id):[]);
  const action=(a,add)=>`<form method="post" action="/profile/showcase/${add?'add':'remove'}">${csrf(req)}<input type="hidden" name="animeId" value="${esc(a.id)}"><input type="hidden" name="q" value="${esc(q)}"><input type="hidden" name="page" value="${page}"><button class="secondary" ${add&&selected.has(a.id)?'disabled':''}>${add?selected.has(a.id)?'Добавлено':'Добавить':'Убрать'}</button></form>`;
  const row=(a,add)=>`<div class="showcase-editor-row"><a href="/anime/${encodeURIComponent(a.id)}">${a.poster?`<img src="${esc(a.poster)}" alt="" loading="lazy">`:''}<span>${esc(a.name)}</span></a>${action(a,add)}</div>`;
