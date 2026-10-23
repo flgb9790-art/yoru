@@ -1,0 +1,1 @@
+<resources><style name="AppTheme" parent="AppBaseTheme"><item name="android:windowSplashScreenBackground">#F5F2FA</item><item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_mark</item><item name="android:windowSplashScreenAnimationDuration">600</item><item name="android:windowSplashScreenIconBackgroundColor">#292137</item></style></resources>

@@ -1,3 +1,4 @@
+import {mountApplications,mountApplicationDownloads} from './applications.js';
 import {animeSearch} from './anime-search.js';
 import {mountAchievements} from './achievements.js';
 import {mountLevels,dailyVisit} from './levels.js';
@@ -42,6 +43,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  app.use(express.urlencoded({extended:true,limit:'300kb'}));app.use(express.json({limit:'300kb'}));
  app.get('/vendor/hls.min.js',(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
+ mountApplicationDownloads(app);
  app.use(express.static(fileURLToPath(new URL('../public',import.meta.url))));
  app.get('/health',async(req,res)=>{await db.query('SELECT 1');res.json({ok:true});});
  app.use(async(req,res,next)=>{const raw=cookie(req,'yoru_session');if(raw){const s=(await db.query('SELECT * FROM sessions WHERE token_hash=$1 AND expires_at>NOW()',[hashToken(raw)])).rows[0];if(s){req.session=s;if(s.user_id)req.user=(await db.query('SELECT id,email,name,role,verified,avatar,cover,public_id,xp,visit_streak,visit_day FROM users WHERE id=$1',[s.user_id])).rows[0];}}
@@ -95,7 +97,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  async function signIn(req,res,user){const raw=token();await db.query('INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,$3,$4)',[hashToken(raw),user.id,token(),new Date(Date.now()+30*86400000)]);res.cookie('yoru_session',raw,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:30*86400000,path:'/'});res.redirect('/profile');}
  mountTelegram(app,db,signIn);
  app.use((req,res,next)=>{if(process.env.AUTH_MODE!=='telegram')return next();const authPath=req.path.toLowerCase().replace(/\/+$/,'')||'/';if(authPath==='/login'&&req.method==='GET')return send(req,res,'Вход через Telegram','<section class="panel auth"><h1>С возвращением</h1><p>Вход и регистрация через Telegram.</p><a class="button" href="/auth/telegram">Войти через Telegram →</a><p class="muted">Номер телефона и доступ к сообщениям не запрашиваются.</p></section>');if(['/login','/register','/forgot','/reset','/verify','/verify/resend'].includes(authPath))return res.redirect('/login');next();});
- mountAccounts(app,db);
+ mountApplications(app);mountAccounts(app,db);
  app.get('/login',(req,res)=>send(req,res,'Вход',`<section class="panel auth"><h1>С возвращением</h1><form method="post" action="/login">${csrf(req)}<label>Почта<input type="email" name="email" required></label><label>Пароль<input type="password" name="password" required></label><button>Войти</button></form><p><a href="/register">Регистрация по почте</a> · <a href="/forgot">Забыли пароль?</a></p><p class="muted">Telegram-вход будет подключён после настройки бота.</p></section>`));
  app.get('/register',(req,res)=>send(req,res,'Регистрация',`<section class="panel auth"><h1>Создать аккаунт</h1><form method="post" action="/register">${csrf(req)}<label>Имя<input name="name" required maxlength="60"></label><label>Почта<input name="email" type="email" required></label><label>Пароль<input name="password" type="password" minlength="10" maxlength="200" required></label><button>Зарегистрироваться</button></form></section>`));
  app.post('/register',authLimiter,async(req,res)=>{const input=z.object({name:z.string().trim().min(1).max(60),email:z.email().transform(s=>s.toLowerCase()),password:z.string().min(10).max(200)}).parse(req.body);if((await db.query('SELECT id FROM users WHERE email=$1',[input.email])).rowCount)return send(req,res,'Регистрация','<p>Не удалось создать аккаунт. Попробуй войти.</p>',400);const id=uuid();await db.query('INSERT INTO users(id,email,name,password_hash) VALUES($1,$2,$3,$4)',[id,input.email,input.name,await hashPassword(input.password)]);await signIn(req,res,{id});});

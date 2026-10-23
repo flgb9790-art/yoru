@@ -94,3 +94,5 @@ html[data-theme=dark] .visit-streak .streak-symbol{background:linear-gradient(14
  .account-guest-features{margin:22px 0;gap:15px}.account-guest-features strong{font-size:11px}.account-guest-features small{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.account-dialog[open],.account-dialog.is-closing,.account-dialog::backdrop,.account-orbit{animation:none!important}}
+
+.account-portrait>img,.account-portrait>.account-initial{border-radius:50%}
