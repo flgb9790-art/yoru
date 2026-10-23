@@ -4,13 +4,15 @@ const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
  sourceSelect.value='kodik';
- const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');
+ const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty','kodik-test'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');
  const providerButtons=[...section.querySelectorAll('[data-provider]')];
  function syncProviderButtons(){for(const button of providerButtons){button.setAttribute('aria-pressed',String(button.dataset.provider===sourceSelect.value));button.disabled=sourceSelect.disabled;}}
  for(const button of providerButtons)button.addEventListener('click',()=>{if(sourceSelect.disabled||sourceSelect.value===button.dataset.provider)return;sourceSelect.value=button.dataset.provider;sourceSelect.dispatchEvent(new Event('change'));});
  syncProviderButtons();
  let requestedEpisode=/^[1-9][0-9]{0,5}$/.test(navigation.get('episode')||'')?Number(navigation.get('episode')):null;const requestedRelease=/^[1-9][0-9]{0,9}$/.test(navigation.get('release')||'')?Number(navigation.get('release')):null;
  qualityLabel.textContent=sourceSelect.value==='aniliberty'?'AniLiberty':'Kodik';
+ let kodikBaseUrl='';
+ const experiment=section.querySelector('[data-kodik-experiment]'),voicePanel=experiment&&window.yoruKodikExperiment?.create(experiment,page,id=>{if(!iframe||blocked||sourceSelect.value!=='kodik-test'||!kodikBaseUrl)return;save(true);const url=new URL(kodikBaseUrl);if(id!==null){url.searchParams.set('only_translations',String(id));url.searchParams.set('translations','true');url.searchParams.set('auto_translation','true');}if(episode){url.searchParams.set('episode',String(episode));url.searchParams.set('season',String(season));}if(position>0)url.searchParams.set('start_from',String(Math.max(0,position-5)));generation++;destroy();resetProgress();mountKodik(url);});
  let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null;
  const integer=(value,min,max)=>Number.isInteger(Number(value))&&Number(value)>=min&&Number(value)<=max?Number(value):null;
  function resetProgress(){position=0;duration=0;watched=0;started=false;ended=false;lastSaved=0;lastSent=-1;translation=null;}
@@ -49,9 +51,10 @@ if(playerHost){
   else if(window.Hls?.isSupported()){hls=new Hls({maxBufferLength:30});hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal)failed();});hls.loadSource(url);hls.attachMedia(media);}
   else{failed();status.textContent='Браузер не поддерживает этот формат. Выбери Kodik или другой браузер.';}
  }
+ function mountKodik(url){origin=url.origin;iframe=document.createElement('iframe');iframe.src=url.href;iframe.title='Смотреть аниме — Kodik';iframe.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';playerHost.classList.add('is-loaded');playerHost.replaceChildren(iframe);}
  async function load(){
   if(blocked)return;
-  save(true);const current=++generation;destroy();resetProgress();loading=true;provider=sourceSelect.value;episode=playerHost.dataset.movie==='true'?1:null;season=1;episodes=[];activeRelease=null;
+  save(true);const current=++generation;destroy();resetProgress();loading=true;provider=sourceSelect.value==='kodik-test'?'kodik':sourceSelect.value;voicePanel?.setActive(sourceSelect.value==='kodik-test');voicePanel?.reset();kodikBaseUrl='';episode=playerHost.dataset.movie==='true'?1:null;season=1;episodes=[];activeRelease=null;
   section.querySelector('[data-episode-control]').hidden=true;section.querySelector('[data-quality-control]').hidden=true;note('Загружаем плеер…');status.textContent='';qualityLabel.textContent=provider==='kodik'?'Kodik':'AniLiberty';
   try{
    const response=await fetch('/api/player/'+playerHost.dataset.anime+(provider==='aniliberty'?'/aniliberty'+(requestedRelease?'?release='+requestedRelease:''):'')),data=await response.json();if(current!==generation)return;if(!response.ok)throw Error(data.error||'Плеер временно недоступен.');
@@ -62,7 +65,7 @@ if(playerHost){
    }else{
     const url=new URL(data.url);if(url.origin!=='https://kodikplayer.com')throw Error('Плеер временно недоступен.');origin=url.origin;
     if(requestedEpisode){episode=requestedEpisode;url.searchParams.set('episode',episode);url.searchParams.set('season',(/^[0-9]{1,3}$/.test(navigation.get('season')||'')?Number(navigation.get('season')):1));if(navigation.get('resume')==='1'&&data.resume?.episode===episode&&data.resume?.season===((/^[0-9]{1,3}$/.test(navigation.get('season')||'')?Number(navigation.get('season')):1)))url.searchParams.set('start_from',Math.max(0,data.resume.position_seconds-5));}else if(data.resume){episode=data.resume.episode;season=data.resume.season;url.searchParams.set('episode',episode);url.searchParams.set('season',season);url.searchParams.set('start_from',Math.max(0,data.resume.position_seconds-5));}
-    iframe=document.createElement('iframe');iframe.src=url.href;iframe.title='Смотреть аниме — Kodik';iframe.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';playerHost.classList.add('is-loaded');playerHost.replaceChildren(iframe);qualityLabel.textContent=['Kodik',data.quality].filter(Boolean).join(' · ');if(playerHost.dataset.auth==='true')status.textContent=data.resume?'Продолжаем с сохранённой позиции.':'Прогресс начнёт сохраняться при просмотре.';
+    kodikBaseUrl=url.href;mountKodik(url);qualityLabel.textContent=['Kodik',data.quality].filter(Boolean).join(' · ');if(playerHost.dataset.auth==='true')status.textContent=data.resume?'Продолжаем с сохранённой позиции.':'Прогресс начнёт сохраняться при просмотре.';
    }
   }catch(error){if(current===generation)note(error.message,true);}finally{if(current===generation)loading=false;}
  }
@@ -76,7 +79,7 @@ if(playerHost){
   if(provider!=='kodik'||!iframe||event.source!==iframe.contentWindow||event.origin!==origin)return;
   let data=event.data;if(typeof data==='string'){if(data.length>4096)return;try{data=JSON.parse(data);}catch{return;}}if(!data||typeof data!=='object')return;
   if(data.key==='kodik_player_current_episode'){
-   const value=data.value;if(!value||typeof value!=='object')return;const nextEpisode=integer(value.episode,1,100000)||(playerHost.dataset.movie==='true'?1:null),nextSeason=integer(value.season??1,0,10000);if(!nextEpisode||nextSeason===null)return;
+   const value=data.value;if(!value||typeof value!=='object')return;const nextEpisode=integer(value.episode,1,100000)||(playerHost.dataset.movie==='true'?1:null),nextSeason=integer(value.season??1,0,10000);if(!nextEpisode||nextSeason===null)return;if(sourceSelect.value==='kodik-test')voicePanel?.observe(value);
    if(nextEpisode!==episode||nextSeason!==season){save(true);resetProgress();}episode=nextEpisode;season=nextSeason;translation=integer(value.translation?.id,1,10000000);
   }else if(data.key==='kodik_player_duration_update'){const value=Number(data.value);if(Number.isFinite(value)&&value>0&&value<=86400)duration=value;
   }else if(data.key==='kodik_player_video_started'||data.key==='kodik_player_play'){started=true;ended=false;
