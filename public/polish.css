@@ -133,7 +133,7 @@ html[data-theme=dark] .top-list li{border-color:#463a54}html[data-theme=dark] .t
 
 /* Detail and messenger refinements. Keep the watch gradient stable on hover. */
 html:not([data-theme=dark]) .watch-actions>a.button{background:#8269b6;transition:background-color .18s,color .18s;filter:none;transform:none}
-html:not([data-theme=dark]) .watch-actions>a.button:hover{background:#765da9;color:#fff;filter:none;box-shadow:none;transform:none}
+
 body .anime-content .anime-story-player>.franchise-order{padding:18px;border:1px solid var(--theme-border,#d8cbe5);border-radius:12px;background:#9270b50c}
 .anime-story-player .franchise-order h2{font-size:16px;margin:0 0 14px}
 .anime-story-player .franchise-order .watch-order li{padding:9px 4px;grid-template-columns:25px minmax(0,1fr) auto}

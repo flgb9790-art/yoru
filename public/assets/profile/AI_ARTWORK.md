@@ -1,5 +1,7 @@
 # Profile artwork
 
+Cover replacement: see [COMPACT_COVERS.md](COMPACT_COVERS.md) for the current 1440×220 cinematic panoramas and their generation prompts. The 1440×540 cover prompts below describe the previous set.
+
 Generated using the built-in OpenAI GPT Image tool (`image_gen.imagegen`), one image per preset. No Higgsfield. Runtime avatars are opaque 256×256 WebP, covers are 1440×540 WebP. Original PNGs stay in Codex generated_images; the website serves only workspace assets. Legacy SVG files remain available for profiles that previously selected them.
 
 ## Prompts

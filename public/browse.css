@@ -178,7 +178,7 @@ nav a:hover,.subnav a:hover,.button:hover,.pagination a:hover,.library-tabs a:ho
 @media(max-width:650px){#chinese-animation .browse-heading{flex-wrap:wrap;gap:12px}.similar-section .similar-carousel{padding:0}.similar-section .section-heading{gap:10px}}
 /* Quiet controls and consistent page introductions. */
 button:hover,.button:hover,.pagination a:hover,.library-tabs a:hover,nav a:hover,.subnav a:hover{box-shadow:none;filter:none;transition:background-color .16s,border-color .16s,color .16s}
-button:not(.episode-toggle):hover,.button:hover{border-color:#aa94c5;background-color:#e8dff3}.button:not(.secondary):hover,button:not(.secondary):not(.text-button):not(.episode-toggle):hover{background:#7759a7;color:#fff}
+/* Button states are defined centrally in buttons.css. */
 :is(header nav,.subnav,.admin-nav,.activity-nav,.library-tabs,.schedule-days)>a,.nav-genres>summary{position:relative;text-decoration:none!important;box-shadow:none!important;border-radius:0;background:transparent;color:#756386;border:0;border-bottom:2px solid transparent;padding:9px 0;transition:color .15s,border-color .15s}
 :is(header nav,.subnav,.admin-nav,.activity-nav,.library-tabs,.schedule-days)>a:hover,.nav-genres>summary:hover,:is(header nav,.subnav,.admin-nav,.activity-nav,.library-tabs,.schedule-days)>a[aria-current],.nav-genres>summary[aria-current]{color:#7959b0;background:transparent;border-bottom-color:#8b6bb8;box-shadow:none!important;filter:none;border-radius:0}
 .admin-nav,.activity-nav,.library-tabs,.schedule-days{column-gap:20px;row-gap:8px}.schedule-days a[aria-current]>span{background:#eee6f7;color:#7959b0}
