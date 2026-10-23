@@ -10,3 +10,11 @@ header .header-tools{display:flex;align-items:center;gap:5px;margin-left:12px;fl
 @media(max-width:760px){.profile-dashboard .profile-cover.profile-banner{height:140px!important}}
 
 .asset-options.cover .asset-option img{aspect-ratio:72/11;object-fit:cover}
+
+/* One control size and one SVG canvas across all desktop header actions. */
+header .header-tools .header-icon,header .header-tools .account{display:flex;align-items:center;justify-content:center;width:34px;height:34px;min-width:34px;min-height:34px;padding:0;line-height:1}
+header .header-tools .header-icon svg,header .header-tools .account svg{display:block;width:20px;height:20px;flex:0 0 20px;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+header .header-tools .theme-toggle .theme-sun{display:none}
+html[data-theme=dark] header .header-tools .theme-toggle .theme-moon{display:none}
+html[data-theme=dark] header .header-tools .theme-toggle .theme-sun{display:block}
+header .header-tools .account img{width:34px;height:34px}
