@@ -1,3 +1,4 @@
+import {mountAchievements} from './achievements.js';
 import {mountLevels,dailyVisit} from './levels.js';
 import {mountShowcase} from './showcase.js';
 import {mountTop} from './top.js';
@@ -54,11 +55,13 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  mountGenreMenu(app,db);
  mountLegal(app,db);
  mountAnimeRemoval(app,db);
+ mountFollows(app,db);
  mountCollections(app,db);
  mountLevels(app,db);
+ mountAchievements(app,db);
  mountTop(app,db);
  mountShowcase(app,db);
- mountFollows(app,db);
+
  mountMessages(app,db);
  mountDiscussion(app,db);
  mountAutoparse(app,db);

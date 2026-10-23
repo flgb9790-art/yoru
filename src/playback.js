@@ -1,3 +1,4 @@
+import {checkAchievements} from './achievements.js';
 import {awardExperience,EPISODE_XP} from './levels.js';
 import {syncLibraryProgress} from './progress.js';
 import {randomUUID} from 'node:crypto';
@@ -80,7 +81,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    if(!anime||anime.blocked){await client.query('ROLLBACK');return res.sendStatus(403);}
   const prior=(await client.query('SELECT completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season=$3 AND episode=$4',[req.user.id,anime.id,input.season,input.episode])).rows[0];
   await client.query('INSERT INTO watch_history(id,user_id,anime_id,episode,position_seconds,completed,translation_id,season,provider,source_release_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET position_seconds=$5,completed=watch_history.completed OR $6,translation_id=$7,provider=$9,source_release_id=$10,manual_mark=CASE WHEN $6 THEN FALSE ELSE watch_history.manual_mark END,updated_at=NOW()',[randomUUID(),req.user.id,anime.id,input.episode,input.position,input.completed==='true',input.translation||null,input.season,input.provider,input.provider==='aniliberty'?(input.release||null):null]);
-   if(input.completed==='true'){await syncLibraryProgress(client,req.user.id,anime);if(!prior?.completed)xpGained=await awardExperience(client,req.user.id,'episode:'+anime.id+':'+input.season+':'+input.episode,EPISODE_XP);}
+   if(input.completed==='true'){await syncLibraryProgress(client,req.user.id,anime);if(!prior?.completed){xpGained=await awardExperience(client,req.user.id,'episode:'+anime.id+':'+input.season+':'+input.episode,EPISODE_XP);await checkAchievements(client,req.user.id);}}
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
   if(req.is('application/json'))return res.json({ok:true,xpGained});res.redirect('/history');
