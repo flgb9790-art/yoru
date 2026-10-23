@@ -1,0 +1,73 @@
+# Achievement artwork
+
+Generated with the built-in OpenAI GPT Image tool (`image_gen.imagegen`), one generation per achievement. No Higgsfield or external stock art. Runtime assets: transparent 256 × 256 WebP, quality 86. Images are served locally and lazy-loaded. Original PNGs remain in the generating chat’s Codex generated_images folder; runtime does not depend on that folder.
+
+## Prompts
+
+### first-frame.webp
+
+Create one standalone premium anime game achievement icon, transparent background, square composition. Original cute chibi anime heroine with lavender hair and sparkling violet eyes holding a glowing cinematic play crystal, surrounded by vibrant purple blue magical screen shards and tiny golden stars. Full small figure and ornate circular fantasy medal frame, polished detailed anime gacha reward art, saturated jewel colors, luminous highlights, clear silhouette at 90px, sophisticated shading, generous transparent padding, no text, no letters, no watermark. Asset for anime community achievement called First Frame. Save the generated asset as a local file.
+
+### ten-episodes.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: midnight blue-haired chibi anime girl in starry pajamas cuddling a moon-shaped popcorn bowl, silver crescent and violet stars. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### fifty-episodes.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: confident silver-haired anime explorer girl stepping through a glowing cyan portal with floating luminous shards. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### hundred-episodes.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: royal pink-haired anime heroine holding a large radiant golden star, five tiny colorful stars and laurel ornaments. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### marathon.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: chibi anime adventurer with red scarf, golden compass, floating fantasy islands and a tiny flying dragon. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### explorer.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: turquoise-haired space anime girl sitting on a small glowing planet with colorful orbiting worlds. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### world-traveler.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: purple-haired anime sorceress opening a golden multiverse gateway, jewel galaxies and crystalline wings. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### three-days.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: cheerful orange-haired chibi anime mage cupping a lively orange flame spirit and tiny gold sparks. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### seven-days.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: golden-haired chibi sun priestess with radiant sun halo, warm gold and cyan magical ornaments. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### thirty-days.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: elegant midnight-haired anime witch with crescent moon staff, blue-violet nebula and silver filigree. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### hundred-days.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: regal white-haired anime queen wearing a splendid gold crown with ruby accents, luminous crystal wings. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### first-comment.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: bright teal-haired chibi anime girl holding a glowing magical speech bubble, floating colorful chat charms. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### ten-comments.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: pink-haired anime writer with huge enchanted feather quill, swirling cyan ink sparkles and purple scrolls. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### fifty-comments.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: wise violet-haired anime librarian with open magical tome, floating golden pages and blue-violet spell circles. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### first-showcase.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: charming rose-haired anime girl holding a radiant pink heart gem, cherry blossom petals and tiny violet crystals. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### eight-showcase.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: anime girl with blue twin tails presenting a colorful eight-point crystal constellation, vibrant rainbow stars. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
+
+### twenty-showcase.webp
+
+Use case: stylized-concept. One standalone premium anime game achievement icon, genuine transparent background, square composition. Subject: emerald-haired anime curator with ornate open book, miniature fantasy worlds and rich gold green magical ornaments. Original character, cute expressive chibi face and full small figure, richly decorated circular fantasy medal composition, polished detailed anime gacha reward art, very saturated jewel colors, luminous highlights and painterly dimensional shading, crisp clear silhouette readable at 90px. Illustration has colorful ornate edges and decorative elements extending outside the medal, like collectible anime badges. Centered, generous transparent padding all around, no text, no letters, no watermark. Single icon only. Match a cohesive violet/cyan/gold anime achievement set.
