@@ -1,0 +1,20 @@
+/* Section destinations stay compact links, independently of primary button styles. */
+#chinese-animation .section-more{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;align-self:center;margin:0;padding:4px 0;min-height:28px;border:0;background:transparent;color:var(--control-ink);font-size:11px;line-height:1.5;white-space:nowrap;text-decoration:none}
+#chinese-animation .section-more:hover{text-decoration:underline}
+#chinese-animation .browse-heading{align-items:center;gap:12px;flex-wrap:wrap}
+/* Only the first header stays in view; the secondary navigation scrolls normally. */
+@media(min-width:761px){
+ html:not(.yoru-android) body>header{position:sticky;top:0;z-index:100}
+ html:not(.yoru-android){scroll-padding-top:90px}
+}
+@media(min-width:761px) and (max-width:1280px){html:not(.yoru-android){scroll-padding-top:145px}}
+@media(max-width:760px){
+ body>footer.site-footer{display:grid;grid-template-columns:minmax(0,1fr);gap:17px;padding:25px 18px 24px;text-align:left;align-items:start;justify-items:stretch}
+ body>footer.site-footer>div,body>footer.site-footer>nav,body>footer.site-footer>small{min-width:0;margin:0;grid-column:1}
+ body>footer.site-footer .footer-brand{display:inline-block;font-size:17px;letter-spacing:2.5px;line-height:1.4}
+ body>footer.site-footer p{font-size:11px;line-height:1.6;margin:7px 0 0}
+ body>footer.site-footer .footer-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 18px;justify-content:start;align-items:start;padding:13px 0;border-block:1px solid var(--theme-border)}
+ body>footer.site-footer .footer-links>a{display:flex;align-items:center;min-height:36px;padding:5px 0;font-size:11px;line-height:1.6;border:0;overflow-wrap:anywhere;text-align:left}
+ body>footer.site-footer>small{display:block;font-size:10px;line-height:1.5;text-align:left;justify-self:start;float:none}
+ body>footer.site-footer>small span{margin-left:6px}
+}

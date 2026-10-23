@@ -65,7 +65,7 @@ html[data-theme] body .account-dialog-close:hover{background:var(--control-soft-
 .account-signin-note{font-size:10px;color:var(--theme-muted);text-align:center;margin:14px 0 22px}
 .account-legal{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;border-top:1px solid var(--theme-border);padding-top:16px;font-size:9px;color:var(--theme-muted)}
 .visit-streak .streak-symbol{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid #d8b66366;border-radius:13px;background:linear-gradient(145deg,#fff8df,#f5e8be);color:#ab7a23;box-shadow:none}
-.visit-streak .streak-symbol .streak-flame{display:block;width:25px;height:25px;overflow:visible}
+.visit-streak .streak-symbol .streak-icon{display:block;width:24px;height:24px;overflow:visible}
 html[data-theme=dark] .visit-streak .streak-symbol{background:linear-gradient(145deg,#4b3c24,#382d23);color:#e4bd66;border-color:#a482474d}
 @keyframes account-enter{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes account-leave{to{opacity:0;transform:translateY(8px) scale(.985)}}
