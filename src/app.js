@@ -1,3 +1,4 @@
+import {mountLevels,dailyVisit} from './levels.js';
 import {mountShowcase} from './showcase.js';
 import {mountTop} from './top.js';
 import {loadFranchiseParts} from './franchise.js';
@@ -41,18 +42,20 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  app.get('/vendor/hls.min.js',(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
  app.use(express.static(fileURLToPath(new URL('../public',import.meta.url))));
  app.get('/health',async(req,res)=>{await db.query('SELECT 1');res.json({ok:true});});
- app.use(async(req,res,next)=>{const raw=cookie(req,'yoru_session');if(raw){const s=(await db.query('SELECT * FROM sessions WHERE token_hash=$1 AND expires_at>NOW()',[hashToken(raw)])).rows[0];if(s){req.session=s;if(s.user_id)req.user=(await db.query('SELECT id,email,name,role,verified,avatar,cover FROM users WHERE id=$1',[s.user_id])).rows[0];}}
+ app.use(async(req,res,next)=>{const raw=cookie(req,'yoru_session');if(raw){const s=(await db.query('SELECT * FROM sessions WHERE token_hash=$1 AND expires_at>NOW()',[hashToken(raw)])).rows[0];if(s){req.session=s;if(s.user_id)req.user=(await db.query('SELECT id,email,name,role,verified,avatar,cover,public_id,xp,visit_streak,visit_day FROM users WHERE id=$1',[s.user_id])).rows[0];}}
   if(!req.session){req.session={csrf:token()};}
   next();});
  app.use((req,res,next)=>{res.set('Cache-Control','no-store');next();});
  // Double-submit CSRF cookie also covers anonymous registration/login forms.
  app.use((req,res,next)=>{let csrfToken=cookie(req,'yoru_csrf');if(!csrfToken||!/^[a-f0-9]{64}$/.test(csrfToken)){csrfToken=token();res.cookie('yoru_csrf',csrfToken,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'});}req.session.csrf=csrfToken;
   if(['POST','PUT','PATCH','DELETE'].includes(req.method)&&(req.body?._csrf||req.get('x-csrf-token'))!==csrfToken)return res.status(403).send('Форма устарела. Обнови страницу.');next();});
+ app.use(async(req,res,next)=>{if(req.user&&req.method==='GET'&&!req.path.startsWith('/api/')&&req.get('Accept')?.includes('text/html')&&req.user.visit_day!==new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Minsk',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){await dailyVisit(db,req.user.id);const stats=(await db.query('SELECT xp,visit_streak FROM users WHERE id=$1',[req.user.id])).rows[0];Object.assign(req.user,stats);}next();});
  mountAndroidPush(app,db);
  mountGenreMenu(app,db);
  mountLegal(app,db);
  mountAnimeRemoval(app,db);
  mountCollections(app,db);
+ mountLevels(app,db);
  mountTop(app,db);
  mountShowcase(app,db);
  mountFollows(app,db);

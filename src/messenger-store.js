@@ -5,13 +5,14 @@ export async function setContact(db,userId,peerId,add){
  else await db.query('DELETE FROM user_contacts WHERE user_id=$1 AND contact_id=$2',[userId,peerId]);
 }
 export async function messengerList(db,userId,{q='',tab='dialogs',page=1}={}){
+ if(!q&&(tab==='people'||tab==='contacts'))return {rows:[],total:0,page,q,tab};
  const contacts=(await db.query('SELECT contact_id FROM user_contacts WHERE user_id=$1',[userId])).rows.map(r=>r.contact_id);
  if(q||tab==='contacts'||tab==='people'){
   const params=[userId],conditions=['u.id<>$1'];
-  if(q){params.push('%'+q+'%',q);conditions.push('(u.name ILIKE $2 OR u.id=$3)');}
+  if(q){const numeric=Number(/^@?(?:YR)?0*(\d+)$/i.exec(q)?.[1]||0);params.push('%'+q+'%',Number.isSafeInteger(numeric)&&numeric<=2147483647?numeric:0);conditions.push('(u.name ILIKE $2 OR u.public_id=$3)');}
   if(tab==='contacts')conditions.push('c.user_id=$1');
   const from=' FROM users u LEFT JOIN user_contacts c ON c.contact_id=u.id AND c.user_id=$1 WHERE '+conditions.join(' AND '),total=+(await db.query('SELECT COUNT(*) AS count'+from,params)).rows[0].count;
-  const rows=(await db.query('SELECT u.id AS peer_id,u.name,u.avatar,u.chat_active_at'+from+' ORDER BY u.name,u.id LIMIT 20 OFFSET $'+(params.length+1),[...params,(page-1)*20])).rows;
+  const rows=(await db.query('SELECT u.id AS peer_id,u.name,u.avatar,u.public_id,u.chat_active_at'+from+' ORDER BY u.name,u.id LIMIT 20 OFFSET $'+(params.length+1),[...params,(page-1)*20])).rows;
   return {rows:rows.map(r=>({...r,contact:contacts.includes(r.peer_id)})),total,page,q,tab};
  }
  const rows=(await db.query('SELECT d.*,u.name,u.avatar FROM (SELECT DISTINCT ON(peer_id) * FROM (SELECT m.*,CASE WHEN m.sender_id=$1 THEN m.recipient_id ELSE m.sender_id END AS peer_id FROM direct_messages m WHERE m.deleted_at IS NULL AND ((m.sender_id=$1 AND m.sender_hidden=FALSE) OR (m.recipient_id=$1 AND m.recipient_hidden=FALSE))) scoped ORDER BY peer_id,created_at DESC,id DESC) d JOIN users u ON u.id=d.peer_id',[userId])).rows;

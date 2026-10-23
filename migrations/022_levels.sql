@@ -1,0 +1,12 @@
+CREATE SEQUENCE IF NOT EXISTS user_public_sequence;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS public_id INTEGER NOT NULL DEFAULT nextval('user_public_sequence');
+CREATE UNIQUE INDEX IF NOT EXISTS users_public_id ON users(public_id);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_day TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS visit_streak INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE IF NOT EXISTS experience_events (
+ user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ event_key TEXT NOT NULL, amount INTEGER NOT NULL CHECK(amount>0),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY(user_id,event_key)
+);
+CREATE INDEX IF NOT EXISTS users_experience ON users(xp DESC,public_id);

@@ -1,3 +1,4 @@
+import {awardExperience,EPISODE_XP} from './levels.js';
 import {syncLibraryProgress} from './progress.js';
 import {randomUUID} from 'node:crypto';
 import rateLimit from 'express-rate-limit';
@@ -73,14 +74,15 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
  const authenticate=(req,res,next)=>req.user?next():req.is('application/json')?res.status(401).json({error:'Войди, чтобы сохранить историю.'}):res.redirect('/login');
  app.post('/watch/:id',authenticate,watchLimit,async(req,res)=>{
   const input=z.object({episode:z.coerce.number().int().min(1).max(100000),season:z.coerce.number().int().min(0).max(10000).default(1),position:z.coerce.number().int().min(0).max(86400).default(0),completed:z.enum(['true','false']).default('false'),translation:z.coerce.number().int().min(1).max(10000000).optional(),provider:z.enum(['kodik','aniliberty']).default('kodik'),release:z.coerce.number().int().positive().optional()}).parse(req.body);
-  const client=await db.connect();try{await client.query('BEGIN');
+  let xpGained=0;const client=await db.connect();try{await client.query('BEGIN');
    await client.query('SELECT id FROM users WHERE id=$1 FOR UPDATE',[req.user.id]);
    const anime=(await client.query('SELECT * FROM anime WHERE id=$1',[req.params.id])).rows[0];
    if(!anime||anime.blocked){await client.query('ROLLBACK');return res.sendStatus(403);}
+  const prior=(await client.query('SELECT completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season=$3 AND episode=$4',[req.user.id,anime.id,input.season,input.episode])).rows[0];
   await client.query('INSERT INTO watch_history(id,user_id,anime_id,episode,position_seconds,completed,translation_id,season,provider,source_release_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(user_id,anime_id,season,episode) DO UPDATE SET position_seconds=$5,completed=watch_history.completed OR $6,translation_id=$7,provider=$9,source_release_id=$10,manual_mark=CASE WHEN $6 THEN FALSE ELSE watch_history.manual_mark END,updated_at=NOW()',[randomUUID(),req.user.id,anime.id,input.episode,input.position,input.completed==='true',input.translation||null,input.season,input.provider,input.provider==='aniliberty'?(input.release||null):null]);
-   if(input.completed==='true')await syncLibraryProgress(client,req.user.id,anime);
+   if(input.completed==='true'){await syncLibraryProgress(client,req.user.id,anime);if(!prior?.completed)xpGained=await awardExperience(client,req.user.id,'episode:'+anime.id+':'+input.season+':'+input.episode,EPISODE_XP);}
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
-  if(req.is('application/json'))return res.json({ok:true});res.redirect('/history');
+  if(req.is('application/json'))return res.json({ok:true,xpGained});res.redirect('/history');
  });
 }

@@ -22,7 +22,7 @@ if(playerHost){
   lastSaved=Date.now();lastSent=position;const current=generation;
   const completed=ended||(duration>0&&position/duration>=.9&&watched>=Math.min(60,duration*.5));
   const body={episode,season,position,completed:String(completed),provider,...(provider==='aniliberty'&&activeRelease?{release:activeRelease}:{}),...(translation?{translation}:{})};
-  try{const response=await fetch('/watch/'+playerHost.dataset.anime,{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':playerHost.dataset.csrf},body:JSON.stringify(body),keepalive:force});if(!response.ok)throw Error();if(current===generation)status.textContent=completed?'Серия отмечена просмотренной.':'Прогресс сохранён · '+episode+' серия, '+Math.floor(position/60)+' мин.';
+  try{const response=await fetch('/watch/'+playerHost.dataset.anime,{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':playerHost.dataset.csrf},body:JSON.stringify(body),keepalive:force});if(!response.ok)throw Error();const result=await response.json();if(current===generation)status.textContent=completed?'Серия отмечена просмотренной.'+(result.xpGained?' +'+result.xpGained+' XP':''):'Прогресс сохранён · '+episode+' серия, '+Math.floor(position/60)+' мин.';
   }catch{if(current===generation)status.textContent='Не удалось сохранить прогресс. Повторим при продолжении просмотра.';}
  }
  async function checkPermission(){
