@@ -12,3 +12,10 @@
 
 /* Override the shared inbox skin without letting its 44px artwork overflow the 34px column. */
 .notifications-drawer .notice-item .notice-visual{width:34px;height:40px;flex:0 0 34px;border-radius:9px;font-size:18px}.notifications-drawer .notice-item .notice-visual.is-person{height:34px}.notifications-drawer .notice-item .notice-title{font-size:11px;line-height:1.5}.notifications-drawer .notice-item .notice-description{font-size:10px;line-height:1.6;margin:4px 0}.notifications-drawer .notice-item .notice-date{font-size:9px;margin:4px 0}.notifications-drawer .notice-item .notice-action{font-size:10px;min-height:20px}.notifications-drawer .notice-item .reward-notice-icon{background:transparent}.notifications-drawer .notice-item .reward-notice-icon img{object-fit:contain;border-radius:0}
+
+/* Profile preset gallery: avatars preview the actual circular profile crop. */
+.profile-dashboard .asset-options.avatar{grid-template-columns:repeat(4,minmax(0,1fr))}.asset-options.avatar .asset-option img{border-radius:50%;aspect-ratio:1;object-fit:cover}.asset-options.cover .asset-option img{aspect-ratio:8/3;object-fit:cover;object-position:center}.profile-dashboard .asset-options .asset-option{padding:7px}.profile-dashboard .asset-options .asset-option span{font-size:10px;line-height:1.5;margin:8px 0 2px}.profile-dashboard .asset-options .asset-option[aria-pressed=true]{outline:2px solid #a98bc9;outline-offset:1px}.asset-options .asset-option:focus-visible{outline:2px solid #a98bc9;outline-offset:2px}@media(max-width:650px){.profile-dashboard .asset-options.avatar{grid-template-columns:repeat(3,minmax(0,1fr))}.profile-dashboard .asset-options{gap:10px}.profile-dashboard .asset-options .asset-option{padding:6px}}
+
+.asset-options.avatar form{display:flex}.asset-options.avatar .asset-option{height:100%}@media(max-width:480px){.profile-dashboard .asset-options.cover{grid-template-columns:minmax(0,1fr)}}
+
+.profile-dashboard .asset-options .asset-option img{height:auto}
