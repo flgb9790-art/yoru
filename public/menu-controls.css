@@ -23,3 +23,20 @@ html[data-theme] .desktop-more-panel a:focus-visible{outline:2px solid var(--con
 html[data-theme] body>header .nav-genres>div>a{background:transparent;color:var(--control-ink);border:1px solid transparent;border-radius:8px;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
 html[data-theme] body>header .nav-genres>div>a:hover,html[data-theme] body>header .nav-genres>div>a[aria-current]{background:var(--control-soft-hover);color:var(--control-ink);border-color:var(--control-border-hover)}
 html[data-theme] body>header .nav-genres>div>a:focus-visible{outline:2px solid var(--control-focus);outline-offset:1px}
+
+/* Navigation stays unfilled at rest, including the current/open item. */
+html[data-theme] body>header :is(#primary-nav>a,#primary-nav>details>summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle),html[data-theme] body>header :is(#primary-nav>a[aria-current],#primary-nav>details[open]>summary,#primary-nav>details>summary[data-current],#primary-nav>details>summary[aria-current]){background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+html[data-theme] body>header :is(.desktop-more-panel a,.nav-genres>div>a){background:transparent!important;border-color:transparent!important}
+@media(max-width:760px){
+ html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account),html[data-theme] body .mobile-menu-grid>a[aria-current]{background:transparent!important;border-color:transparent!important}
+ html[data-theme] body>.mobile-bottom-nav>[aria-current=page],html[data-theme] body>.mobile-bottom-nav>[aria-expanded=true]{background:transparent!important}
+}
+@media(hover:hover) and (pointer:fine){
+ html[data-theme] body>header :is(#primary-nav>a,#primary-nav>details>summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle):hover,html[data-theme] body>header :is(#primary-nav>a[aria-current],#primary-nav>details[open]>summary,#primary-nav>details>summary[data-current],#primary-nav>details>summary[aria-current]):hover{background:var(--control-soft-hover)!important;border-color:var(--control-border-hover)!important}
+ html[data-theme] body>header :is(.desktop-more-panel a,.nav-genres>div>a):hover,html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account):hover,html[data-theme] body .mobile-menu-grid>a[aria-current]:hover{background:var(--control-soft-hover)!important;border-color:var(--control-border-hover)!important}
+ html[data-theme] body>.mobile-bottom-nav>a:hover,html[data-theme] body>.mobile-bottom-nav>button:hover{background:var(--control-quiet-hover)!important}
+}
+/* Clicking/tapping keeps focus for subsequent keyboard use, without a stuck ring. */
+html[data-theme][data-input-modality=pointer] body :is(button,a,summary,#primary-nav>a,#primary-nav>details>summary):focus{outline:none!important;box-shadow:none!important}
+
+@media(hover:none){html[data-theme] body :is(#primary-nav a,#primary-nav summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle,.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account,.mobile-bottom-nav>a,.mobile-bottom-nav>button):hover{background:transparent!important;border-color:transparent!important}}

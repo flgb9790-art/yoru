@@ -1,5 +1,9 @@
 /* Page lifecycle keeps timers, global handlers and media scoped to one AJAX visit. */
 (()=>{
+ document.documentElement.dataset.inputModality='pointer';
+ document.addEventListener('pointerdown',()=>{document.documentElement.dataset.inputModality='pointer';},{capture:true});
+ document.addEventListener('keydown',event=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','Enter',' '].includes(event.key))document.documentElement.dataset.inputModality='keyboard';},{capture:true});
+
  const mounts=[],cleanups=[];
  window.yoruPages={register(mount){mounts.push(mount);start(mount);}};
  function start(mount){const controller=new AbortController(),timers=[];
