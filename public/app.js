@@ -1,7 +1,8 @@
 window.yoruPages.register((page)=>{
 const listen=page.listen,setInterval=page.interval,setTimeout=page.timeout;
-const genreMenu=document.querySelector('.nav-genres');
-if(genreMenu){listen(document,'pointerdown',event=>{if(genreMenu.open&&!genreMenu.contains(event.target))genreMenu.open=false;});listen(document,'keydown',event=>{if(event.key==='Escape'&&genreMenu.open){genreMenu.open=false;genreMenu.querySelector('summary')?.focus();}});listen(genreMenu,'click',event=>{if(event.target.closest('a'))genreMenu.open=false;});}
+const headerMenus=[...document.querySelectorAll('#primary-nav details')];
+for(const menu of headerMenus){listen(document,'pointerdown',event=>{if(menu.open&&!menu.contains(event.target))menu.open=false;});listen(menu,'toggle',()=>{menu.querySelector('summary').setAttribute('aria-expanded',String(menu.open));if(menu.open)for(const other of headerMenus)if(other!==menu)other.open=false;});listen(document,'keydown',event=>{if(event.key==='Escape'&&menu.open){menu.open=false;menu.querySelector('summary').focus();}});listen(menu,'click',event=>{if(event.target.closest('a'))menu.open=false;});listen(menu,'focusout',event=>{if(event.relatedTarget&&!menu.contains(event.relatedTarget))menu.open=false;});}
+
 const fetch=(input,options={})=>window.fetch(input,{...options,signal:options.signal||page.signal});
 document.querySelectorAll('[data-countdown]').forEach(element=>{
  const date=new Date(element.dataset.countdown);if(Number.isNaN(date.valueOf()))return;
