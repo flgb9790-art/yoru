@@ -47,3 +47,9 @@ test('episode scheduling deduplicates jobs; partial failures preserve counters a
 test('synchronization invalidates cached playlists so a new episode is immediately selectable',async t=>{
  const db=await setup(t),a=await anime(db,8);await db.query('INSERT INTO aniliberty_sources(anime_id,payload) VALUES($1,$2)',[a.id,JSON.stringify({available:true,episodes:[{number:1}]})]);await saveEpisodeRelease(db,a,release(8,801,[1,2]));assert.equal((await db.query('SELECT * FROM aniliberty_sources WHERE anime_id=$1',[a.id])).rowCount,0);
 });
+
+test('release sync stores provider ages and preserves Kinopoisk recommendations',async t=>{
+ const db=await setup(t),a=await anime(db,77),raw={...release(77,7701),age_rating:{value:'R16_PLUS',label:'16+'}};
+ await saveEpisodeRelease(db,a,raw);let row=(await db.query('SELECT * FROM anime WHERE id=$1',[a.id])).rows[0];assert.equal(row.metadata.age_recommendation.minimum,16);
+ await db.query('UPDATE anime SET metadata=$1 WHERE id=$2',[{...row.metadata,age_recommendation:{minimum:18,source:'kinopoisk'}},a.id]);await saveEpisodeRelease(db,a,raw);row=(await db.query('SELECT * FROM anime WHERE id=$1',[a.id])).rows[0];assert.equal(row.metadata.age_recommendation.source,'kinopoisk');
+});

@@ -1,3 +1,4 @@
+import {providerAgeRating} from './age-ratings.js';
 import {getConfig as getParserConfig} from './parser-config.js';
 import {assertSelected} from './parser-candidates.js';
 import {isImportSkip} from './import-policy.js';
@@ -7,7 +8,7 @@ import {anilibertyRequest,normalizeRelease} from './aniliberty.js';
 import {fetchAnime,saveImported} from './shikimori.js';
 function sourceDate(value,now){const date=new Date(value);return value&&Number.isFinite(date.valueOf())&&date.valueOf()<=now.valueOf()+300000?date:null;}
 export async function saveEpisodeRelease(db,anime,raw,{now=new Date()}={}){
- const normalized=normalizeRelease(raw,anime.shikimori_id),releaseId=Number(raw.id);
+ const normalized=normalizeRelease(raw,anime.shikimori_id),releaseId=Number(raw.id),age=providerAgeRating(raw,anime.shikimori_id,now);
  if(!Number.isSafeInteger(releaseId)||releaseId<1)throw new Error('Invalid source release ID');
  const fresh=sourceDate(raw.fresh_at,now),rawEpisodes=new Map((raw.episodes||[]).map(e=>[Number(e.ordinal),e]));
  const items=normalized.episodes.flatMap(e=>{
@@ -18,7 +19,8 @@ export async function saveEpisodeRelease(db,anime,raw,{now=new Date()}={}){
  const client=await db.connect();
  try{
   await client.query('BEGIN');
-  const lockedAnime=(await client.query('SELECT id,blocked,status FROM anime WHERE id=$1 FOR UPDATE',[anime.id])).rows[0];
+  const lockedAnime=(await client.query('SELECT id,blocked,status,metadata,protected_fields FROM anime WHERE id=$1 FOR UPDATE',[anime.id])).rows[0];
+  if(age&&lockedAnime.metadata?.age_recommendation?.source!=='kinopoisk'&&(!lockedAnime.metadata?.age_recommendation||lockedAnime.metadata.age_recommendation.releaseId===age.releaseId||age.minimum>=lockedAnime.metadata.age_recommendation.minimum)&&!lockedAnime.protected_fields?.includes('metadata')&&!lockedAnime.protected_fields?.includes('metadata.age_recommendation'))await client.query('UPDATE anime SET metadata=$1 WHERE id=$2',[JSON.stringify({...lockedAnime.metadata,age_recommendation:age}),anime.id]);
   const existing=(await client.query('SELECT episode FROM episode_releases WHERE anime_id=$1 AND release_id=$2',[anime.id,releaseId])).rows,seen=new Set(existing.map(e=>e.episode));
   await client.query("UPDATE episode_releases SET available=FALSE WHERE anime_id=$1 AND provider='aniliberty' AND release_id=$2",[anime.id,releaseId]);
   for(let offset=0;offset<items.length;offset+=100){

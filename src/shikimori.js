@@ -1,3 +1,4 @@
+import {normalizeAgeRating} from './age-ratings.js';
 import {lookupCountries} from './countries.js';
 import {assertAnimeContent,assertAllowedGenres,assertRussianTitle,sourceCountry} from './import-policy.js';
 import {removeRejectedImport} from './catalog-cleanup.js';
@@ -25,7 +26,7 @@ export function normalizeAnime(raw,roles=[],screenshots=[],related=[]){
  return {shikimori_id:raw.id,name:String(raw.russian||'').trim(),original_name:raw.name||'',year:raw.aired_on?Number(raw.aired_on.slice(0,4)):null,
  country:sourceCountry(raw.country_code),kind:raw.kind||'tv',status:raw.status||'anons',rating:Number(raw.score)||0,
  episodes:Number(raw.episodes)||0,aired:raw.status==='released'?(Number(raw.episodes)||Number(raw.episodes_aired)||0):(Number(raw.episodes_aired)||0),genres:(raw.genres||[]).map(g=>g.russian||g.name),description:plainDescription(raw.description||''),poster:absolute(raw.image?.original),
- metadata:{shikimori_score:Number(raw.score)||0,russian_title:Boolean(String(raw.russian||'').trim()),source_material:raw.origin||null,country_code:raw.country_code||null,country_source:raw.country_source||null,source_genres:raw.genres||[],age_rating:raw.rating||null,duration:raw.duration||0,studios:(raw.studios||[]).map(s=>s.name),authors:names('Original Creator'),directors:names('Director'),
+ metadata:{shikimori_score:Number(raw.score)||0,russian_title:Boolean(String(raw.russian||'').trim()),source_material:raw.origin||null,country_code:raw.country_code||null,country_source:raw.country_source||null,source_genres:raw.genres||[],age_rating:normalizeAgeRating(raw.rating),duration:raw.duration||0,studios:(raw.studios||[]).map(s=>s.name),authors:names('Original Creator'),directors:names('Director'),
  screenshots:screenshots.map(s=>absolute(s.original)),related:related.filter(r=>r.anime).map(r=>({id:r.anime.id,name:r.anime.russian||r.anime.name,relation:r.relation_russian||r.relation,relation_key:r.relation})),airDate:raw.aired_on,endDate:raw.released_on,nextEpisode:raw.next_episode_at||null,source:base}};
 }
 export async function fetchAnime(id,{countryLookup=lookupCountries}={}){
@@ -36,9 +37,9 @@ export async function fetchAnime(id,{countryLookup=lookupCountries}={}){
  const screenshots=await shikiRequest(`/api/animes/${id}/screenshots`);
  const related=await shikiRequest(`/api/animes/${id}/related`);
  const result=normalizeAnime(anime,roles,screenshots,related);
- const extra=await shikiRequest('/api/graphql',fetch,{query:'{ animes(ids: "'+id+'", limit: 1) { id russian origin genres { id name russian } nextEpisodeAt poster { originalUrl } chronology { id name russian kind airedOn { date } } } }'});
+ const extra=await shikiRequest('/api/graphql',fetch,{query:'{ animes(ids: "'+id+'", limit: 1) { id russian origin rating genres { id name russian } nextEpisodeAt poster { originalUrl } chronology { id name russian kind airedOn { date } } } }'});
  if(extra.errors?.length)throw new Error('Shikimori GraphQL: '+extra.errors[0].message);
- const enriched=extra.data?.animes?.[0];if(enriched){if(Object.hasOwn(enriched,'russian')){result.name=String(enriched.russian||'').trim();result.metadata.russian_title=Boolean(result.name);}result.metadata.source_material=enriched.origin||null;result.metadata.source_genres=enriched.genres||result.metadata.source_genres;if(Array.isArray(enriched.genres)&&enriched.genres.length)result.genres=[...new Set(enriched.genres.map(g=>g.russian||g.name).filter(Boolean))];result.metadata.nextEpisode=enriched.nextEpisodeAt||null;result.metadata.chronology=(enriched.chronology||[]).filter(a=>!['music','pv','cm'].includes(a.kind)).map(a=>({id:Number(a.id),name:a.russian||a.name,date:a.airedOn?.date||null})).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));if(enriched.poster?.originalUrl)result.poster=enriched.poster.originalUrl;}
+ const enriched=extra.data?.animes?.[0];if(enriched){if(Object.hasOwn(enriched,'russian')){result.name=String(enriched.russian||'').trim();result.metadata.russian_title=Boolean(result.name);}if(Object.hasOwn(enriched,'rating'))result.metadata.age_rating=normalizeAgeRating(enriched.rating)||'none';result.metadata.source_material=enriched.origin||null;result.metadata.source_genres=enriched.genres||result.metadata.source_genres;if(Array.isArray(enriched.genres)&&enriched.genres.length)result.genres=[...new Set(enriched.genres.map(g=>g.russian||g.name).filter(Boolean))];result.metadata.nextEpisode=enriched.nextEpisodeAt||null;result.metadata.chronology=(enriched.chronology||[]).filter(a=>!['music','pv','cm'].includes(a.kind)).map(a=>({id:Number(a.id),name:a.russian||a.name,date:a.airedOn?.date||null})).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));if(enriched.poster?.originalUrl)result.poster=enriched.poster.originalUrl;}
  try{const countries=await countryLookup([result]),code=countries.get(result.shikimori_id);if(code){result.country=sourceCountry(code);result.metadata.country_code=code;result.metadata.country_source='anilist-verified';}}catch{result.metadata.country_lookup_failed=true;}
  return result;
 }

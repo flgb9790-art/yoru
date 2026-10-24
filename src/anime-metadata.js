@@ -1,8 +1,9 @@
+import {ageDescriptions,ageDescription} from './age-ratings.js';
+export {ageDescriptions} from './age-ratings.js';
 import {fetchAnime,saveImported} from './shikimori.js';
 import {isImportSkip} from './import-policy.js';
 
-export const ageDescriptions={g:'Для всех возрастов',pg:'Рекомендуется присутствие родителей',pg_13:'13+ · Для подростков от 13 лет',r:'17+ · Для зрителей от 17 лет, сцены насилия',r_plus:'18+ · Для взрослых, возможна нагота',rx:'18+ · Только для взрослых, откровенные сцены'};
-export function animeDetails(a){const m=a.metadata||{};return [['Автор',(m.authors||[]).join(', ')],['Режиссёр',(m.directors||[]).join(', ')],['Страна',a.country==='Не определена'?'':a.country],['Возраст',ageDescriptions[m.age_rating]||''],['Год',a.year],['Жанры',(a.genres||[]).join(', ')],['Время',m.duration?m.duration+' мин.':''],['Студия',(m.studios||[]).join(', ')]].filter(([,value])=>String(value||'').trim());}
+export function animeDetails(a){const m=a.metadata||{};return [['Автор',(m.authors||[]).join(', ')],['Режиссёр',(m.directors||[]).join(', ')],['Страна',a.country==='Не определена'?'':a.country],['Возраст',ageDescription(a)],['Год',a.year],['Жанры',(a.genres||[]).join(', ')],['Время',m.duration?m.duration+' мин.':''],['Студия',(m.studios||[]).join(', ')]].filter(([,value])=>String(value||'').trim());}
 export function missingMetadata(a){const m=a.metadata||{},protectedFields=new Set(a.protected_fields||[]);return [
  ['country',!a.country||a.country==='Не определена'],['year',!a.year],['genres',!a.genres?.length],
  ['metadata.authors',!m.authors?.length],['metadata.directors',!m.directors?.length],['metadata.studios',!m.studios?.length],['metadata.duration',!m.duration],['metadata.age_rating',!ageDescriptions[m.age_rating]],
