@@ -2,6 +2,8 @@ window.yoruPages.register((page)=>{
 const listen=page.listen,setInterval=page.interval;
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
+ const previewImage=playerHost.querySelector('.player-preview-image');if(previewImage){listen(previewImage,'error',()=>{previewImage.hidden=true;});if(previewImage.complete&&!previewImage.naturalWidth)previewImage.hidden=true;}
+
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
  sourceSelect.value='kodik';
  const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');

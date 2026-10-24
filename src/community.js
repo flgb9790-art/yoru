@@ -1,3 +1,4 @@
+import {moderationView} from './comment-moderation.js';
 import {animeSearch} from './anime-search.js';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
@@ -35,8 +36,8 @@ export function mountCommunity(app,db){
  const moderator=(req,res,next)=>['admin','moderator'].includes(req.user?.role)?next():res.sendStatus(403);
  app.get('/moderation',moderator,async(req,res)=>{
   const page=pageOf(req.query.page),total=+(await db.query('SELECT COUNT(*) AS count FROM comments')).rows[0].count;
-  const rows=(await db.query('SELECT comments.*,users.name AS username,anime.name AS title FROM comments JOIN users ON users.id=comments.user_id JOIN anime ON anime.id=comments.anime_id ORDER BY comments.created_at DESC LIMIT 20 OFFSET $1',[(page-1)*20])).rows;
-  send(req,res,'Модерация',`<h1>Комментарии</h1><div class="panel">${rows.map(c=>`<article class="comment"><a href="/anime/${c.anime_id}">${esc(c.title)}</a><p><strong>${esc(c.username)}</strong> · ${c.hidden?'Скрыт':'Опубликован'}</p><p>${esc(c.body)}</p><form method="post" action="/moderation/${c.id}">${csrf(req)}<input type="hidden" name="hidden" value="${!c.hidden}"><button class="secondary">${c.hidden?'Восстановить':'Скрыть'}</button></form></article>`).join('')||'<p>Комментариев пока нет.</p>'}</div>${pagination(page,total,20,n=>'/moderation?page='+n)}`);
+  const rows=(await db.query('SELECT comments.*,users.name AS username,users.avatar,users.xp,anime.name AS title FROM comments JOIN users ON users.id=comments.user_id JOIN anime ON anime.id=comments.anime_id ORDER BY comments.created_at DESC LIMIT 20 OFFSET $1',[(page-1)*20])).rows;
+  send(req,res,'Модерация',moderationView(req,rows,page,total));
  });
- app.post('/moderation/:id',moderator,async(req,res)=>{const hidden=z.enum(['true','false']).parse(req.body.hidden)==='true';const updated=await db.query('UPDATE comments SET hidden=$1 WHERE id=$2',[hidden,req.params.id]);if(!updated.rowCount)return res.sendStatus(404);await db.query('INSERT INTO audit(id,user_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),req.user.id,'comment:hidden:'+req.body.hidden,req.params.id]);res.redirect('/moderation');});
+ app.post('/moderation/:id',moderator,async(req,res)=>{const hidden=z.enum(['true','false']).parse(req.body.hidden)==='true';const updated=await db.query('UPDATE comments SET hidden=$1 WHERE id=$2',[hidden,req.params.id]);if(!updated.rowCount)return res.sendStatus(404);await db.query('INSERT INTO audit(id,user_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),req.user.id,'comment:hidden:'+req.body.hidden,req.params.id]);res.redirect('/moderation'+(pageOf(req.body.page)>1?'?page='+pageOf(req.body.page):''));});
 }

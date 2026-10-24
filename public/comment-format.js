@@ -1,0 +1,7 @@
+const escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tags={b:['<strong>','</strong>'],i:['<em>','</em>'],u:['<u>','</u>'],s:['<s>','</s>'],quote:['<blockquote>','</blockquote>'],code:['<code>','</code>'],spoiler:['<details class="comment-inline-spoiler"><summary>Спойлер · показать</summary><div>','</div></details>']};
+// An allowlisted text grammar, never user HTML. Shared by server and preview.
+export function renderCommentText(input){const text=String(input??'').slice(0,4000).replace(/\r\n?/g,'\n'),root={children:[]},stack=[root],tokens=/\[(\/?)(b|i|u|s|quote|spoiler|code)\]/gi;let offset=0,match;
+ while((match=tokens.exec(text))){const top=stack.at(-1);top.children.push(text.slice(offset,match.index));offset=tokens.lastIndex;const close=!!match[1],tag=match[2].toLowerCase();if(top.tag==='code'&&!(close&&tag==='code')){top.children.push(match[0]);continue;}if(close){if(top.tag===tag){top.closed=true;stack.pop();}else top.children.push(match[0]);}else if(stack.length<9){const node={tag,open:match[0],children:[],closed:false};top.children.push(node);stack.push(node);}else top.children.push(match[0]);}
+ stack.at(-1).children.push(text.slice(offset));const render=items=>items.map(node=>typeof node==='string'?escape(node).replace(/\n/g,'<br>'):node.closed?tags[node.tag][0]+render(node.children)+tags[node.tag][1]:escape(node.open)+render(node.children)).join('');return render(root.children);
+}
