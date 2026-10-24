@@ -1,0 +1,25 @@
+/* One navigation palette and interaction system in both themes. */
+html[data-theme] body>header :is(#primary-nav>a,#primary-nav>details>summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle){background:var(--control-soft)!important;color:var(--control-ink)!important;border:1px solid var(--control-border)!important;border-radius:10px;box-shadow:none!important;filter:none!important;text-decoration:none!important;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+html[data-theme] body>header :is(#primary-nav>a,#primary-nav>details>summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle):hover{background:var(--control-soft-hover)!important;color:var(--control-ink)!important;border-color:var(--control-border-hover)!important;transform:none!important}
+html[data-theme] body>header :is(#primary-nav>a[aria-current],#primary-nav>details[open]>summary,#primary-nav>details>summary[data-current],#primary-nav>details>summary[aria-current]){background:var(--control-soft-hover)!important;color:var(--control-ink)!important;border-color:var(--control-border-hover)!important}
+html[data-theme] body>header :is(#primary-nav>a,#primary-nav>details>summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle):focus-visible{outline:2px solid var(--control-focus)!important;outline-offset:3px}
+html[data-theme] body>header #primary-nav>a,html[data-theme] body>header #primary-nav>details>summary{display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:7px 10px;line-height:18px;white-space:nowrap}
+html[data-theme] body>header .apps-header-link{min-height:34px;padding-block:6px}
+html[data-theme] body>header #primary-nav{gap:6px}
+html[data-theme] body>header .header-account-group{background:transparent;border-color:var(--control-border);box-shadow:none}
+html[data-theme] body>header .header-account-group .account{padding:0;overflow:hidden}
+html[data-theme] .desktop-more-panel a{background:transparent;color:var(--control-ink);border:1px solid transparent;transition:background-color .16s ease,border-color .16s ease}
+html[data-theme] .desktop-more-panel a:hover,html[data-theme] .desktop-more-panel a[aria-current]{background:var(--control-soft-hover);border-color:var(--control-border-hover);color:var(--control-ink)}
+html[data-theme] .desktop-more-panel a:focus-visible{outline:2px solid var(--control-focus);outline-offset:1px}
+@media(max-width:760px){
+ html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account){background:var(--control-soft)!important;color:var(--control-ink)!important;border-color:var(--control-border)!important;box-shadow:none!important;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+ html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account):hover,html[data-theme] body .mobile-menu-grid>a[aria-current]{background:var(--control-soft-hover)!important;color:var(--control-ink)!important;border-color:var(--control-border-hover)!important}
+ html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account):focus-visible{outline:2px solid var(--control-focus)!important;outline-offset:2px}
+ html[data-theme] body>.mobile-bottom-nav>a,html[data-theme] body>.mobile-bottom-nav>button{color:var(--control-ink)!important;background:var(--control-soft)!important;border:1px solid transparent!important;transition:background-color .16s ease,border-color .16s ease}
+ html[data-theme] body>.mobile-bottom-nav>[aria-current=page],html[data-theme] body>.mobile-bottom-nav>[aria-expanded=true]{background:var(--control-soft-hover)!important;border-color:var(--control-border-hover)!important}
+}
+@media(prefers-reduced-motion:reduce){html[data-theme] body>header :is(a,button,summary),html[data-theme] body :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account,.mobile-bottom-nav>a,.mobile-bottom-nav>button){transition:none!important}}
+
+html[data-theme] body>header .nav-genres>div>a{background:transparent;color:var(--control-ink);border:1px solid transparent;border-radius:8px;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+html[data-theme] body>header .nav-genres>div>a:hover,html[data-theme] body>header .nav-genres>div>a[aria-current]{background:var(--control-soft-hover);color:var(--control-ink);border-color:var(--control-border-hover)}
+html[data-theme] body>header .nav-genres>div>a:focus-visible{outline:2px solid var(--control-focus);outline-offset:1px}
