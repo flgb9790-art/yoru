@@ -1,6 +1,6 @@
 import {layout} from './views.js';
 import {fileURLToPath} from 'node:url';
-export const ANDROID_VERSION='0.1.4';
+export const ANDROID_VERSION='0.1.5';
 const apk='/downloads/YORU-'+ANDROID_VERSION+'.apk';
 const step=(image,title,body)=>`<li class="install-step"><a class="install-preview" href="/assets/install/${image}.svg?v=2" target="_blank" rel="noopener noreferrer" aria-label="Увеличить подсказку: ${title}"><img src="/assets/install/${image}.svg?v=2" alt="${title}" width="320" height="200" loading="lazy" decoding="async"></a><div><strong>${title}</strong><p>${body}</p></div></li>`;
 export function mountApplicationDownloads(app){

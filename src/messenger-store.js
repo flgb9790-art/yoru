@@ -5,7 +5,7 @@ export async function setContact(db,userId,peerId,add){
  else await db.query('DELETE FROM user_contacts WHERE user_id=$1 AND contact_id=$2',[userId,peerId]);
 }
 export async function messengerList(db,userId,{q='',tab='dialogs',page=1}={}){
- if(!q&&(tab==='people'||tab==='contacts'))return {rows:[],total:0,page,q,tab};
+ if(!q&&tab==='people')return {rows:[],total:0,page,q,tab};
  const contacts=(await db.query('SELECT contact_id FROM user_contacts WHERE user_id=$1',[userId])).rows.map(r=>r.contact_id);
  if(q||tab==='contacts'||tab==='people'){
   const params=[userId],conditions=['u.id<>$1'];
