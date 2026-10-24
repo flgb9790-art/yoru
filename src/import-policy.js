@@ -26,4 +26,15 @@ export function selectionReason(a,c){
 
 export function hasRealPoster(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)&&!/(?:missing|no[_-]?(?:image|poster)|placeholder|questionmark|default[_-]?(?:image|poster)|\/404(?:[._/-]|$))/i.test(u.pathname);}catch{return false;}}
 export function hasEpisodes(a){return Number(a.episodes)>0||Number(a.aired)>0;}
-export function catalogueQualityReason(a,{requirePoster=true,requireEpisodes=true}={}){try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';if(requireEpisodes&&!hasEpisodes(a))return 'Нет серий';return '';}
+export function catalogueQualityReason(a,{requirePoster=true,requireEpisodes=true}={}){const content=nonAnimeReason(a);if(content)return content;try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';if(requireEpisodes&&!hasEpisodes(a))return 'Нет серий';return '';}
+
+// TV anime and story specials are valid. Only explicitly non-story/promotional releases are excluded.
+export function nonAnimeReason(a){
+ const kind=key(a.kind||'tv');if(['music','pv','cm','tv show','tvshow','live action','drama'].includes(kind))return 'Клип, реклама или неанимешное ТВ-шоу';
+ const titles=[a.name,a.original_name,...(a.metadata?.source_genres||[]).flatMap(g=>[g.name,g.russian])].filter(Boolean).map(key);
+ if(titles.some(t=>/(?:^|[^\p{L}])(?:recap|recaps|summary|summaries|digest|soushuuhen|soushuu hen|compilation|рекап|рекапы|пересказ|пересказы|рекапитуляция)(?:$|[^\p{L}])|総集編|краткое содержание|итоги сезона/iu.test(t)))return 'Рекап или краткий пересказ';
+ const description=String(a.description||'').replace(/<[^>]*>|\[[^\]]*\]/g,'').trim();
+ if(/^(?:(?:это|данный (?:эпизод|спецвыпуск)|спецвыпуск|фильм)\s*[-—:]?\s*)?(?:рекап|краткий пересказ|краткое содержание|пересказ|компиляция|recap|summary|compilation)(?:\s|[.,:])/iu.test(description))return 'Рекап или краткий пересказ';
+ return '';
+}
+export function assertAnimeContent(a){const reason=nonAnimeReason(a);if(reason)throw policyError('ANIME_FILTERED',reason);}

@@ -1,5 +1,5 @@
 import {lookupCountries} from './countries.js';
-import {assertAllowedGenres,assertRussianTitle,sourceCountry} from './import-policy.js';
+import {assertAnimeContent,assertAllowedGenres,assertRussianTitle,sourceCountry} from './import-policy.js';
 import {removeRejectedImport} from './catalog-cleanup.js';
 import {assertAired} from './catalog-policy.js';
 import {randomUUID} from 'node:crypto';
@@ -10,7 +10,9 @@ export function shikiRequest(path,fetcher=fetch,body){
   const delay=Math.max(0,nextRequest-Date.now());if(delay)await new Promise(r=>setTimeout(r,delay));
   nextRequest=Date.now()+1200;
   const base=process.env.SHIKIMORI_BASE_URL||'https://shikimori.one';
-  const response=await fetcher(new URL(path,base),{...(body?{method:'POST',body:JSON.stringify(body)}:{}),headers:{...(body?{'Content-Type':'application/json'}:{}),'User-Agent':process.env.SHIKIMORI_USER_AGENT||'Yoru/0.1',Accept:'application/json',...(process.env.SHIKIMORI_TOKEN?{Authorization:`Bearer ${process.env.SHIKIMORI_TOKEN}`}:{})},signal:AbortSignal.timeout(20000)});
+  const options=()=>({...body?{method:'POST',body:JSON.stringify(body)}:{},headers:{...(body?{'Content-Type':'application/json'}:{}),'User-Agent':process.env.SHIKIMORI_USER_AGENT||'Yoru/0.1',Accept:'application/json',...(process.env.SHIKIMORI_TOKEN?{Authorization:`Bearer ${process.env.SHIKIMORI_TOKEN}`}:{})},signal:AbortSignal.timeout(20000)});
+  let response;try{response=await fetcher(new URL(path,base),options());}catch(error){if(process.env.SHIKIMORI_BASE_URL)throw error;}
+  if(!process.env.SHIKIMORI_BASE_URL&&(!response||response.status>=500))response=await fetcher(new URL(path,'https://shikimori.io'),options());
   if(!response.ok){const error=new Error(`Shikimori returned ${response.status}`);error.status=502;error.upstreamStatus=response.status;throw error;}
   return response.json();
  };const result=queue.then(run);queue=result.catch(()=>{});return result;
@@ -29,6 +31,7 @@ export function normalizeAnime(raw,roles=[],screenshots=[],related=[]){
 export async function fetchAnime(id,{countryLookup=lookupCountries}={}){
  if(!Number.isSafeInteger(+id)||+id<1)throw Object.assign(new Error('Некорректный Shikimori ID'),{status:400});
  const anime=await shikiRequest(`/api/animes/${id}`);if(Number(anime.id)!==Number(id))throw Error('Shikimori вернул другой ID тайтла');
+ assertAnimeContent(normalizeAnime(anime));
  const roles=await shikiRequest(`/api/animes/${id}/roles`);
  const screenshots=await shikiRequest(`/api/animes/${id}/screenshots`);
  const related=await shikiRequest(`/api/animes/${id}/related`);
@@ -39,11 +42,11 @@ export async function fetchAnime(id,{countryLookup=lookupCountries}={}){
  try{const countries=await countryLookup([result]),code=countries.get(result.shikimori_id);if(code){result.country=sourceCountry(code);result.metadata.country_code=code;result.metadata.country_source='anilist-verified';}}catch{result.metadata.country_lookup_failed=true;}
  return result;
 }
-export async function saveImported(db,item){assertAired(item);try{assertAllowedGenres(item);}catch(error){await removeRejectedImport(db,item);throw error;}assertRussianTitle(item);const client=await db.connect();try{await client.query('BEGIN');if(Number.isSafeInteger(item.shikimori_id)){await client.query('INSERT INTO anime_import_locks(shikimori_id) VALUES($1) ON CONFLICT(shikimori_id) DO NOTHING',[item.shikimori_id]);await client.query('SELECT shikimori_id FROM anime_import_locks WHERE shikimori_id=$1 FOR UPDATE',[item.shikimori_id]);if((await client.query('SELECT id FROM deleted_anime WHERE shikimori_id=$1',[item.shikimori_id])).rowCount)throw Object.assign(Error('Аниме удалено администратором и исключено из импорта'),{code:'ANIME_REMOVED',status:409});}const id=await saveImportedRow(client,item);await client.query('COMMIT');return id;}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}}
+export async function saveImported(db,item){assertAired(item);try{assertAnimeContent(item);assertAllowedGenres(item);}catch(error){await removeRejectedImport(db,item);throw error;}assertRussianTitle(item);const client=await db.connect();try{await client.query('BEGIN');if(Number.isSafeInteger(item.shikimori_id)){await client.query('INSERT INTO anime_import_locks(shikimori_id) VALUES($1) ON CONFLICT(shikimori_id) DO NOTHING',[item.shikimori_id]);await client.query('SELECT shikimori_id FROM anime_import_locks WHERE shikimori_id=$1 FOR UPDATE',[item.shikimori_id]);if((await client.query('SELECT id FROM deleted_anime WHERE shikimori_id=$1',[item.shikimori_id])).rowCount)throw Object.assign(Error('Аниме удалено администратором и исключено из импорта'),{code:'ANIME_REMOVED',status:409});}const id=await saveImportedRow(client,item);await client.query('COMMIT');return id;}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}}
 async function saveImportedRow(db,item){
  assertAired(item);
  const existing=(await db.query('SELECT * FROM anime WHERE shikimori_id=$1',[item.shikimori_id])).rows[0];
- if(existing){const protectedSet=new Set(existing.protected_fields||[]);const merged={...existing,...Object.fromEntries(Object.entries(item).filter(([k])=>!protectedSet.has(k)))};if(!protectedSet.has('metadata')){merged.metadata={...existing.metadata,...item.metadata};for(const key of ['authors','directors','studios'])if(!item.metadata?.[key]?.length&&existing.metadata?.[key]?.length)merged.metadata[key]=existing.metadata[key];for(const key of ['age_rating','duration'])if(!item.metadata?.[key]&&existing.metadata?.[key])merged.metadata[key]=existing.metadata[key];for(const key of protectedSet)if(key.startsWith('metadata.'))merged.metadata[key.slice(9)]=existing.metadata[key.slice(9)];}
+ if(existing){const protectedSet=new Set(existing.protected_fields||[]);const merged={...existing,...Object.fromEntries(Object.entries(item).filter(([k])=>!protectedSet.has(k)))};if(!protectedSet.has('metadata')){merged.metadata={...existing.metadata,...item.metadata};if(existing.metadata?.airingCheckedAt&&Date.now()-Date.parse(existing.metadata.airingCheckedAt)<3600000){for(const key of ['nextEpisode','nextEpisodeNumber','airingSource','airingConflict','airingCheckedAt'])merged.metadata[key]=existing.metadata[key];}for(const key of ['authors','directors','studios'])if(!item.metadata?.[key]?.length&&existing.metadata?.[key]?.length)merged.metadata[key]=existing.metadata[key];for(const key of ['age_rating','duration'])if(!item.metadata?.[key]&&existing.metadata?.[key])merged.metadata[key]=existing.metadata[key];for(const key of protectedSet)if(key.startsWith('metadata.'))merged.metadata[key.slice(9)]=existing.metadata[key.slice(9)];}
   if(!item.genres?.length&&existing.genres?.length)merged.genres=existing.genres;if(item.country==='Не определена'&&existing.metadata?.country_source==='anilist-verified'&&!protectedSet.has('country')){merged.country=existing.country;merged.metadata={...merged.metadata,country_code:existing.metadata.country_code,country_source:existing.metadata.country_source};}
   if(!protectedSet.has('poster')&&existing.metadata?.poster_source==='myanimelist-via-jikan'&&existing.poster)merged.poster=existing.poster;
   await db.query('UPDATE anime SET name=$1,original_name=$2,year=$3,country=$4,kind=$5,status=$6,rating=$7,episodes=$8,aired=$9,genres=$10,description=$11,poster=$12,metadata=$13,updated_at=CASE WHEN aired<>$9 OR status<>$6 THEN NOW() ELSE updated_at END,synced_at=NOW() WHERE id=$14',[merged.name,merged.original_name,merged.year,merged.country,merged.kind,merged.status,merged.rating,merged.episodes,merged.aired,merged.genres,merged.description,merged.poster,JSON.stringify(merged.metadata),existing.id]);return existing.id;

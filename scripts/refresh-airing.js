@@ -1,0 +1,5 @@
+import {database} from '../src/db.js';
+import {syncAiringCalendar} from '../src/airing-sync.js';
+import {nonAnimeReason} from '../src/import-policy.js';
+import {removeAnime} from '../src/anime-removal.js';
+const apply=process.argv.includes('--apply'),db=database();try{const calendar=await syncAiringCalendar(db,{dryRun:!apply,protectUntilRefresh:apply});const rejected=(await db.query('SELECT * FROM anime')).rows.filter(nonAnimeReason);let removed=0;if(apply&&process.argv.includes('--remove-recaps'))for(let offset=0;offset<rejected.length;offset+=4){const results=await Promise.allSettled(rejected.slice(offset,offset+4).map(async a=>{try{return await removeAnime(db,{id:null,role:'admin'},a.id,'Правила каталога: '+nonAnimeReason(a),{when:row=>!!nonAnimeReason(row)});}catch(error){if(error.status===404)return false;throw error;}}));for(const result of results){if(result.status==='rejected')throw result.reason;if(result.value)removed++;}}console.log(JSON.stringify({apply,calendar,excluded:rejected.length,removed},null,2));}finally{await db.end();}
