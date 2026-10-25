@@ -2,6 +2,7 @@ window.yoruPages.register((page)=>{
 const listen=page.listen,setInterval=page.interval;
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
+ let libertyProbe;
  const previewImage=playerHost.querySelector('.player-preview-image');if(previewImage){listen(previewImage,'error',()=>{previewImage.hidden=true;});if(previewImage.complete&&!previewImage.naturalWidth)previewImage.hidden=true;}
 
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
@@ -13,11 +14,11 @@ if(playerHost){
  syncProviderButtons();
  let requestedEpisode=/^[1-9][0-9]{0,5}$/.test(navigation.get('episode')||'')?Number(navigation.get('episode')):null;const requestedRelease=/^[1-9][0-9]{0,9}$/.test(navigation.get('release')||'')?Number(navigation.get('release')):null;
  qualityLabel.textContent=sourceSelect.value==='aniliberty'?'AniLiberty':'Kodik';
- let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null,lookupAbort,mediaEvents,retryState=null;
+ let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null,lookupAbort,mediaEvents,retryState=null,skipCleanup;
  const restart=document.createElement('button');restart.type='button';restart.className='secondary player-restart';restart.textContent='Перезапустить плеер';restart.hidden=true;restart.dataset.playerRestart='';section.querySelector('.player-toolbar').append(restart);listen(restart,'click',()=>reloadStream());
  const integer=(value,min,max)=>Number.isInteger(Number(value))&&Number(value)>=min&&Number(value)<=max?Number(value):null;
  function resetProgress(){position=0;duration=0;watched=0;started=false;ended=false;lastSaved=0;lastSent=-1;translation=null;}
- function destroy(){const oldVideo=video;video=null;mediaEvents?.abort();mediaEvents=null;const oldHls=hls;hls=null;oldHls?.destroy();if(oldVideo){oldVideo.pause();oldVideo.removeAttribute('src');oldVideo.load();}iframe?.remove();iframe=null;origin='';}
+ function destroy(){const oldVideo=video;video=null;skipCleanup?.();skipCleanup=null;mediaEvents?.abort();mediaEvents=null;const oldHls=hls;hls=null;oldHls?.destroy();if(oldVideo){oldVideo.pause();oldVideo.removeAttribute('src');oldVideo.load();}iframe?.remove();iframe=null;origin='';}
  function reloadStream(){if(loading||blocked)return;const time=Number(video?.currentTime);const resume=retryState|| (video&&episode?{number:episode,position:Number.isFinite(time)?time:position,autoplay:started&&!video.paused,watched,release:activeRelease}:null);load({refresh:true,resume});}
  function note(text,retry=false){playerHost.classList.remove('is-loaded');const box=document.createElement('div'),p=document.createElement('p');p.textContent=text;box.append(p);if(retry){const button=document.createElement('button');button.type='button';button.textContent='Попробовать ещё раз';button.addEventListener('click',()=>reloadStream());box.append(button);}playerHost.replaceChildren(box);}
  async function save(force=false){
@@ -34,6 +35,12 @@ if(playerHost){
   try{const response=await fetch('/api/player/'+playerHost.dataset.anime+'/status');if(response.status!==403&&response.status!==404)return;const data=await response.json();blocked=true;generation++;destroy();started=false;sourceSelect.disabled=true;syncProviderButtons();episodeSelect.disabled=true;qualitySelect.disabled=true;note(data.error||'Просмотр ограничен.');status.textContent='';}catch{}
  }
  let permissionTimer=setInterval(checkPermission,60000);
+ const libertyButton=providerButtons.find(b=>b.dataset.provider==='aniliberty'),providerPicker=section.querySelector('.provider-picker');
+ function syncProviderVisibility(){if(providerPicker)providerPicker.hidden=Boolean(libertyButton?.hidden);}
+ syncProviderVisibility();
+ function libertyLookup(params){return fetch('/api/player/'+playerHost.dataset.anime+'/aniliberty'+(params.size?'?'+params:''),{signal:AbortSignal.any([page.signal,AbortSignal.timeout(20000)])}).then(async response=>({ok:response.ok,status:response.status,data:await response.json()}));}
+ const probeParams=new URLSearchParams();if(requestedRelease)probeParams.set('release',requestedRelease);
+ libertyProbe=libertyLookup(probeParams);libertyProbe.then(result=>{if(page.signal.aborted)return;if(libertyButton)libertyButton.hidden=!result.ok&&[403,404].includes(result.status);if(libertyButton?.hidden){sourceSelect.value='kodik';syncProviderButtons();}syncProviderVisibility();}).catch(()=>{if(!page.signal.aborted&&libertyButton){libertyButton.hidden=false;syncProviderVisibility();}});
  function streamUrl(value){const url=new URL(value);if(url.protocol!=='https:'||!(url.hostname==='libria.fun'||url.hostname.endsWith('.libria.fun'))||!url.pathname.endsWith('.m3u8'))throw Error('Поток временно недоступен.');return url.href;}
  function playEpisode(item,offset=0,autoplay=false,keepWatched=false){
   retryState=null;save(true);generation++;const current=generation,previousWatched=keepWatched?watched:0;destroy();resetProgress();watched=previousWatched;episode=item.number;season=item.season;provider='aniliberty';episodeSelect.value=String(episode);
@@ -45,7 +52,8 @@ if(playerHost){
   restart.hidden=false;restart.disabled=false;
   const failed=()=>{if(!active()||terminal)return;terminal=true;recoveryPending=false;retryState={number:episode,position:Number.isFinite(media.currentTime)?media.currentTime:position,autoplay:started&&!media.paused,watched,release:activeRelease};const engine=hls;hls=null;engine?.destroy();status.textContent='Поток прервался. Нажми «Перезапустить плеер» — продолжим с этой позиции, или выбери другое качество.';};
   const mediaAbort=new AbortController();mediaEvents=mediaAbort;const mediaListen=(target,type,fn,capture=false)=>target.addEventListener(type,fn,{capture,signal:mediaAbort.signal});
-  const fullscreen=()=>document.fullscreenElement===media||document.webkitFullscreenElement===media||media.webkitDisplayingFullscreen===true;
+  skipCleanup=window.yoruPlayerSkips?.mount({video:media,host:playerHost,skips:item.skips,signal:mediaAbort.signal,onSeek:()=>{seeking=true;position=Math.round(media.currentTime);save(true);}});
+  const fullscreen=()=>document.fullscreenElement===playerHost||document.webkitFullscreenElement===playerHost||document.fullscreenElement===media||document.webkitFullscreenElement===media||media.webkitDisplayingFullscreen===true;
   // UA controls live in a closed shadow tree. Capture fullscreen shortcuts before
   // its last focused button handles arrows; blur clears that button's focus ring.
   const clearControlFocus=()=>{if(active()&&fullscreen()){media.blur();playerHost.tabIndex=-1;playerHost.focus({preventScroll:true});}};
@@ -78,7 +86,7 @@ if(playerHost){
   save(true);const current=++generation;destroy();resetProgress();loading=true;restart.hidden=sourceSelect.value!=='aniliberty';restart.disabled=true;provider=sourceSelect.value;episode=playerHost.dataset.movie==='true'?1:null;season=1;episodes=[];activeRelease=null;
   section.querySelector('[data-episode-control]').hidden=true;section.querySelector('[data-quality-control]').hidden=true;note('Загружаем плеер…');status.textContent='';qualityLabel.textContent=provider==='kodik'?'Kodik':'AniLiberty';
   try{
-   const params=new URLSearchParams();if(resume?.release||requestedRelease)params.set('release',resume?.release||requestedRelease);if(refresh)params.set('refresh','1');const response=await fetch('/api/player/'+playerHost.dataset.anime+(provider==='aniliberty'?'/aniliberty'+(params.size?'?'+params:''):''),{signal:lookup.signal}),data=await response.json();if(current!==generation)return;if(!response.ok)throw Error(data.error||'Плеер временно недоступен.');
+   const params=new URLSearchParams();if(resume?.release||requestedRelease)params.set('release',resume?.release||requestedRelease);if(refresh)params.set('refresh','1');const result=provider==='aniliberty'&&!refresh&&(!resume?.release||resume.release===requestedRelease)?await libertyProbe.catch(()=>null):null;const response=result||await fetch('/api/player/'+playerHost.dataset.anime+(provider==='aniliberty'?'/aniliberty'+(params.size?'?'+params:''):''),{signal:lookup.signal}),data=result?result.data:await response.json();if(provider==='aniliberty'&&libertyButton){libertyButton.hidden=!response.ok&&[403,404].includes(response.status);if(libertyButton.hidden){sourceSelect.value='kodik';syncProviderButtons();}syncProviderVisibility();}if(current!==generation)return;if(!response.ok)throw Error(data.error||'Плеер временно недоступен.');
    if(provider==='aniliberty'){
     activeRelease=data.release_id;episodes=data.episodes;if(!Array.isArray(episodes)||!episodes.length)throw Error('У источника пока нет доступных серий.');
     episodeSelect.replaceChildren(...episodes.map(item=>new Option(item.number+' серия'+(item.name?' · '+item.name:''),item.number)));

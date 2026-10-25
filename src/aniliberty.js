@@ -14,6 +14,12 @@ export function validateStream(value){
  // Preserve the provider's complete URL, including regional and advertising parameters.
  return url.href;
 }
+export function normalizeSkip(value,duration){
+ if(!value||typeof value.start!=='number'||typeof value.stop!=='number'||!Number.isFinite(value.start)||!Number.isFinite(value.stop))return null;
+ const start=value.start<0?duration+value.start:value.start,end=value.stop<0?duration+value.stop:value.stop;
+ if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||end>86400||(duration>0&&end>duration)||((value.start<0||value.stop<0)&&!(duration>0)))return null;
+ return {start,end};
+}
 export function normalizeRelease(raw,shikimoriId){
  if(Number(raw.shikimori?.id)!==Number(shikimoriId))throw new Error('AniLiberty release does not match Shikimori');
  if(raw.is_blocked_by_geo!==false||raw.is_blocked_by_copyrights!==false)return {available:false,restricted:true,episodes:[]};
@@ -21,9 +27,9 @@ export function normalizeRelease(raw,shikimoriId){
   const number=Number(item.ordinal);if(!Number.isInteger(number)||number<1||number>100000)return [];
   const streams={};for(const quality of ['480','720','1080'])if(item['hls_'+quality])streams[quality]=validateStream(item['hls_'+quality]);
   if(!Object.keys(streams).length)return [];
-  return [{number,season:1,name:String(item.name||'').slice(0,250),duration:Number(item.duration)||0,streams}];
+  return [{number,season:1,name:String(item.name||'').slice(0,250),duration:Number(item.duration)||0,streams,skips:{opening:normalizeSkip(item.opening,Number(item.duration)||0),ending:normalizeSkip(item.ending,Number(item.duration)||0)}}];
  }).sort((a,b)=>a.number-b.number);
- return {available:episodes.length>0,restricted:false,release_id:raw.id,episodes};
+ return {skip_version:1,available:episodes.length>0,restricted:false,release_id:raw.id,episodes};
 }
 export function createAniLibertyClient(fetcher=fetch){
  const request=path=>anilibertyRequest(path,fetcher);
