@@ -2,7 +2,7 @@ window.yoruPages.register((page)=>{
 const listen=page.listen,setInterval=page.interval;
 const playerHost=document.querySelector('[data-kodik-player]');
 if(playerHost){
- let libertyProbe;
+ let libertyProbe,libertyData=null;
  const previewImage=playerHost.querySelector('.player-preview-image');if(previewImage){listen(previewImage,'error',()=>{previewImage.hidden=true;});if(previewImage.complete&&!previewImage.naturalWidth)previewImage.hidden=true;}
 
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
@@ -36,11 +36,12 @@ if(playerHost){
  }
  let permissionTimer=setInterval(checkPermission,60000);
  const libertyButton=providerButtons.find(b=>b.dataset.provider==='aniliberty'),providerPicker=section.querySelector('.provider-picker');
- function syncProviderVisibility(){if(providerPicker)providerPicker.hidden=Boolean(libertyButton?.hidden);}
+ function libertyAvailable(data,wanted=requestedEpisode||(provider==='kodik'?episode:null)){return Boolean(data&&data.available!==false&&!data.restricted&&Array.isArray(data.episodes)&&data.episodes.some(item=>(!wanted||Number(item.number)===Number(wanted))&&item.streams&&Object.keys(item.streams).length));}
+ function syncProviderVisibility(){const available=libertyAvailable(libertyData);if(libertyButton)libertyButton.hidden=!available;if(providerPicker)providerPicker.hidden=!available;}
  syncProviderVisibility();
  function libertyLookup(params){return fetch('/api/player/'+playerHost.dataset.anime+'/aniliberty'+(params.size?'?'+params:''),{signal:AbortSignal.any([page.signal,AbortSignal.timeout(20000)])}).then(async response=>({ok:response.ok,status:response.status,data:await response.json()}));}
  const probeParams=new URLSearchParams();if(requestedRelease)probeParams.set('release',requestedRelease);
- libertyProbe=libertyLookup(probeParams);libertyProbe.then(result=>{if(page.signal.aborted)return;if(libertyButton)libertyButton.hidden=!result.ok&&[403,404].includes(result.status);if(libertyButton?.hidden){sourceSelect.value='kodik';syncProviderButtons();}syncProviderVisibility();}).catch(()=>{if(!page.signal.aborted&&libertyButton){libertyButton.hidden=false;syncProviderVisibility();}});
+ libertyProbe=libertyLookup(probeParams);libertyProbe.then(result=>{if(page.signal.aborted)return;libertyData=result.ok?result.data:null;syncProviderVisibility();if(!libertyAvailable(libertyData)&&!loading&&!iframe&&!video){sourceSelect.value='kodik';syncProviderButtons();}}).catch(()=>{if(!page.signal.aborted){libertyData=null;syncProviderVisibility();}});
  function streamUrl(value){const url=new URL(value);if(url.protocol!=='https:'||!(url.hostname==='libria.fun'||url.hostname.endsWith('.libria.fun'))||!url.pathname.endsWith('.m3u8'))throw Error('Поток временно недоступен.');return url.href;}
  function playEpisode(item,offset=0,autoplay=false,keepWatched=false){
   retryState=null;save(true);generation++;const current=generation,previousWatched=keepWatched?watched:0;destroy();resetProgress();watched=previousWatched;episode=item.number;season=item.season;provider='aniliberty';episodeSelect.value=String(episode);
@@ -80,13 +81,13 @@ if(playerHost){
   else if(window.Hls?.isSupported()){hls=new Hls({maxBufferLength:30,maxMaxBufferLength:60,backBufferLength:30});hls.on(Hls.Events.ERROR,(_event,data)=>recover(data));hls.loadSource(url);hls.attachMedia(media);}
   else{failed();status.textContent='Браузер не поддерживает этот формат. Выбери Kodik или другой браузер.';}
  }
- async function load({refresh=false,resume=null}={}){
+ async function load({refresh=false,resume=null,fallbackNotice=''}={}){
   if(blocked)return;
   lookupAbort?.abort();lookupAbort=new AbortController();const lookup=lookupAbort;page.timeout(()=>lookup.abort(),20000);if(resume)retryState=resume;
   save(true);const current=++generation;destroy();resetProgress();loading=true;restart.hidden=sourceSelect.value!=='aniliberty';restart.disabled=true;provider=sourceSelect.value;episode=playerHost.dataset.movie==='true'?1:null;season=1;episodes=[];activeRelease=null;
   section.querySelector('[data-episode-control]').hidden=true;section.querySelector('[data-quality-control]').hidden=true;note('Загружаем плеер…');status.textContent='';qualityLabel.textContent=provider==='kodik'?'Kodik':'AniLiberty';
   try{
-   const params=new URLSearchParams();if(resume?.release||requestedRelease)params.set('release',resume?.release||requestedRelease);if(refresh)params.set('refresh','1');const result=provider==='aniliberty'&&!refresh&&(!resume?.release||resume.release===requestedRelease)?await libertyProbe.catch(()=>null):null;const response=result||await fetch('/api/player/'+playerHost.dataset.anime+(provider==='aniliberty'?'/aniliberty'+(params.size?'?'+params:''):''),{signal:lookup.signal}),data=result?result.data:await response.json();if(provider==='aniliberty'&&libertyButton){libertyButton.hidden=!response.ok&&[403,404].includes(response.status);if(libertyButton.hidden){sourceSelect.value='kodik';syncProviderButtons();}syncProviderVisibility();}if(current!==generation)return;if(!response.ok)throw Error(data.error||'Плеер временно недоступен.');
+   const params=new URLSearchParams();if(resume?.release||requestedRelease)params.set('release',resume?.release||requestedRelease);if(refresh)params.set('refresh','1');const result=provider==='aniliberty'&&!refresh&&(!resume?.release||resume.release===requestedRelease)?await libertyProbe.catch(()=>null):null;const response=result||await fetch('/api/player/'+playerHost.dataset.anime+(provider==='aniliberty'?'/aniliberty'+(params.size?'?'+params:''):''),{signal:lookup.signal}),data=result?result.data:await response.json();if(current!==generation)return;if(provider==='aniliberty'){libertyData=response.ok?data:null;syncProviderVisibility();if(!response.ok||!libertyAvailable(data)){sourceSelect.value='kodik';syncProviderButtons();restart.hidden=true;return load({fallbackNotice:!response.ok&&![403,404].includes(response.status)?'AniLiberty временно недоступен. Открыт Kodik.':requestedEpisode?'У AniLiberty пока нет '+requestedEpisode+' серии. Открыт Kodik.':'AniLiberty недоступен для этого аниме. Открыт Kodik.'});}}if(!response.ok)throw Error(data.error||'Плеер временно недоступен.');
    if(provider==='aniliberty'){
     activeRelease=data.release_id;episodes=data.episodes;if(!Array.isArray(episodes)||!episodes.length)throw Error('У источника пока нет доступных серий.');
     episodeSelect.replaceChildren(...episodes.map(item=>new Option(item.number+' серия'+(item.name?' · '+item.name:''),item.number)));
@@ -94,12 +95,12 @@ if(playerHost){
    }else{
     const url=new URL(data.url);if(url.origin!=='https://kodikplayer.com')throw Error('Плеер временно недоступен.');origin=url.origin;
     if(requestedEpisode){episode=requestedEpisode;url.searchParams.set('episode',episode);url.searchParams.set('season',(/^[0-9]{1,3}$/.test(navigation.get('season')||'')?Number(navigation.get('season')):1));if(navigation.get('resume')==='1'&&data.resume?.episode===episode&&data.resume?.season===((/^[0-9]{1,3}$/.test(navigation.get('season')||'')?Number(navigation.get('season')):1)))url.searchParams.set('start_from',Math.max(0,data.resume.position_seconds-5));}else if(data.resume){episode=data.resume.episode;season=data.resume.season;url.searchParams.set('episode',episode);url.searchParams.set('season',season);url.searchParams.set('start_from',Math.max(0,data.resume.position_seconds-5));}
-    iframe=document.createElement('iframe');iframe.src=url.href;iframe.title='Смотреть аниме — Kodik';iframe.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';playerHost.classList.add('is-loaded');playerHost.replaceChildren(iframe);qualityLabel.textContent=['Kodik',data.quality].filter(Boolean).join(' · ');if(playerHost.dataset.auth==='true')status.textContent=data.resume?'Продолжаем с сохранённой позиции.':'Прогресс начнёт сохраняться при просмотре.';
+    iframe=document.createElement('iframe');iframe.src=url.href;iframe.title='Смотреть аниме — Kodik';iframe.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';iframe.allowFullscreen=true;iframe.referrerPolicy='strict-origin-when-cross-origin';playerHost.classList.add('is-loaded');playerHost.replaceChildren(iframe);qualityLabel.textContent=['Kodik',data.quality].filter(Boolean).join(' · ');syncProviderVisibility();if(fallbackNotice)status.textContent=fallbackNotice;else if(playerHost.dataset.auth==='true')status.textContent=data.resume?'Продолжаем с сохранённой позиции.':'Прогресс начнёт сохраняться при просмотре.';
    }
-  }catch(error){if(current===generation)note(error.name==='AbortError'?'Загрузка заняла слишком много времени. Попробуй ещё раз.':error.message,true);}finally{if(current===generation){loading=false;restart.disabled=false;}}
+  }catch(error){if(current===generation&&provider==='aniliberty'&&!page.signal.aborted){libertyData=null;sourceSelect.value='kodik';syncProviderButtons();syncProviderVisibility();restart.hidden=true;return load({fallbackNotice:'Не удалось загрузить AniLiberty. Открыт Kodik.'});}if(current===generation)note(error.name==='AbortError'?'Загрузка заняла слишком много времени. Попробуй ещё раз.':error.message,true);}finally{if(current===generation){loading=false;restart.disabled=false;}}
  }
  playerHost.querySelector('[data-load-player]')?.addEventListener('click',()=>load());
- sourceSelect.addEventListener('change',()=>{retryState=null;syncProviderButtons();try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
+ sourceSelect.addEventListener('change',()=>{if(episode)requestedEpisode=episode;retryState=null;syncProviderButtons();try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
  episodeSelect.addEventListener('change',()=>{requestedEpisode=null;const item=episodes.find(item=>item.number===Number(episodeSelect.value));if(item)playEpisode(item);});
  qualitySelect.addEventListener('change',()=>{qualitySelect.dataset.preferred=qualitySelect.value;const item=episodes.find(item=>item.number===episode);if(item)playEpisode(item,position,Boolean(video&&!video.paused),true);});
  document.querySelectorAll('a[href="#player"]').forEach(link=>link.addEventListener('click',()=>{if(!loading&&!iframe&&!video)load();}));
@@ -109,7 +110,7 @@ if(playerHost){
   let data=event.data;if(typeof data==='string'){if(data.length>4096)return;try{data=JSON.parse(data);}catch{return;}}if(!data||typeof data!=='object')return;
   if(data.key==='kodik_player_current_episode'){
    const value=data.value;if(!value||typeof value!=='object')return;const nextEpisode=integer(value.episode,1,100000)||(playerHost.dataset.movie==='true'?1:null),nextSeason=integer(value.season??1,0,10000);if(!nextEpisode||nextSeason===null)return;
-   if(nextEpisode!==episode||nextSeason!==season){save(true);resetProgress();}episode=nextEpisode;season=nextSeason;translation=integer(value.translation?.id,1,10000000);
+   if(nextEpisode!==episode||nextSeason!==season){save(true);resetProgress();}episode=nextEpisode;season=nextSeason;requestedEpisode=nextEpisode;syncProviderVisibility();translation=integer(value.translation?.id,1,10000000);
   }else if(data.key==='kodik_player_duration_update'){const value=Number(data.value);if(Number.isFinite(value)&&value>0&&value<=86400)duration=value;
   }else if(data.key==='kodik_player_video_started'||data.key==='kodik_player_play'){started=true;ended=false;
   }else if(data.key==='kodik_player_time_update'){const value=Math.round(Number(data.value));if(!Number.isFinite(value)||value<0||value>86400)return;const delta=value-position;if(started&&delta>0&&delta<=6)watched+=delta;position=value;save();

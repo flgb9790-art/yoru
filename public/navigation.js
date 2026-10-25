@@ -10,6 +10,8 @@
   const page={signal:controller.signal,listen(target,type,fn,options={}){target.addEventListener(type,fn,{...(typeof options==='boolean'?{capture:options}:options),signal:controller.signal});},interval(fn,ms){const id=window.setInterval(fn,ms);timers.push(id);return id;},timeout(fn,ms){const id=window.setTimeout(fn,ms);timers.push(id);return id;}};
   const dispose=mount(page);cleanups.push(()=>{dispose?.();controller.abort();timers.forEach(id=>{clearInterval(id);clearTimeout(id);});});
  }
+ const assetStamp=doc=>JSON.stringify([...doc.querySelectorAll('head script[src],head link[rel="stylesheet"]')].map(node=>node.getAttribute('src')||node.getAttribute('href')));
+ const loadedAssets=assetStamp(document);
  let request,visit=0;
  const eligible=url=>url.origin===location.origin&&/^https?:$/.test(url.protocol)&&!/^\/(auth|logout|api|media|vendor)(\/|$)/.test(url.pathname)&&! /\.(?:js|css|png|jpe?g|webp|svg|zip|json|mp4|m3u8)$/i.test(url.pathname);
  function position(url,scroll){if(scroll===false)return;const target=url.hash&&document.getElementById(decodeURIComponent(url.hash.slice(1)));if(target)target.scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});}
@@ -22,6 +24,9 @@
    const text=await response.text();if(id!==visit)return;
    if(!response.headers.get('content-type')?.includes('text/html')){message(text.slice(0,600)||'Не удалось выполнить действие.');return;}
    const doc=new DOMParser().parseFromString(text,'text/html');if(!doc.querySelector('main')||!doc.querySelector('header')){message(doc.body.textContent.slice(0,600)||'Не удалось открыть страницу.');return;}
+   // A deployment may change globally loaded players/styles. Never combine a new
+   // body with old page mounts that remain in memory after an AJAX navigation.
+   if(assetStamp(doc)!==loadedAssets){if(final.pathname===url.pathname&&final.search===url.search)final.hash=url.hash;if(replace||fromHistory)location.replace(final.href);else location.assign(final.href);return;}
    if(fragment){const current=document.querySelector(fragment),next=doc.querySelector(fragment);if(current&&next&&final.pathname===location.pathname){const x=scrollX,y=scrollY,tools=current.querySelector('.progress-tools')?.open;current.replaceWith(document.importNode(next,true));const updated=document.querySelector(fragment);if(tools&&updated.querySelector('.progress-tools'))updated.querySelector('.progress-tools').open=true;history.replaceState({},'',final.href);window.scrollTo({left:x,top:y,behavior:'instant'});document.dispatchEvent(new CustomEvent('yoru:fragment',{detail:{selector:fragment,requestUrl:url.href,url:final.href,method}}));return;}}
    cleanups.splice(0).forEach(dispose=>dispose());document.querySelectorAll('dialog[open]').forEach(d=>d.close());
    doc.querySelectorAll('script').forEach(s=>s.remove());document.body.replaceWith(document.importNode(doc.body,true));document.title=doc.title;
