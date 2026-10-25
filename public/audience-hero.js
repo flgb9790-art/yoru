@@ -4,7 +4,7 @@ window.yoruPages.register(page=>{
  if(!slides.length)return;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),duration=8000;
  let index=0,elapsed=0,last=performance.now(),enabled=!reduced.matches,focused=false,visible=true,start=null,suppressClick=false;
- const paint=()=>{bars.forEach((bar,i)=>bar.value=i<index?1:i===index?elapsed/duration:0);toggle.setAttribute('aria-label',enabled?'Приостановить смену слайдов':'Включить смену слайдов');icon.setAttribute('d',enabled?'M7 5h4v14H7zM14 5h4v14h-4z':'m8 5 11 7-11 7z');};
+ const paint=()=>{bars.forEach((bar,i)=>bar.value=i<index?1:i===index?elapsed/duration:0);toggle.setAttribute('aria-label',enabled?'Приостановить смену слайдов':'Включить смену слайдов');const glyph=enabled?'pause':'play';if(icon.dataset.icon!==glyph){icon.innerHTML=window.yoruIcons.svg(glyph,{size:14});icon.dataset.icon=glyph;}};
  const show=(next,manual=false)=>{index=(next+slides.length)%slides.length;elapsed=0;last=performance.now();slides.forEach((slide,i)=>slide.hidden=i!==index);buttons.forEach((button,i)=>{if(i===index)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');});if(manual)announcement.textContent=slides[index].querySelector('h3').textContent;paint();};
  const unavailable=img=>{if(img.matches('[data-hero-backdrop]')&&img.dataset.poster&&img.src!==new URL(img.dataset.poster,location.href).href){img.src=img.dataset.poster;}else{img.hidden=true;if(img.parentElement.matches('.audience-cover'))img.parentElement.hidden=true;}};
  for(const img of hero.querySelectorAll('img')){page.listen(img,'error',()=>unavailable(img));if(img.complete&&!img.naturalWidth)unavailable(img);}

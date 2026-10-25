@@ -13,12 +13,12 @@ window.yoruPages.register(page=>{
  let index=0,busy=false,paused=reduced.matches,hovered=false,focused=false,inView=true,last=performance.now(),renderVersion=0,suppressClickUntil=0;
  const visible=()=>innerWidth<=650?3:innerWidth<=1000?5:8;
  const normalize=n=>(n%total+total)%total;
- function pauseState(){pause.setAttribute('aria-pressed',String(paused));pause.setAttribute('aria-label',paused?'Продолжить прокрутку':'Приостановить витрину');pause.querySelector('path').setAttribute('d',paused?'m8 5 11 7-11 7Z':'M7 5h3v14H7zM14 5h3v14h-3z');}
+ function pauseState(){pause.setAttribute('aria-pressed',String(paused));pause.setAttribute('aria-label',paused?'Продолжить прокрутку':'Приостановить витрину');window.yoruIcons.set(pause.querySelector('svg'),paused?'play':'pause');}
  function card(a,i){
   const link=document.createElement('a');link.className='showcase-card';link.href='/anime/'+encodeURIComponent(a.id);link.title=a.name;
   if(i>=visible()){link.tabIndex=-1;link.setAttribute('aria-hidden','true');}
   if(a.poster){const img=document.createElement('img');img.src=a.poster;img.alt='';img.loading='lazy';img.width=160;img.height=230;link.append(img);}else{const span=document.createElement('span');span.className='showcase-placeholder';span.textContent='YORU.';link.append(span);}
-  const caption=document.createElement('span'),name=document.createElement('strong'),meta=document.createElement('small');caption.className='showcase-caption';name.textContent=a.name;meta.textContent='★ '+Number(a.rating).toFixed(1)+(a.year?' · '+a.year:'');caption.append(name,meta);link.append(caption);return link;
+  const caption=document.createElement('span'),name=document.createElement('strong'),meta=document.createElement('small');caption.className='showcase-caption';name.textContent=a.name;meta.textContent=Number(a.rating).toFixed(1)+(a.year?' · '+a.year:'');meta.insertAdjacentHTML('afterbegin',window.yoruIcons.svg('star',{className:'rating-icon',size:12})+' ');caption.append(name,meta);link.append(caption);return link;
  }
  async function item(n){
   n=normalize(n);const batch=Math.floor(n/24);
