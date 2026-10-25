@@ -13,11 +13,11 @@ if(playerHost){
  syncProviderButtons();
  let requestedEpisode=/^[1-9][0-9]{0,5}$/.test(navigation.get('episode')||'')?Number(navigation.get('episode')):null;const requestedRelease=/^[1-9][0-9]{0,9}$/.test(navigation.get('release')||'')?Number(navigation.get('release')):null;
  qualityLabel.textContent=sourceSelect.value==='aniliberty'?'AniLiberty':'Kodik';
- let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null,lookupAbort,retryState=null;
+ let iframe,video,hls,loading=false,generation=0,origin='',provider='kodik',episodes=[],episode=null,season=1,translation=null,position=0,duration=0,watched=0,started=false,ended=false,lastSaved=0,lastSent=-1,blocked=false,activeRelease=null,lookupAbort,mediaEvents,retryState=null;
  const restart=document.createElement('button');restart.type='button';restart.className='secondary player-restart';restart.textContent='Перезапустить плеер';restart.hidden=true;restart.dataset.playerRestart='';section.querySelector('.player-toolbar').append(restart);listen(restart,'click',()=>reloadStream());
  const integer=(value,min,max)=>Number.isInteger(Number(value))&&Number(value)>=min&&Number(value)<=max?Number(value):null;
  function resetProgress(){position=0;duration=0;watched=0;started=false;ended=false;lastSaved=0;lastSent=-1;translation=null;}
- function destroy(){const oldVideo=video;video=null;const oldHls=hls;hls=null;oldHls?.destroy();if(oldVideo){oldVideo.pause();oldVideo.removeAttribute('src');oldVideo.load();}iframe?.remove();iframe=null;origin='';}
+ function destroy(){const oldVideo=video;video=null;mediaEvents?.abort();mediaEvents=null;const oldHls=hls;hls=null;oldHls?.destroy();if(oldVideo){oldVideo.pause();oldVideo.removeAttribute('src');oldVideo.load();}iframe?.remove();iframe=null;origin='';}
  function reloadStream(){if(loading||blocked)return;const time=Number(video?.currentTime);const resume=retryState|| (video&&episode?{number:episode,position:Number.isFinite(time)?time:position,autoplay:started&&!video.paused,watched,release:activeRelease}:null);load({refresh:true,resume});}
  function note(text,retry=false){playerHost.classList.remove('is-loaded');const box=document.createElement('div'),p=document.createElement('p');p.textContent=text;box.append(p);if(retry){const button=document.createElement('button');button.type='button';button.textContent='Попробовать ещё раз';button.addEventListener('click',()=>reloadStream());box.append(button);}playerHost.replaceChildren(box);}
  async function save(force=false){
@@ -44,7 +44,15 @@ if(playerHost){
   let seeking=false,networkRetries=0,mediaRetries=0,nativeRetries=0,recoveryPending=false,terminal=false;
   restart.hidden=false;restart.disabled=false;
   const failed=()=>{if(!active()||terminal)return;terminal=true;recoveryPending=false;retryState={number:episode,position:Number.isFinite(media.currentTime)?media.currentTime:position,autoplay:started&&!media.paused,watched,release:activeRelease};const engine=hls;hls=null;engine?.destroy();status.textContent='Поток прервался. Нажми «Перезапустить плеер» — продолжим с этой позиции, или выбери другое качество.';};
-  listen(media,'keydown',event=>{if(!active()||terminal||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(!Number.isFinite(media.duration)||media.duration<=0)return;seeking=true;media.currentTime=Math.max(0,Math.min(media.duration-.05,media.currentTime+(event.key==='ArrowRight'?5:-5)));position=Math.round(media.currentTime);},true);
+  const mediaAbort=new AbortController();mediaEvents=mediaAbort;const mediaListen=(target,type,fn,capture=false)=>target.addEventListener(type,fn,{capture,signal:mediaAbort.signal});
+  const fullscreen=()=>document.fullscreenElement===media||document.webkitFullscreenElement===media||media.webkitDisplayingFullscreen===true;
+  // UA controls live in a closed shadow tree. Capture fullscreen shortcuts before
+  // its last focused button handles arrows; blur clears that button's focus ring.
+  const clearControlFocus=()=>{if(active()&&fullscreen()){media.blur();playerHost.tabIndex=-1;playerHost.focus({preventScroll:true});}};
+  mediaListen(document,'fullscreenchange',clearControlFocus);mediaListen(document,'webkitfullscreenchange',clearControlFocus);mediaListen(media,'webkitbeginfullscreen',clearControlFocus);
+  const seekKey=event=>{if(!active()||terminal||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(fullscreen()){media.dataset.seekKeyboard="true";clearControlFocus();}if(!Number.isFinite(media.duration)||media.duration<=0)return;seeking=true;media.currentTime=Math.max(0,Math.min(media.duration-.05,media.currentTime+(event.key==='ArrowRight'?5:-5)));position=Math.round(media.currentTime);};
+  mediaListen(media,'keydown',seekKey,true);
+  mediaListen(window,'keydown',event=>{if(event.key==='Tab')delete media.dataset.seekKeyboard;if(fullscreen())seekKey(event);},true);
   media.addEventListener('seeking',()=>{if(active())seeking=true;});media.addEventListener('seeked',()=>{if(active()){position=Math.round(media.currentTime);seeking=false;save(true);}});
   const recover=data=>{if(!active()||terminal||!data.fatal||recoveryPending)return;
    if(data.type===Hls.ErrorTypes.MEDIA_ERROR&&mediaRetries++<1){recoveryPending=true;status.textContent='Восстанавливаем воспроизведение…';page.timeout(()=>{if(!active()||terminal)return;recoveryPending=false;hls?.recoverMediaError();},500);}

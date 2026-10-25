@@ -10,3 +10,11 @@ html[data-theme] .kodik-shell video,html[data-theme] .kodik-shell video:is(:focu
 
 /* Video and season navigation share one surface. */
 #player{padding:20px;border:1px solid var(--theme-border);border-radius:14px;background:var(--theme-surface)}#player>h2{margin-top:0}#player .player-seasons{margin:8px 0 0;padding:18px 0 0;border:0;border-top:1px solid var(--theme-border);border-radius:0;background:transparent}@media(max-width:650px){#player{padding:14px}#player .player-seasons{padding:15px 0 0}}
+
+#player .player-status{padding:0 2px 12px;margin:0;justify-content:flex-start;min-height:26px}#player .player-status [data-watch-status]{text-align:left;line-height:1.6}#player .player-status [hidden]{display:none!important}
+
+#player .player-heading{display:flex;align-items:center;justify-content:space-between;gap:10px 20px;flex-wrap:wrap;margin-bottom:18px}#player .player-heading h2{margin:0;font-size:20px}#player .player-heading .player-status{flex:1;min-width:150px;min-height:0;padding:0;justify-content:flex-end}#player .player-heading [data-watch-status]{text-align:right}.kodik-shell:focus{outline:0!important;box-shadow:none!important}@media(max-width:650px){#player .player-heading h2{font-size:17px}#player .player-heading .player-status{font-size:10px}}
+/* Native Chromium controls keep their last clicked shadow button focused. Arrow
+   seeking must not paint that button; Tab restores native keyboard focus cues. */
+.kodik-shell video[data-seek-keyboard]::-webkit-media-controls-fullscreen-button{outline:0!important;box-shadow:none!important;border:0!important}
+#player .player-heading{display:grid;grid-template-columns:auto minmax(0,1fr)}#player .player-heading .player-status{min-width:0}
