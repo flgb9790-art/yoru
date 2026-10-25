@@ -40,3 +40,11 @@ html[data-theme] body>header :is(.desktop-more-panel a,.nav-genres>div>a){backgr
 html[data-theme][data-input-modality=pointer] body :is(button,a,summary,#primary-nav>a,#primary-nav>details>summary):focus{outline:none!important;box-shadow:none!important}
 
 @media(hover:none){html[data-theme] body :is(#primary-nav a,#primary-nav summary,.apps-header-link,.header-tools .header-icon,.header-tools .account,.menu-toggle,.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account,.mobile-bottom-nav>a,.mobile-bottom-nav>button):hover{background:transparent!important;border-color:transparent!important}}
+/* The mobile YORU sheet uses outlined destinations like the account entry dialog. */
+@media(max-width:760px){
+ html[data-theme] body .mobile-menu-sheet :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account){border:1px solid var(--theme-border)!important;background:transparent!important;box-shadow:none!important}
+ html[data-theme] body .mobile-menu-sheet .mobile-menu-account{border-radius:12px}
+}
+@media(max-width:760px) and (hover:hover) and (pointer:fine){
+ html[data-theme] body .mobile-menu-sheet :is(.mobile-menu-grid>a,.mobile-apps-link,.mobile-menu-footer>a,.mobile-menu-footer>button,.mobile-menu-account):hover{border-color:var(--control-border-hover)!important;background:var(--control-quiet-hover)!important}
+}
