@@ -20,7 +20,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    const pageOrigin=new URL(process.env.BASE_URL||'http://localhost:3000').origin;
    let cached=(await db.query('SELECT * FROM aniliberty_sources WHERE anime_id=$1',[anime.id])).rows[0],source=cached?.payload;
    const ttl=source?.available?10*60000:3*60000,key='aniliberty:'+anime.id+':'+(requestedRelease||'default');
-   if(!cached||cached.page_origin!==pageOrigin||(requestedRelease&&Number(source?.release_id)!==requestedRelease)||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
+   if(!cached||(req.query.refresh==='1'&&Date.now()-new Date(cached.checked_at).valueOf()>30000)||cached.page_origin!==pageOrigin||(requestedRelease&&Number(source?.release_id)!==requestedRelease)||Date.now()-new Date(cached.checked_at).valueOf()>ttl){
     if(!pending.has(key))pending.set(key,(async()=>{
      const result=await libertyResolver(anime,requestedRelease);
      if(requestedRelease&&Number(result.release_id)!==requestedRelease)throw new Error('Release edition mismatch');
