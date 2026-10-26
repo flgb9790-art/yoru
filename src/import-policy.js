@@ -1,6 +1,6 @@
-export const bannedGenres=['Детское','Авангард','Антропоморфизм','Хентай','Яой'];
+export const bannedGenres=['Детское','Авангард','Антропоморфизм','Хентай','Яой','Эротика'];
 const key=s=>String(s||'').normalize('NFKC').trim().toLowerCase().replace(/[ё]/g,'е').replace(/[-_–—]/g,' ').replace(/\s+/g,' ');
-const aliases=[['детское','детский','для детей','kids'],['авангард','avant garde','avantgarde'],['антропоморфизм','anthropomorphic','anthropomorphism'],['хентай','hentai'],['яой','yaoi']];
+const aliases=[['детское','детский','для детей','kids'],['авангард','avant garde','avantgarde'],['антропоморфизм','anthropomorphic','anthropomorphism'],['хентай','hentai'],['яой','yaoi'],['эротика','erotica']];
 export function forbiddenGenre(a){const values=[...(a.genres||[]),...(a.metadata?.source_genres||[]).flatMap(g=>[g.name,g.russian])];for(let i=0;i<aliases.length;i++)if(values.some(g=>aliases[i].includes(key(g))))return bannedGenres[i];return '';}
 export const policyError=(code,message)=>Object.assign(Error(message),{code,status:409});
 export const isImportSkip=e=>['ANIME_NOT_AIRED','ANIME_REMOVED','ANIME_NO_RUSSIAN','ANIME_FORBIDDEN_GENRE','ANIME_FILTERED'].includes(e.code);
