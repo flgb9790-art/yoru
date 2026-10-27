@@ -155,3 +155,6 @@ html[data-theme] body #player .player-toolbar>.offline-entry{flex:0 0 auto;align
 
 /* Local downloads is a deliberate destination inside the mobile menu grid. */
 @media(max-width:760px){.mobile-menu-sheet .mobile-menu-grid>a.mobile-downloads-link{grid-column:1/-1;gap:12px;padding:12px!important;min-height:58px}.mobile-downloads-link>svg:first-child{width:20px;height:20px;flex-shrink:0}.mobile-downloads-link>span{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.mobile-downloads-link strong{font-size:12px;font-weight:600}.mobile-downloads-link small{font-size:10px;color:var(--theme-muted);line-height:1.4}.mobile-downloads-link>svg:last-child{width:14px;height:14px;margin-left:auto;opacity:.65}}
+
+/* Approved first banner; mobile-only source prevents a large desktop image request. */
+.mobile-download-banner{display:none}@media(max-width:760px){body[data-page=home] .mobile-download-banner{display:block;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid #ad8cc338;background:#252230;line-height:0;text-decoration:none}.mobile-download-banner picture,.mobile-download-banner img{display:block;width:100%;height:auto}.mobile-download-banner img{aspect-ratio:2129/739;object-fit:contain}.mobile-download-banner:focus-visible{outline:2px solid var(--accent,#b09bd6);outline-offset:4px}}
