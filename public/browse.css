@@ -199,3 +199,5 @@ button:hover,.button:hover,.pagination a:hover,.library-tabs a:hover,nav a:hover
 .profile-dashboard .profile-columns>.panel{margin-top:0}.profile-dashboard .profile-timeline p{padding-left:0;border:0}.profile-dashboard .profile-timeline p::before{display:none}.profile-dashboard .profile-timeline{padding:0;border:0}body[data-page=admin] :is(button,.button){min-height:34px;padding:7px 12px;font-size:11px}body[data-page=admin] .carousel-buttons button{min-height:30px;padding:0}body[data-page=admin] .panel h2{font-size:18px}body[data-page=admin] .admin-row input,body[data-page=admin] .admin-row select{font-size:12px;max-width:100%}.admin-catalog-controls .section-heading{margin-bottom:12px}.admin-catalog-controls>.muted{margin:0}
 
 .filter-toggle-label>[data-filter-state]{width:auto;height:auto;white-space:nowrap;flex:none}.filter-toggle-label>span[aria-hidden]{flex:0 0 14px}
+
+@media(max-width:650px){.catalog-filters>label:has(select[name="provider"]){grid-column:1/-1}}

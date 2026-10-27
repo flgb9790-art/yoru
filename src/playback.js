@@ -1,3 +1,4 @@
+import {recordAniAvailability} from './aniliberty-availability.js';
 import {checkAchievements} from './achievements.js';
 import {awardExperience,EPISODE_XP} from './levels.js';
 import {syncLibraryProgress} from './progress.js';
@@ -26,7 +27,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
      if(requestedRelease&&Number(result.release_id)!==requestedRelease)throw new Error('Release edition mismatch');
      result.skip_version=1;if(result.restricted){result.available=false;result.episodes=[];}
      for(const item of result.episodes||[])for(const value of Object.values(item.streams||{}))validateStream(value);
-     await db.query('INSERT INTO aniliberty_sources(anime_id,payload,page_origin) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET payload=$2,page_origin=$3,checked_at=NOW()',[anime.id,JSON.stringify(result),pageOrigin]);return result;
+     await db.query('INSERT INTO aniliberty_sources(anime_id,payload,page_origin) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET payload=$2,page_origin=$3,checked_at=NOW()',[anime.id,JSON.stringify(result),pageOrigin]);await recordAniAvailability(db,anime.id,result).catch(()=>{});return result;
     })().finally(()=>pending.delete(key)));
     source=await pending.get(key);
    }

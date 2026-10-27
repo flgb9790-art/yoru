@@ -1,3 +1,4 @@
+import {recordAniAvailability} from './aniliberty-availability.js';
 import {providerAgeRating} from './age-ratings.js';
 import {getConfig as getParserConfig} from './parser-config.js';
 import {assertSelected} from './parser-candidates.js';
@@ -35,6 +36,7 @@ export async function saveEpisodeRelease(db,anime,raw,{now=new Date()}={}){
   if(!prior||newDate>oldDate||(newDate===oldDate&&releaseId>=prior.release_id))await client.query('INSERT INTO episode_feed_titles(anime_id,release_id,source_fresh_at) VALUES($1,$2,$3) ON CONFLICT(anime_id) DO UPDATE SET release_id=$2,source_fresh_at=$3,checked_at=NOW()',[anime.id,releaseId,fresh]);
   // A feed link must not open a stale playlist without the newly discovered episode.
   await client.query('DELETE FROM aniliberty_sources WHERE anime_id=$1',[anime.id]);
+  await recordAniAvailability(client,anime.id,{...normalized,release_id:releaseId},{checkedAt:now});
   await notifyEpisodes(client,{...anime,blocked:lockedAnime.blocked,status:lockedAnime.status},releaseId,items,{newEdition:!prior||prior.release_id!==releaseId});
   await client.query('COMMIT');
   return {inserted:items.filter(e=>!seen.has(e.number)).length,episodes:items.length,restricted:normalized.restricted};
