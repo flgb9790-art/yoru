@@ -162,3 +162,5 @@ html[data-theme] body #player .player-toolbar>.offline-entry{flex:0 0 auto;align
 html[data-theme] body #player .player-toolbar>.offline-entry{order:10;margin-left:auto!important}
 
 .profile-friends-empty{font-size:12px;line-height:1.7;margin:12px 0 0}
+
+.legal-navigation{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.legal-document .legal-navigation a{display:inline-flex;padding:7px 11px;border:1px solid var(--theme-border);border-radius:9px;text-decoration:none;font-size:11px}.legal-navigation a[aria-current]{background:var(--theme-bg);color:var(--theme-text)}.legal-navigation a:hover{border-color:var(--accent)}
