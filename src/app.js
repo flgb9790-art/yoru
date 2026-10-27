@@ -44,8 +44,12 @@ const uuid=()=>randomUUID();
 export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver}={}){
  const access=requestAnimeAccess(db);db=access.db;const app=express();app.use(access.middleware);app.set('trust proxy',1);
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
+ // The standalone offline library fetches poster images as well as media; main-site CSP stays unchanged.
+ app.use('/offline',helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'https:'],connectSrc:["'self'",'https:'],mediaSrc:["'self'",'blob:'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  app.use(express.urlencoded({extended:true,limit:'300kb'}));app.use(express.json({limit:'300kb'}));
- app.get(['/vendor/hls.min.js','/offline/hls.min.js'],(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
+ for(const path of ['/vendor/hls.min.js','/offline/hls.min.js'])app.get(path,(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
+ app.get('/offline/library',(req,res)=>res.sendFile(fileURLToPath(new URL('../public/offline/index.html',import.meta.url))));
+ app.get('/offline/icons.svg',(req,res)=>res.sendFile(fileURLToPath(new URL('../public/assets/icons/lucide.svg',import.meta.url))));
  mountApplicationDownloads(app);
  app.use(express.static(fileURLToPath(new URL('../public',import.meta.url))));
  app.get('/health',async(req,res)=>{await db.query('SELECT 1');res.json({ok:true});});

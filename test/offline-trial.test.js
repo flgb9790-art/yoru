@@ -1,4 +1,5 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {compilePlaylist,rangedResponse,providerUrl} from '../public/offline/core.js';import request from 'supertest';import {newDb} from 'pg-mem';import {migrate} from '../src/db.js';import {createApp} from '../src/app.js';import {hashToken} from '../src/security.js';
+import {normalizeRecord,episodeKey} from '../public/offline/storage.js';
+import test from 'node:test';import assert from 'node:assert/strict';import {compilePlaylist,rangedResponse,providerUrl} from '../public/offline/library-core.js';import request from 'supertest';import {newDb} from 'pg-mem';import {migrate} from '../src/db.js';import {createApp} from '../src/app.js';import {hashToken} from '../src/security.js';
 const id='11111111-1111-4111-8111-111111111111',base='https://cache.libria.fun/videos/trial/480/index.m3u8?token=kept';
 test('offline playlist rewrites every media/key/map reference locally and fails closed on unsupported streams',()=>{
  const p=compilePlaylist('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key.bin?token=abc"\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:10,\nseg.ts?token=abc\n#EXT-X-ENDLIST\n',base,id);
@@ -19,6 +20,9 @@ test('offline trial is staff-only, pinned to one public title, respects blocks, 
  for(const who of ['',cookie('u')])assert.equal((await request(app).get('/api/offline/trial').set('Cookie',who)).status,403);
  for(const who of ['m','a']){const r=await request(app).get('/api/offline/trial').set('Cookie',cookie(who));assert.equal(r.status,200);assert.deepEqual(r.body,{id:'trial',title:'Тестовый тайтл',episode:1,quality:'480'});}
  await db.query("UPDATE anime SET blocked=TRUE WHERE id='trial'");assert.equal((await request(app).get('/api/offline/trial').set('Cookie',cookie('a'))).status,404);
- const shell=await request(app).get('/offline/');assert.equal(shell.status,200);assert.doesNotMatch(shell.text,/yoru_session|csrf|Тестовый тайтл/);assert.match(shell.text,/Смотреть офлайн/);
+ await db.query("UPDATE anime SET blocked=FALSE,genres=$1 WHERE id='trial'",[[]]);assert.equal((await request(app).get('/api/offline/anime/trial')).status,200);await db.query("UPDATE anime SET metadata=$1 WHERE id='trial'",[{manual_staff_anime:true}]);assert.equal((await request(app).get('/api/offline/anime/trial').set('Cookie',cookie('a'))).status,404);
+ const shell=await request(app).get('/offline/');assert.equal(shell.status,200);assert.doesNotMatch(shell.text,/yoru_session|csrf|Тестовый тайтл/);assert.match(shell.text,/Моя офлайн-библиотека/);
  assert.equal((await request(app).get('/offline-sw.js')).status,200);
 });
+
+test('legacy trial downloads retain identity and new episodes distinguish titles, editions and quality',()=>{const data={id,title:'Фрирен',bytes:100,savedAt:1,paths:['/offline/media/'+id+'/0']},legacy=normalizeRecord(data,id);assert.equal(legacy.shikimoriId,52991);assert.equal(legacy.episode,1);assert.equal(legacy.release,9542);assert.equal(legacy.quality,'480');assert.equal(episodeKey(legacy),episodeKey({...legacy,animeId:'new-site-id'}));assert.notEqual(episodeKey(legacy),episodeKey({...legacy,episode:2}));assert.notEqual(episodeKey(legacy),episodeKey({...legacy,shikimoriId:21}));assert.notEqual(episodeKey(legacy),episodeKey({...legacy,release:7}));assert.notEqual(episodeKey(legacy),episodeKey({...legacy,quality:'720'}));assert.equal(normalizeRecord({...data,paths:['https://evil.test']},id),null);});

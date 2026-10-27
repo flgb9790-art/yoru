@@ -37,7 +37,7 @@ if(playerHost){
  let permissionTimer=setInterval(checkPermission,60000);
  const libertyButton=providerButtons.find(b=>b.dataset.provider==='aniliberty'),providerPicker=section.querySelector('.provider-picker');
  function libertyAvailable(data,wanted=requestedEpisode||(provider==='kodik'?episode:null)){return Boolean(data&&data.available!==false&&!data.restricted&&Array.isArray(data.episodes)&&data.episodes.some(item=>(!wanted||Number(item.number)===Number(wanted))&&item.streams&&Object.keys(item.streams).length));}
- function syncProviderVisibility(){const available=libertyAvailable(libertyData);if(libertyButton)libertyButton.hidden=!available;if(providerPicker)providerPicker.hidden=!available;}
+ function syncProviderVisibility(){const available=libertyAvailable(libertyData);const offline=section.querySelector('[data-offline-picker]');if(offline){offline.hidden=!libertyAvailable(libertyData,null)||blocked;offline.dataset.release=libertyData?.release_id||'';}if(libertyButton)libertyButton.hidden=!available;if(providerPicker)providerPicker.hidden=!available;}
  syncProviderVisibility();
  function libertyLookup(params){return fetch('/api/player/'+playerHost.dataset.anime+'/aniliberty'+(params.size?'?'+params:''),{signal:AbortSignal.any([page.signal,AbortSignal.timeout(20000)])}).then(async response=>({ok:response.ok,status:response.status,data:await response.json()}));}
  const probeParams=new URLSearchParams();if(requestedRelease)probeParams.set('release',requestedRelease);
