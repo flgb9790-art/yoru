@@ -3,6 +3,10 @@ import {readRecords,titleInfo,sourceInfo,groupKey,episodeKey,icon,escapeHtml as 
 import {openSelection} from './selection.js';
 const $=id=>document.getElementById(id),video=$('video'),QUEUE='yoru_offline_queue_v2',POSITIONS='yoru_offline_positions_v2';
 $('cancel').innerHTML=icon('x');$('close-video').innerHTML=icon('x');document.querySelector('.intro-symbol').innerHTML=icon('download');document.querySelector('.empty>div').innerHTML=icon('download');
+for(const link of document.querySelectorAll('[data-icon]'))link.insertAdjacentHTML('afterbegin',icon(link.dataset.icon));
+for(const [id,name] of [['pause','pause'],['resume','play'],['next','arrow-right'],['more','download'],['disable','trash-2']])$(id).insertAdjacentHTML('afterbegin',icon(name));
+// Repair links when an older cached document is open during an update.
+for(const link of document.querySelectorAll('a[href^="/catalog"]'))link.href='/catalog?provider=aniliberty';
 const sourceCache=new Map();
 let records=[],queue=[],positions={},selected=null,current=null,hls=null,busy=false,starting=false,abort=null,stopReason='',wake=null,lastPosition=0;
 const size=n=>n>=1024**3?(n/1024**3).toFixed(2)+' ГБ':(n/1024**2).toFixed(1)+' МБ',say=text=>{$('status').textContent=text;$('status').hidden=!text;};

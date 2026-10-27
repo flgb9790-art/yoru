@@ -158,3 +158,5 @@ html[data-theme] body #player .player-toolbar>.offline-entry{flex:0 0 auto;align
 
 /* Approved first banner; mobile-only source prevents a large desktop image request. */
 .mobile-download-banner{display:none}@media(max-width:760px){body[data-page=home] .mobile-download-banner{display:block;width:100%;margin:0 0 16px;border-radius:14px;overflow:hidden;border:1px solid #ad8cc338;background:#252230;line-height:0;text-decoration:none}.mobile-download-banner picture,.mobile-download-banner img{display:block;width:100%;height:auto}.mobile-download-banner img{aspect-ratio:2129/739;object-fit:contain}.mobile-download-banner:focus-visible{outline:2px solid var(--accent,#b09bd6);outline-offset:4px}}
+
+html[data-theme] body #player .player-toolbar>.offline-entry{order:10;margin-left:auto!important}

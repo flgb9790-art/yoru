@@ -1,4 +1,5 @@
 import {SHELL_CACHE,VIDEO_PREFIX,rangedResponse} from './offline/library-core.js';
+// v4 refreshes online documents without changing saved media.
 const SHELL=['/offline/','/offline/library.css','/offline/library.js','/offline/library-core.js','/offline/storage.js','/offline/selection.js','/offline/picker.css','/offline/icons.svg','/offline/hls.min.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(SHELL_CACHE);for(const path of SHELL){const response=await fetch(path,{cache:'reload'});if(!response.ok)throw Error('Offline shell unavailable');await cache.put(path,response);}await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();for(const name of await caches.keys())if(name.startsWith('yoru-offline-shell-')&&name!==SHELL_CACHE)await caches.delete(name);})()));
@@ -10,6 +11,7 @@ self.addEventListener('fetch',event=>{
   const cache=await caches.open(name);if(!await cache.match('/offline/media/'+match[1]+'/ready.json'))return new Response('Download incomplete',{status:404});
   const response=await cache.match(url.pathname);if(!response)return new Response('Download missing',{status:404});return url.pathname.endsWith('/poster')?response:rangedResponse(response,event.request.headers.get('range'),event.request.method);
  })());return;}
+ if(event.request.mode==='navigate'&&['/offline/','/offline/library'].includes(url.pathname)){event.respondWith((async()=>{const cache=await caches.open(SHELL_CACHE);try{const response=await fetch(event.request,{cache:'no-store'});if(response.ok){await cache.put('/offline/',response.clone());return response;}}catch{}return await cache.match('/offline/')||new Response('Открой загрузки с подключением к интернету.',{status:503});})());return;}
  if(SHELL.includes(url.pathname)||url.pathname==='/offline/library'){event.respondWith((async()=>{const cached=await (await caches.open(SHELL_CACHE)).match(url.pathname==='/offline/library'?'/offline/':url.pathname);return cached||fetch(event.request);})());return;}
  if(event.request.mode==='navigate'&&url.pathname==='/')event.respondWith(fetch(event.request).catch(()=>Response.redirect(new URL('/offline/',self.location.origin).href,302)));
 });
