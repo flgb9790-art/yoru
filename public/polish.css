@@ -164,3 +164,9 @@ html[data-theme] body #player .player-toolbar>.offline-entry{order:10;margin-lef
 .profile-friends-empty{font-size:12px;line-height:1.7;margin:12px 0 0}
 
 .legal-navigation{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.legal-document .legal-navigation a{display:inline-flex;padding:7px 11px;border:1px solid var(--theme-border);border-radius:9px;text-decoration:none;font-size:11px}.legal-navigation a[aria-current]{background:var(--theme-bg);color:var(--theme-text)}.legal-navigation a:hover{border-color:var(--accent)}
+
+.seo-breadcrumbs{display:flex;flex-wrap:wrap;gap:7px;font-size:11px;color:var(--theme-muted);margin:0 0 16px;line-height:1.7}.seo-breadcrumbs>span:last-child{overflow-wrap:anywhere}
+
+.home-about h1{font-size:24px;line-height:1.4;margin:0 0 16px}@media(max-width:650px){.home-about h1{font-size:20px}}
+
+.anime-original-name{font-size:12px;color:var(--theme-muted);margin:-8px 0 20px;overflow-wrap:anywhere}
