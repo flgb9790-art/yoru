@@ -1,4 +1,4 @@
-param([switch]$DebugApk,[switch]$Verify,[switch]$Clean,[string]$SiteUrl='https://web-production-6bc5ed.up.railway.app')
+param([switch]$DebugApk,[switch]$Verify,[switch]$Clean,[string]$SiteUrl='https://yoru.one')
 $ErrorActionPreference='Stop'
 Push-Location $PSScriptRoot
 try {

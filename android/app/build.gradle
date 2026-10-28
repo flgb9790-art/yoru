@@ -5,7 +5,7 @@ def firebase = firebaseFile.exists() ? new JsonSlurper().parse(firebaseFile) : n
 def firebaseClient = firebase?.client?.find { it.client_info.android_client_info.package_name == 'app.yoru.android' }
 if (firebase && (!firebaseClient?.client_info?.mobilesdk_app_id || !firebaseClient?.api_key?.getAt(0)?.current_key || !firebase?.project_info?.project_id || !firebase?.project_info?.project_number)) throw new GradleException('google-services.json must contain complete Firebase configuration for app.yoru.android')
 def quoted = { value -> groovy.json.JsonOutput.toJson(value ?: '') }
-def siteOrigin = new URI(providers.gradleProperty('yoruUrl').getOrElse('https://web-production-6bc5ed.up.railway.app'))
+def siteOrigin = new URI(providers.gradleProperty('yoruUrl').getOrElse('https://yoru.one'))
 if(siteOrigin.scheme != 'https' || !siteOrigin.host || siteOrigin.rawUserInfo || siteOrigin.rawQuery || siteOrigin.rawFragment || siteOrigin.rawPath) throw new GradleException('yoruUrl must be an HTTPS origin without a path or credentials')
 def signingFile = rootProject.file('keystore.properties')
 def signingProps = new Properties()
@@ -15,8 +15,8 @@ android {
  compileSdk 35
  defaultConfig {
   applicationId 'app.yoru.android'; minSdk 26; targetSdk 35
-  versionCode 6; versionName '0.1.5'
-  buildConfigField 'String', 'SITE_ORIGIN', quoted(providers.gradleProperty('yoruUrl').getOrElse('https://web-production-6bc5ed.up.railway.app'))
+  versionCode 7; versionName '0.1.6'
+  buildConfigField 'String', 'SITE_ORIGIN', quoted(providers.gradleProperty('yoruUrl').getOrElse('https://yoru.one'))
   buildConfigField 'String', 'FIREBASE_APP_ID', quoted(firebaseClient?.client_info?.mobilesdk_app_id)
   buildConfigField 'String', 'FIREBASE_PROJECT_ID', quoted(firebase?.project_info?.project_id)
   buildConfigField 'String', 'FIREBASE_API_KEY', quoted(firebaseClient?.api_key?.getAt(0)?.current_key)

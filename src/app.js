@@ -1,3 +1,4 @@
+import {canonicalSite} from './site-origin.js';
 import {downloadableAniTitles} from './aniliberty-availability.js';
 import {mountOfflineTrial} from './offline-trial.js';
 import {requestAnimeAccess,staffOnlyGenre} from './anime-access.js';
@@ -43,7 +44,7 @@ import {mountPlayback} from './playback.js';
 import {episodeFeed,enqueueEpisodeSync} from './episode-feed.js';
 const uuid=()=>randomUUID();
 export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver}={}){
- const access=requestAnimeAccess(db);db=access.db;const app=express();app.use(access.middleware);app.set('trust proxy',1);
+ const access=requestAnimeAccess(db);db=access.db;const app=express();app.use(access.middleware);app.set('trust proxy',1);app.use(canonicalSite);
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  // The standalone offline library fetches poster images as well as media; main-site CSP stays unchanged.
  app.use('/offline',helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'https:'],connectSrc:["'self'",'https:'],mediaSrc:["'self'",'blob:'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
