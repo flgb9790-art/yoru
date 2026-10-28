@@ -67,7 +67,7 @@ export function seoHead(title,req){
  }
  if(a){heading=a.name+(a.year?' ('+a.year+')':'')+' — смотреть аниме онлайн';description=short(a.description,145)||('Описание, серии и просмотр аниме «'+a.name+'» на YORU.');description+=' '+[a.year,a.aired? a.aired+' серий':'',...(a.genres||[]).slice(0,2)].filter(Boolean).join(' · ');}
  if(p.page>1){heading+=' — страница '+p.page;description+=' Страница '+p.page+'.';}
- const fullTitle=short(heading,115)+' · YORU',image=a?.poster||custom.image||(origin?origin+'/app-icon-512.png?v=3':null),safeImage=image&&/^https:\/\//.test(image)?image:null;
+ const fullTitle=short(heading,115)+' · YORU',image=a?.poster||custom.image||(origin?origin+'/app-icon-512.png?v=5':null),safeImage=image&&/^https:\/\//.test(image)?image:null;
  const robots=index?'index, follow, max-image-preview:large':'noindex, '+(error?'nofollow':'follow');
  const meta=(name,value,property=false)=>`<meta ${property?'property':'name'}="${name}" content="${html(value)}" data-seo>`;
  let head=`<title>${html(fullTitle)}</title>${meta('description',short(description,210))}${meta('robots',robots)}`;

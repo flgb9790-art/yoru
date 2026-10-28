@@ -1,6 +1,6 @@
 import {SHELL_CACHE,VIDEO_PREFIX,rangedResponse} from './offline/library-core.js';
-// v5 refreshes online documents without changing saved media.
-const SHELL=['/offline/','/offline/library.css','/offline/library.js','/offline/library-core.js','/offline/storage.js','/offline/selection.js','/offline/picker.css','/offline/icons.svg','/offline/hls.min.js'];
+// v7 refreshes online documents without changing saved media.
+const SHELL=['/assets/brand/wordmark.svg','/offline/','/offline/library.css','/offline/library.js','/offline/library-core.js','/offline/storage.js','/offline/selection.js','/offline/picker.css','/offline/icons.svg','/offline/hls.min.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(SHELL_CACHE);for(const path of SHELL){const response=await fetch(path,{cache:'reload'});if(!response.ok)throw Error('Offline shell unavailable');await cache.put(path,response);}await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();for(const name of await caches.keys())if(name.startsWith('yoru-offline-shell-')&&name!==SHELL_CACHE)await caches.delete(name);})()));
 self.addEventListener('fetch',event=>{

@@ -10,3 +10,5 @@ a.quiet:hover,a.button:hover{text-decoration:none}
 .library>.section-head{align-items:center;flex-wrap:wrap}
 @media(hover:hover){.catalog-link:hover{border-color:#bc98d5;background:#79548f38}.quiet:hover{border-color:#9775ac}#disable:hover{background:#70445344}}
 @media(max-width:360px){.library>.section-head h2{font-size:15px}.catalog-link{padding:7px 9px}}
+
+.brand img{display:block;width:98px;height:22px}
