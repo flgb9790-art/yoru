@@ -20,3 +20,12 @@ body .watch-room .room-player .room-connect{background:#b99ed5;color:#21172c}
 .watch-room dialog{width:440px;padding:24px}.room-friends{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow:auto;margin:16px 0}.watch-room .room-friend{text-align:left;justify-content:flex-start;white-space:normal;padding:10px 12px;border:1px solid var(--theme-border);background:var(--theme-bg);color:var(--theme-text)}
 .sidebar-rooms{background:linear-gradient(145deg,#a184c51a,transparent),var(--theme-surface)}.sidebar-rooms h3{margin-bottom:12px}.active-room-card{display:flex;gap:9px;padding:12px 0;border-top:1px solid var(--theme-border);font-size:11px}.active-room-card>img{width:38px;height:54px;object-fit:cover;border-radius:6px;flex:none}.active-room-card>span{min-width:0}.active-room-card strong{display:block;line-height:1.4}.active-room-card small{display:block;font-size:10px;color:var(--theme-muted);margin-top:4px}
 @media(max-width:760px){.watch-room{padding:16px 12px;border-radius:14px}.room-heading h1{font-size:20px}.room-toolbar{padding:10px}.room-toolbar .room-volume{flex:1 1 100%;max-width:none}.room-volume label{max-width:100%}.room-chat{height:380px}.room-members [data-room-members]{grid-template-columns:1fr}.room-xp{align-items:flex-start;line-height:1.6}}
+
+/* Keep room controls on one baseline; narrow screens can scroll the toolbar. */
+body .watch-room .room-toolbar{flex-wrap:nowrap;align-items:center;overflow-x:auto;scrollbar-width:thin;gap:8px}
+body .watch-room .room-toolbar>.room-volume{flex:0 0 148px;max-width:none}
+body .watch-room .room-toolbar>label{flex:1 1 160px;min-width:120px;max-width:none;margin:0}
+body .watch-room .room-toolbar>label:has([data-room-quality]){flex:0 0 84px;min-width:84px}
+body .watch-room .room-toolbar select{height:32px;min-height:32px;margin:0;padding:5px 28px 5px 10px;font-size:11px;text-overflow:ellipsis}
+body .watch-room .room-toolbar>button{flex:0 0 auto;height:32px;min-height:32px;white-space:nowrap}
+body .watch-room .room-toolbar>[data-room-fullscreen]{width:32px;padding:6px}
