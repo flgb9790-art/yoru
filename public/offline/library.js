@@ -6,7 +6,7 @@ $('cancel').innerHTML=icon('x');$('close-video').innerHTML=icon('x');document.qu
 for(const link of document.querySelectorAll('[data-icon]'))link.insertAdjacentHTML('afterbegin',icon(link.dataset.icon));
 for(const [id,name] of [['pause','pause'],['resume','play'],['next','arrow-right'],['more','download'],['disable','trash-2']])$(id).insertAdjacentHTML('afterbegin',icon(name));
 // Repair links when an older cached document is open during an update.
-for(const link of document.querySelectorAll('a[href^="/catalog"]'))link.href='/catalog?provider=aniliberty';
+for(const link of document.querySelectorAll('a[href^="/catalog"]'))link.href='/catalog';
 const sourceCache=new Map();
 let records=[],queue=[],positions={},selected=null,current=null,hls=null,busy=false,starting=false,abort=null,stopReason='',wake=null,lastPosition=0;
 const size=n=>n>=1024**3?(n/1024**3).toFixed(2)+' ГБ':(n/1024**2).toFixed(1)+' МБ',say=text=>{$('status').textContent=text;$('status').hidden=!text;};
@@ -54,7 +54,7 @@ async function snapshot(job,cache){await cache.put('/offline/media/'+job.id+'/jo
 async function batchSource(id,release,signal,provider='aniliberty'){const key=provider+':'+id+':'+(release||0),cached=sourceCache.get(key);if(cached&&cached.until>Date.now())return cached.data;const data=await sourceInfo(id,release,signal,provider);sourceCache.set(key,{data,until:Date.now()+300000});return data;}
 async function saveEpisode(job){
  abort=new AbortController();const signal=abort.signal;job.status='downloading';job.error='';renderQueue();persist();
- const info=await titleInfo(job.animeId,signal),source=await batchSource(job.animeId,job.release,signal,job.provider),ep=source.episodes.find(e=>e.number===job.episode&&(e.season||1)===(job.season||1)),url=ep?.streams?.[job.quality];
+ const info=await titleInfo(job.animeId,signal),source=await (job.provider==='kodik'?sourceInfo(job.animeId,job.release,signal,'kodik',job.episode,job.season):batchSource(job.animeId,job.release,signal,job.provider)),ep=source.episodes.find(e=>e.number===job.episode&&(e.season||1)===(job.season||1)),url=ep?.streams?.[job.quality];
  if(!url)throw Error('Эта серия недоступна в выбранном качестве.');Object.assign(job,{title:info.title,shikimoriId:info.shikimoriId,release:source.release_id,name:ep.name||'',season:ep.season||1});
  const original=await remote(url,signal,true,job.provider),compiled=compilePlaylist(original.body,url,job.id,job.provider),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(original.body)),fingerprint=[...new Uint8Array(digest)].map(n=>n.toString(16).padStart(2,'0')).join('');
  if(job.fingerprint&&job.fingerprint!==fingerprint)await caches.delete(VIDEO_PREFIX+job.id);job.fingerprint=fingerprint;const cache=await caches.open(VIDEO_PREFIX+job.id);job.bytes=0;await snapshot(job,cache);

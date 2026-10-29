@@ -11,4 +11,4 @@ export async function prepareOffline(){
  if(!navigator.serviceWorker.controller)await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Обнови страницу, чтобы включить загрузки.')),10000);navigator.serviceWorker.addEventListener('controllerchange',()=>{clearTimeout(timer);resolve();},{once:true});});
  window.yoruOfflinePrepared=true;
 }
-if(document.body.hasAttribute('data-offline-library')){try{await prepareOffline();await import('./library.js?v=8');}catch(e){const status=document.getElementById('status');if(status)status.textContent=e.message;}}
+if(document.body.hasAttribute('data-offline-library')){try{await prepareOffline();await import('./library.js?v=9');}catch(e){const status=document.getElementById('status');if(status)status.textContent=e.message;}}
