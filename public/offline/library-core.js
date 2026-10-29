@@ -1,17 +1,17 @@
-export const SHELL_CACHE='yoru-offline-shell-v7';
+export const SHELL_CACHE='yoru-offline-shell-v8';
 export const VIDEO_PREFIX='yoru-offline-video-v1-';
 export const MAX_BYTES=1536*1024*1024;
-export function providerUrl(value,base){
+export function providerUrl(value,base,provider='aniliberty'){
  const u=new URL(value,base);
- if(u.protocol!=='https:'||u.username||u.password||u.port||!(u.hostname==='libria.fun'||u.hostname.endsWith('.libria.fun')))throw Error('Источник содержит неподдерживаемую ссылку.');
+ if(u.protocol!=='https:'||u.username||u.password||u.port||!(provider==='kodik'?/^p\d+\.solodcdn\.com$/.test(u.hostname):u.hostname==='libria.fun'||u.hostname.endsWith('.libria.fun')))throw Error('Источник содержит неподдерживаемую ссылку.');
  return u.href;
 }
-export function compilePlaylist(text,source,id){
- providerUrl(source);if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Неверный идентификатор загрузки.');
+export function compilePlaylist(text,source,id,provider='aniliberty'){
+ providerUrl(source,undefined,provider);if(!/^[a-f0-9-]{36}$/.test(id))throw Error('Неверный идентификатор загрузки.');
  if(text.length>1000000||!text.trimStart().startsWith('#EXTM3U')||!text.includes('#EXT-X-ENDLIST'))throw Error('Нужен полный плейлист готовой серии.');
  if(/#EXT-X-(?:STREAM-INF|MEDIA:|BYTERANGE|I-FRAME|PART:|PRELOAD|SESSION-)/.test(text))throw Error('Этот формат потока пока не поддерживается для загрузки.');
  const files=[],known=new Map(),root='/offline/media/'+id+'/';
- const resource=(value,kind)=>{const url=providerUrl(value,source);if(known.has(url))return known.get(url);if(files.length>=3000)throw Error('В серии слишком много фрагментов для загрузки.');const path=root+files.length;files.push({url,path,kind});known.set(url,path);return path;};
+ const resource=(value,kind)=>{const url=providerUrl(value,source,provider);if(known.has(url))return known.get(url);if(files.length>=3000)throw Error('В серии слишком много фрагментов для загрузки.');const path=root+files.length;files.push({url,path,kind});known.set(url,path);return path;};
  const lines=text.trim().split(/\r?\n/).map(line=>{
   if(!line||line.startsWith('#')&&!line.includes('URI='))return line;
   if(!line.startsWith('#'))return resource(line.trim(),'segment');

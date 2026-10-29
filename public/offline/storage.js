@@ -1,6 +1,6 @@
 import {VIDEO_PREFIX} from './library-core.js';
 export const groupKey=r=>String(r.shikimoriId||r.animeId||'legacy');
-export const episodeKey=r=>[groupKey(r),r.release||0,r.season||1,r.episode||1,r.quality||'480'].join(':');
+export const episodeKey=r=>(r.provider==='kodik'?'kodik:':'')+[groupKey(r),r.release||0,r.season||1,r.episode||1,r.quality||'480'].join(':');
 export function normalizeRecord(data,id){
  if(data.id!==id||!Array.isArray(data.paths)||data.paths.length>3000||!data.paths.length)return null;
  const root='/offline/media/'+id+'/';if(!data.paths.every(path=>typeof path==='string'&&path.startsWith(root)))return null;
@@ -12,6 +12,6 @@ export async function readRecords(){
  }return result.sort((a,b)=>b.savedAt-a.savedAt);
 }
 export async function titleInfo(id,signal){const response=await fetch('/api/offline/anime/'+encodeURIComponent(id),{cache:'no-store',signal});if(!response.ok)throw Error('Этот тайтл сейчас недоступен для загрузки.');return response.json();}
-export async function sourceInfo(id,release,signal){const response=await fetch('/api/player/'+encodeURIComponent(id)+'/aniliberty'+(release?'?release='+encodeURIComponent(release):''),{cache:'no-store',signal});if(!response.ok)throw Error('Не удалось получить серии AniLiberty. Попробуй позже.');const source=await response.json();if(!source.available||source.restricted||!source.episodes?.length)throw Error('У AniLiberty пока нет доступных серий.');return source;}
+export async function sourceInfo(id,release,signal,provider='aniliberty'){const response=await fetch((provider==='kodik'?'/api/offline/kodik-trial/':'/api/player/')+encodeURIComponent(id)+(provider==='kodik'?'':'/aniliberty')+(release?'?release='+encodeURIComponent(release):''),{cache:'no-store',signal});if(!response.ok)throw Error('Не удалось получить серии источника. Попробуй позже.');const source=await response.json();if(!source.available||source.restricted||!source.episodes?.length)throw Error('У источника пока нет доступных серий.');return source;}
 export const icon=name=>'<svg width="18" height="18" aria-hidden="true"><use href="/offline/icons.svg#'+name+'"></use></svg>';
 export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
