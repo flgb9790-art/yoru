@@ -56,3 +56,5 @@ html[data-theme] body #player .player-toolbar>.offline-entry[data-offline-provid
 @media(max-width:760px){.player-translation .translation-mobile{display:block;width:100%;height:32px;margin:0}.player-translation .translation-options,.player-translation>p{display:none}}
 
 @media(max-width:760px){#player .player-translation select.translation-mobile{padding:0 32px 0 10px;font-size:12px;line-height:normal;min-height:32px;margin:0}}
+
+@media(max-width:760px){#player .player-heading .player-status{display:none}#player .player-heading{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:8px}html[data-theme] body #player .player-heading>.offline-entry:not([hidden]){display:inline-flex!important;align-items:center;justify-content:center;gap:6px;flex:none;width:auto;height:30px;min-height:30px;padding:0 10px;font-size:11px;line-height:1;border-radius:8px;margin:0}#player .player-heading>.offline-entry[hidden]{display:none!important}}

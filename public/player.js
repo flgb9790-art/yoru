@@ -6,6 +6,9 @@ if(playerHost){
  const previewImage=playerHost.querySelector('.player-preview-image');if(previewImage){listen(previewImage,'error',()=>{previewImage.hidden=true;});if(previewImage.complete&&!previewImage.naturalWidth)previewImage.hidden=true;}
 
  const section=playerHost.closest('section'),sourceSelect=section.querySelector('[data-player-provider]'),episodeSelect=section.querySelector('[data-player-episode]'),qualitySelect=section.querySelector('[data-player-resolution]'),status=section.querySelector('[data-watch-status]'),qualityLabel=section.querySelector('[data-player-quality]');
+ const download=section.querySelector('[data-offline-picker]'),heading=section.querySelector('.player-heading'),toolbar=section.querySelector('.player-toolbar'),mobileLayout=window.matchMedia?.('(max-width: 760px)');
+ function placeDownload(){if(!download||!heading||!toolbar)return;if(mobileLayout?.matches)heading.append(download);else toolbar.prepend(download);}
+ placeDownload();if(mobileLayout)listen(mobileLayout,'change',placeDownload);
  sourceSelect.value='kodik';
  const navigation=new URLSearchParams(location.search);if(['kodik','aniliberty'].includes(navigation.get('source')))sourceSelect.value=navigation.get('source');
  const providerButtons=[...section.querySelectorAll('.provider-picker [data-provider]')];
@@ -114,7 +117,7 @@ if(playerHost){
   }catch(error){if(current===generation&&provider==='aniliberty'&&!page.signal.aborted){libertyData=null;sourceSelect.value='kodik';syncProviderButtons();syncProviderVisibility();restart.hidden=true;return load({fallbackNotice:'Не удалось загрузить AniLiberty. Открыт Kodik.'});}if(current===generation)note(error.name==='AbortError'?'Загрузка заняла слишком много времени. Попробуй ещё раз.':error.message,true);}finally{if(current===generation){loading=false;restart.disabled=false;}}
  }
  playerHost.querySelector('[data-load-player]')?.addEventListener('click',()=>load());
- sourceSelect.addEventListener('change',()=>{if(episode)requestedEpisode=episode;retryState=null;syncProviderButtons();try{localStorage.setItem('yoru_player_source',sourceSelect.value);}catch{}load();});
+ sourceSelect.addEventListener('change',()=>{if(episode)requestedEpisode=episode;retryState=null;syncProviderButtons();load();});
  episodeSelect.addEventListener('change',()=>{requestedEpisode=null;const item=episodes.find(item=>item.number===Number(episodeSelect.value));if(item)playEpisode(item);});
  qualitySelect.addEventListener('change',()=>{qualitySelect.dataset.preferred=qualitySelect.value;const item=episodes.find(item=>item.number===episode);if(item)playEpisode(item,position,Boolean(video&&!video.paused),true);});
  document.querySelectorAll('a[href="#player"]').forEach(link=>link.addEventListener('click',()=>{if(!loading&&!iframe&&!video)load();}));
