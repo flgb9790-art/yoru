@@ -45,3 +45,5 @@ html[data-theme] body .anime-hero .watch-actions .ui-icon{width:13px;height:13px
 html[data-theme] body .rating-form{gap:8px}
 html[data-theme] body .rating-form :is(button,select){width:auto;min-width:80px}
 html[data-theme] body .rating-form select{padding-right:30px!important}
+
+html[data-theme] body .rating-form select{width:104px;min-width:104px;padding-right:34px!important}
