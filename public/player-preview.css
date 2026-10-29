@@ -27,3 +27,11 @@ html[data-theme] .kodik-shell video,html[data-theme] .kodik-shell video:is(:focu
 
 /* Desktop PiP is a compact trailing toolbar action. */
 html[data-theme] body #player .player-toolbar>.player-pip{order:9;flex:0 0 auto;align-self:center;margin:0 0 0 auto!important;min-height:32px!important;width:auto;max-width:100%;padding:6px 11px!important;border-radius:9px;font-size:11px!important;line-height:18px;white-space:nowrap}
+
+/* Consistent compact source, episode, quality and download controls. */
+html[data-theme] body #player .player-toolbar{gap:8px;align-items:center}
+html[data-theme] body #player .player-toolbar :is(button,select){box-sizing:border-box;height:32px!important;min-height:32px!important;margin:0;padding:6px 11px!important;border-radius:9px;font-size:11px!important;line-height:18px;white-space:nowrap}
+html[data-theme] body #player .player-toolbar select{padding-right:30px!important;width:100%;max-width:100%;text-overflow:ellipsis}
+html[data-theme] body #player .player-toolbar>label{margin:0;min-width:100px;max-width:260px}
+html[data-theme] body #player .player-toolbar>.offline-entry{height:32px!important;min-height:32px!important}
+@media(max-width:650px){html[data-theme] body #player .player-toolbar>label{flex:1 1 100px;min-width:0;max-width:100%}html[data-theme] body #player .provider-picker{gap:6px}html[data-theme] body #player .player-toolbar>.offline-entry{flex:0 0 auto}}
