@@ -1,3 +1,5 @@
+import {kodikTranslations} from './kodik-catalogue.js';
+import {countryMiddleware} from './kodik-geo.js';
 import {mountModeratorTimings} from './moderator-timings.js';
 import {mountKodikDownloadTrial} from './kodik-download.js';
 import {parseSkipRules} from './kodik-skips.js';
@@ -47,8 +49,8 @@ import {enqueueImport} from './worker.js';
 import {mountPlayback} from './playback.js';
 import {episodeFeed,enqueueEpisodeSync} from './episode-feed.js';
 const uuid=()=>randomUUID();
-export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver,kodikCatalogueResolver}={}){
- const access=requestAnimeAccess(db);db=access.db;const app=express();app.use(access.middleware);app.set('trust proxy',1);app.use(canonicalSite);app.use(seoMiddleware);
+export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver,kodikCatalogueResolver,countryLookup}={}){
+ const access=requestAnimeAccess(db);db=access.db;const rawCatalogue=kodikCatalogueResolver||kodikTranslations;kodikCatalogueResolver=async anime=>access.filterTranslations(await rawCatalogue(anime));const app=express();app.use(access.middleware);app.set('trust proxy',1);app.use(countryMiddleware(countryLookup));app.use(canonicalSite);app.use(seoMiddleware);
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'",(req)=>"'nonce-"+req.seoNonce+"'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  // The standalone offline library fetches poster images as well as media; main-site CSP stays unchanged.
  app.use('/offline',helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'https:'],connectSrc:["'self'",'https:'],mediaSrc:["'self'",'blob:'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));

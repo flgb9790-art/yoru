@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS kodik_geo (
+ shikimori_id INTEGER PRIMARY KEY,
+ blocked_countries TEXT[] NOT NULL DEFAULT '{}',
+ checked_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS kodik_geo_state (
+ id INTEGER PRIMARY KEY,
+ checked_at TIMESTAMPTZ,
+ next_run TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ lease_until TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01',
+ last_error TEXT NOT NULL DEFAULT ''
+);
+INSERT INTO kodik_geo_state(id) VALUES(1) ON CONFLICT(id) DO NOTHING;
