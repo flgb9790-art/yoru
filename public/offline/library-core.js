@@ -1,4 +1,4 @@
-export const SHELL_CACHE='yoru-offline-shell-v9';
+export const SHELL_CACHE='yoru-offline-shell-v10';
 export const VIDEO_PREFIX='yoru-offline-video-v1-';
 export const MAX_BYTES=1536*1024*1024;
 export function providerUrl(value,base,provider='aniliberty'){
