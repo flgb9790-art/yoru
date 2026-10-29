@@ -29,3 +29,5 @@ body .watch-room .room-toolbar>label:has([data-room-quality]){flex:0 0 84px;min-
 body .watch-room .room-toolbar select{height:32px;min-height:32px;margin:0;padding:5px 28px 5px 10px;font-size:11px;text-overflow:ellipsis}
 body .watch-room .room-toolbar>button{flex:0 0 auto;height:32px;min-height:32px;white-space:nowrap}
 body .watch-room .room-toolbar>[data-room-fullscreen]{width:32px;padding:6px}
+
+.room-player>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.room-create label{display:block;margin:12px 0;font-size:12px}.room-create select{display:block;width:100%;margin-top:6px}.room-create [hidden]{display:none!important}

@@ -5,7 +5,7 @@ const SCRIPT_URL='https://kodik-add.com/add-players.min.js';
 const LOOKUP_URL='https://kodik-api.com/get-player';
 export function validatePlayerUrl(value){
  const url=new URL(value,KODIK_ORIGIN);
- if(url.origin!==KODIK_ORIGIN||url.username||url.password||!/^\/(serial|video)\/\d+\/[a-z0-9]+\/720p\/?$/.test(url.pathname))throw new Error('Unexpected Kodik player address');
+ if(url.origin!==KODIK_ORIGIN||url.username||url.password||!/^\/(serial|video|season|seria)\/\d+\/[a-z0-9]+\/720p\/?$/.test(url.pathname))throw new Error('Unexpected Kodik player address');
  url.search='';url.hash='';return url.href;
 }
 export function createKodikClient(fetcher=fetch){

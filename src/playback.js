@@ -1,3 +1,5 @@
+import {normalizeSkipRules} from './kodik-skips.js';
+import {kodikTranslations} from './kodik-catalogue.js';
 import {recordAniAvailability} from './aniliberty-availability.js';
 import {checkAchievements} from './achievements.js';
 import {awardExperience,EPISODE_XP} from './levels.js';
@@ -7,7 +9,7 @@ import rateLimit from 'express-rate-limit';
 import {z} from 'zod';
 import {resolveKodik,validatePlayerUrl} from './kodik.js';
 import {resolveAniLiberty,validateStream} from './aniliberty.js';
-export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resolveAniLiberty){
+export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resolveAniLiberty,catalogueResolver=kodikTranslations){
  const pending=new Map();
  const lookupLimit=rateLimit({windowMs:3600000,limit:180,standardHeaders:'draft-8',legacyHeaders:false});
  app.get('/api/player/:id/aniliberty',lookupLimit,async(req,res)=>{
@@ -40,6 +42,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    res.json({...source,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'aniliberty_lookup_error',anime_id:anime.id,message:'Release lookup failed'}));res.status(503).json({error:'AniLiberty временно недоступен. Попробуй позже или выбери Kodik.'});}
  });
+ app.get('/api/player/:id/translations',lookupLimit,async(req,res)=>{res.set('Cache-Control','no-store');const anime=(await db.query('SELECT id,name,shikimori_id,blocked FROM anime WHERE id=$1',[req.params.id])).rows[0];if(!anime)return res.status(404).json({error:'Аниме не найдено.'});if(anime.blocked)return res.status(403).json({error:'Просмотр ограничен.'});try{const translations=await catalogueResolver(anime);const current=(await db.query('SELECT blocked FROM anime WHERE id=$1',[anime.id])).rows[0];if(!current||current.blocked)return res.status(403).json({error:'Просмотр ограничен.'});res.json({translations});}catch{res.status(503).json({error:'Список озвучек временно недоступен.'});}});
  app.get('/api/player/:id/status',async(req,res)=>{
   res.set('Cache-Control','no-store');
   const anime=(await db.query('SELECT blocked,block_reason FROM anime WHERE id=$1',[req.params.id])).rows[0];
@@ -49,7 +52,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
  });
  app.get('/api/player/:id',lookupLimit,async(req,res)=>{
   res.set('Cache-Control','no-store');
-  const anime=(await db.query('SELECT id,name,shikimori_id,blocked,block_reason FROM anime WHERE id=$1',[req.params.id])).rows[0];
+  const anime=(await db.query('SELECT id,name,shikimori_id,metadata,blocked,block_reason FROM anime WHERE id=$1',[req.params.id])).rows[0];
   if(!anime)return res.status(404).json({error:'Аниме не найдено.'});
   if(anime.blocked)return res.status(403).json({error:'Просмотр ограничен: '+(anime.block_reason||'по решению администратора')});
   if(!anime.shikimori_id)return res.status(404).json({error:'Для этого аниме ещё не указан Shikimori ID.'});
@@ -69,7 +72,7 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    const current=(await db.query('SELECT blocked FROM anime WHERE id=$1',[anime.id])).rows[0];if(!current||current.blocked)return res.status(403).json({error:'Просмотр ограничен администратором.'});
    if(!source.available)return res.status(404).json({error:'Kodik пока не предоставил плеер для этого аниме.'});
    const resume=req.user?(await db.query('SELECT episode,season,position_seconds,translation_id,completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id])).rows[0]:null;
-   res.json({url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,resume:resume&&!resume.completed?resume:null});
+   res.json({skipRules:normalizeSkipRules(anime.metadata?.kodik_skip_rules),url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'kodik_lookup_error',anime_id:anime.id,message:'Public player lookup failed'}));res.status(503).json({error:'Не удалось связаться с Kodik. Попробуй открыть плеер чуть позже.'});}
  });
  const watchLimit=rateLimit({windowMs:15*60000,limit:240,standardHeaders:'draft-8',legacyHeaders:false});
