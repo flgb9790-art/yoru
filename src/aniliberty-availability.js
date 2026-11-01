@@ -1,3 +1,4 @@
+import {publishPlayerCatalogue} from './player-catalogue.js';
 import {anilibertyRequest,normalizeRelease,validateStream} from './aniliberty.js';
 import {staffOnlyGenre} from './anime-access.js';
 export function hasDownloadableEpisodes(source){return source?.available===true&&source.restricted!==true&&Array.isArray(source.episodes)&&source.episodes.some(ep=>Number.isInteger(ep.number)&&ep.number>0&&['480','720','1080'].some(q=>{try{return !!ep.streams?.[q]&&!!validateStream(ep.streams[q]);}catch{return false;}}));}
@@ -16,16 +17,26 @@ export async function downloadableAniTitles(db,{now=new Date()}={}){
  const ids=[...chosen.keys()],rows=(await db.query('SELECT id,genres,metadata FROM anime WHERE blocked=FALSE AND status<>\'anons\' AND id IN ('+ids.map((_,i)=>'$'+(i+1)).join(',')+')',ids)).rows,allowed=new Set(rows.filter(a=>!a.metadata?.manual_staff_anime&&!(a.genres||[]).some(staffOnlyGenre)).map(a=>a.id));
  return new Map([...chosen].filter(([id])=>allowed.has(id)));
 }
+export async function loadAniCatalogPage(page,{request=anilibertyRequest}={}){
+  const list=await request('anime/catalog/releases?'+new URLSearchParams({limit:'50',page:String(page)}));if(!Array.isArray(list.data))throw Error('Unexpected AniLiberty catalogue');
+  const ids=[...new Set(list.data.map(r=>Number(r.id)))];if(ids.some(id=>!Number.isSafeInteger(id)||id<1))throw Error('Invalid release mapping');
+  let releases=[];if(ids.length){const bulk=await request('anime/releases/list?'+new URLSearchParams({ids:ids.join(','),limit:'50'}));if(!Array.isArray(bulk.data))throw Error('Unexpected AniLiberty details');releases=bulk.data;const expected=new Map(list.data.map(r=>[Number(r.id),Number(r.shikimori?.id)]));if(releases.some(r=>!ids.includes(r.id)||(Number.isSafeInteger(expected.get(r.id))&&expected.get(r.id)>0&&expected.get(r.id)!==Number(r.shikimori?.id))))throw Error('AniLiberty mapping mismatch');const received=new Set(releases.map(r=>r.id));if(ids.some(id=>!received.has(id)))throw Error('Incomplete AniLiberty details');}
+  const total=Number(list.meta?.pagination?.total_pages);if(!Number.isSafeInteger(total)||total<1||page>total)throw Error('Invalid catalogue pagination');const finished=page>=total;
+ return {page,releases,finished};
+}
 export async function syncAniCatalogPage(db,{request=anilibertyRequest,now=new Date()}={}){
  const claim=(await db.query('UPDATE aniliberty_catalog_state SET lease_until=$1 WHERE id=1 AND lease_until<=$2 AND next_run<=$2 RETURNING page,cycle_started_at',[new Date(now.valueOf()+180000),now])).rows[0];if(!claim)return {skipped:true};
  try{
-  const page=claim.page,list=await request('anime/catalog/releases?'+new URLSearchParams({limit:'50',page:String(page)}));if(!Array.isArray(list.data))throw Error('Unexpected AniLiberty catalogue');
-  const ids=[...new Set(list.data.map(r=>Number(r.id)))];if(ids.some(id=>!Number.isSafeInteger(id)||id<1))throw Error('Invalid release mapping');
-  let releases=[];if(ids.length){const bulk=await request('anime/releases/list?'+new URLSearchParams({ids:ids.join(','),limit:'50'}));if(!Array.isArray(bulk.data))throw Error('Unexpected AniLiberty details');releases=bulk.data;const expected=new Map(list.data.map(r=>[Number(r.id),Number(r.shikimori?.id)]));if(releases.some(r=>!ids.includes(r.id)||(Number.isSafeInteger(expected.get(r.id))&&expected.get(r.id)>0&&expected.get(r.id)!==Number(r.shikimori?.id))))throw Error('AniLiberty mapping mismatch');const received=new Set(releases.map(r=>r.id));if(ids.some(id=>!received.has(id)))throw Error('Incomplete AniLiberty details');}
+  if(claim.page>1){const proof=(await db.query("SELECT staging_cycle,staged_page FROM player_catalogue_state WHERE provider='aniliberty'")).rows[0];if(!proof||Date.parse(proof.staging_cycle)!==Date.parse(claim.cycle_started_at)||proof.staged_page!==claim.page-1){await db.query('UPDATE aniliberty_catalog_state SET page=1,cycle_started_at=$1,next_run=$1,lease_until=$2 WHERE id=1',[now,new Date(0)]);return {restarted:true};}}
+  const {page,releases,finished}=await loadAniCatalogPage(claim.page,{request});
   const shikis=[...new Set(releases.map(r=>Number(r.shikimori?.id)).filter(n=>Number.isSafeInteger(n)&&n>0))],local=shikis.length?(await db.query('SELECT id,shikimori_id FROM anime WHERE shikimori_id IN ('+shikis.map((_,i)=>'$'+(i+1)).join(',')+')',shikis)).rows:[],mapping=new Map(local.map(a=>[a.shikimori_id,a.id]));
   let updated=0;for(const raw of releases){const animeId=mapping.get(Number(raw.shikimori?.id));if(!animeId)continue;await recordAniAvailability(db,animeId,{...normalizeRelease(raw,Number(raw.shikimori.id)),release_id:Number(raw.id)},{checkedAt:now});updated++;}
-  const total=Number(list.meta?.pagination?.total_pages);if(!Number.isSafeInteger(total)||total<1||page>total)throw Error('Invalid catalogue pagination');const finished=page>=total;
-  if(finished)await db.query('UPDATE aniliberty_availability SET available=FALSE,checked_at=$2 WHERE checked_at<$1',[claim.cycle_started_at,now]);
+
+  if(page===1){await db.query("DELETE FROM player_catalogue_staging WHERE provider='aniliberty'");await db.query("UPDATE player_catalogue_state SET staging_cycle=$1,staged_page=0 WHERE provider='aniliberty'",[claim.cycle_started_at]);}
+  for(const raw of releases){const shiki=Number(raw.shikimori?.id);if(Number.isSafeInteger(shiki)&&shiki>0&&hasDownloadableEpisodes(normalizeRelease(raw,shiki)))await db.query("INSERT INTO player_catalogue_staging(provider,shikimori_id) VALUES('aniliberty',$1) ON CONFLICT(provider,shikimori_id) DO NOTHING",[shiki]);}
+  await db.query("UPDATE player_catalogue_state SET staged_page=$1 WHERE provider='aniliberty'",[page]);
+  if(finished){const client=await db.connect();try{await client.query('BEGIN');const ids=(await client.query("SELECT shikimori_id FROM player_catalogue_staging WHERE provider='aniliberty'")).rows.map(r=>r.shikimori_id);await publishPlayerCatalogue(client,'aniliberty',ids);await client.query('UPDATE aniliberty_availability SET available=FALSE,checked_at=$2 WHERE checked_at<$1',[claim.cycle_started_at,now]);await client.query('COMMIT');}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}}
+
   await db.query('UPDATE aniliberty_catalog_state SET page=$1,cycle_started_at=$2,next_run=$3,lease_until=$4,last_error=\'\' WHERE id=1',[finished?1:page+1,finished?new Date(now.valueOf()+24*3600000):claim.cycle_started_at,new Date(now.valueOf()+(finished?24*3600000:3000)),new Date(0)]);
   return {page,updated,finished};
  }catch(error){await db.query('UPDATE aniliberty_catalog_state SET next_run=$1,lease_until=$2,last_error=$3 WHERE id=1',[new Date(now.valueOf()+300000),new Date(0),'AniLiberty catalogue unavailable']);throw error;}

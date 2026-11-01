@@ -57,4 +57,21 @@ html[data-theme] body #player .player-toolbar>.offline-entry[data-offline-provid
 
 @media(max-width:760px){#player .player-translation select.translation-mobile{padding:0 32px 0 10px;font-size:12px;line-height:normal;min-height:32px;margin:0}}
 
-@media(max-width:760px){#player .player-heading .player-status{display:none}#player .player-heading{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:8px}html[data-theme] body #player .player-heading>.offline-entry:not([hidden]){display:inline-flex!important;align-items:center;justify-content:center;gap:6px;flex:none;width:auto;height:30px;min-height:30px;padding:0 10px;font-size:11px;line-height:1;border-radius:8px;margin:0}#player .player-heading>.offline-entry[hidden]{display:none!important}}
+/* Title and player actions share one row; progress follows the translations. */
+#player .player-heading{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:8px}
+#player .player-heading h2{min-width:0}
+#player .player-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:none}
+html[data-theme] body #player .player-heading-actions>button{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;flex:none;width:auto;height:32px!important;min-height:32px!important;padding:6px 11px!important;font-size:11px!important;line-height:18px;border-radius:9px;margin:0!important;white-space:nowrap}
+#player .player-heading-actions>button[hidden]{display:none!important}
+#player>.player-status{display:flex;min-width:0;font-size:11px}
+#player .player-translation{margin-bottom:8px}
+@media(max-width:760px){html[data-theme] body #player .player-heading-actions>button{height:30px!important;min-height:30px!important;padding:0 10px!important;line-height:1}#player>.player-status{font-size:10px}}
+
+/* Desktop actions sit below the video; mobile keeps the header download action. */
+#player .player-bottom-actions{display:none}
+@media(min-width:901px){
+ #player .player-bottom-actions:has(>button:not([hidden])){display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
+ html[data-theme] body #player .player-bottom-actions>button{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;flex:none;width:auto;height:32px!important;min-height:32px!important;padding:6px 11px!important;font-size:11px!important;line-height:18px;border-radius:9px;margin:0!important;white-space:nowrap}
+ #player .player-bottom-actions>button[hidden]{display:none!important}
+ html[data-theme] body #player .player-bottom-actions>.offline-entry{margin-left:auto!important}
+}

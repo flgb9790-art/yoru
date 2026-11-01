@@ -1,3 +1,4 @@
+import {kodikHasPlayer,publishPlayerCatalogue} from './player-catalogue.js';
 import geoip from 'geoip-country';
 export const countryCode=value=>typeof value==='string'&&/^[A-Z]{2}$/.test(value)?value:null;
 export function visitorCountry(ip){try{return countryCode(geoip.lookup(ip)?.country);}catch{return null;}}
@@ -10,18 +11,22 @@ export async function syncKodikGeo(db,{fetcher=fetch,token=process.env.KODIK_API
  if(!token)return {unavailable:true};
  const claimed=await db.query("UPDATE kodik_geo_state SET lease_until=NOW()+INTERVAL '15 minutes' WHERE id=1 AND next_run<=NOW() AND lease_until<NOW() RETURNING id");if(!claimed.rowCount)return {busy:true};
  try{
-  const countries=new Map(),seen=new Set();let cursor='',pages=0,rows=0;const deadline=Date.now()+10*60000;
+  const {countries,playable,pages,rows}=await scanKodikCatalogue({fetcher,token,onPage:()=>db.query("UPDATE kodik_geo_state SET lease_until=NOW()+INTERVAL '15 minutes' WHERE id=1")});
+  const client=await db.connect();try{await client.query('BEGIN');await client.query('DELETE FROM kodik_geo');for(const [id,blocked]of countries)if(blocked.length)await client.query('INSERT INTO kodik_geo(shikimori_id,blocked_countries) VALUES($1,$2)',[id,blocked]);if(playable.size)await publishPlayerCatalogue(client,'kodik',playable);await client.query("UPDATE kodik_geo_state SET checked_at=NOW(),next_run=NOW()+INTERVAL '24 hours',lease_until='1970-01-01',last_error='' WHERE id=1");await client.query('COMMIT');}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+  return {pages,rows,restricted:[...countries.values()].filter(v=>v.length).length};
+ }catch{await db.query("UPDATE kodik_geo_state SET lease_until='1970-01-01',next_run=NOW()+INTERVAL '15 minutes',last_error='Не удалось полностью обновить ограничения Kodik' WHERE id=1");throw Error('Kodik geographic restrictions sync failed');}
+}
+export async function scanKodikCatalogue({fetcher=fetch,token=process.env.KODIK_API_TOKEN,onPage}={}){if(!token)throw Error('Kodik API is not configured');
+  const countries=new Map(),playable=new Set(),seen=new Set();let cursor='',pages=0,rows=0;const deadline=Date.now()+10*60000;
   do{
    if(++pages>2000||Date.now()>deadline)throw Error('Catalogue scan limit');
    const body=new URLSearchParams({token,types:'anime,anime-serial',limit:'100',sort:'created_at',order:'asc'});if(cursor)body.set('next',cursor);
    const response=await fetcher('https://kodik-api.com/list',{method:'POST',body,redirect:'error',signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('Catalogue unavailable');const data=await response.json();if(!Array.isArray(data.results)||data.error||!Object.hasOwn(data,'next_page')||(data.next_page!==null&&typeof data.next_page!=='string')||!data.results.length)throw Error('Invalid catalogue');
    for(const [id,blocked]of aggregateCountries(data.results)){const previous=countries.get(id);countries.set(id,previous?previous.filter(c=>blocked.includes(c)):blocked);}rows+=data.results.length;
    cursor='';if(data.next_page){const next=new URL(data.next_page);if(next.origin!=='https://kodik-api.com'||next.pathname!=='/list'||!next.searchParams.get('next'))throw Error('Invalid catalogue cursor');cursor=next.searchParams.get('next');if(seen.has(cursor))throw Error('Repeated catalogue cursor');seen.add(cursor);}
-   await db.query("UPDATE kodik_geo_state SET lease_until=NOW()+INTERVAL '15 minutes' WHERE id=1");
+   for(const row of data.results)if(kodikHasPlayer(row))playable.add(Number(row.shikimori_id));await onPage?.({pages,rows});
   }while(cursor);
   if(!countries.size)throw Error('Empty catalogue');
-  const client=await db.connect();try{await client.query('BEGIN');await client.query('DELETE FROM kodik_geo');for(const [id,blocked]of countries)if(blocked.length)await client.query('INSERT INTO kodik_geo(shikimori_id,blocked_countries) VALUES($1,$2)',[id,blocked]);await client.query("UPDATE kodik_geo_state SET checked_at=NOW(),next_run=NOW()+INTERVAL '24 hours',lease_until='1970-01-01',last_error='' WHERE id=1");await client.query('COMMIT');}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
-  return {pages,rows,restricted:[...countries.values()].filter(v=>v.length).length};
- }catch{await db.query("UPDATE kodik_geo_state SET lease_until='1970-01-01',next_run=NOW()+INTERVAL '15 minutes',last_error='Не удалось полностью обновить ограничения Kodik' WHERE id=1");throw Error('Kodik geographic restrictions sync failed');}
+ return {countries,playable,pages,rows};
 }
 export function startKodikGeo(db){let busy=false,stopped=false;const tick=async()=>{if(busy||stopped)return;busy=true;try{await syncKodikGeo(db);}catch{console.error(JSON.stringify({event:'kodik_geo_sync_failed'}));}finally{busy=false;}};const timer=setInterval(tick,60000);timer.unref();tick();return ()=>{stopped=true;clearInterval(timer);};}
