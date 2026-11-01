@@ -11,6 +11,7 @@ import {resolveKodik,validatePlayerUrl} from './kodik.js';
 import {resolveAniLiberty,validateStream} from './aniliberty.js';
 export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resolveAniLiberty,catalogueResolver=kodikTranslations){
  const pending=new Map();
+ const lastWatched=async(req,id)=>req.user?(await db.query("SELECT provider,source_release_id,updated_at FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1",[req.user.id,id])).rows[0]||null:null;
  const lookupLimit=rateLimit({windowMs:3600000,limit:180,standardHeaders:'draft-8',legacyHeaders:false});
  app.get('/api/player/:id/aniliberty',lookupLimit,async(req,res)=>{
   res.set('Cache-Control','no-store');
@@ -38,8 +39,8 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    if(!source.available)return res.status(404).json({error:'В AniLiberty пока нет доступных серий этого аниме. Попробуй Kodik.'});
    // Validate cached links too; media is fetched directly from the provider, never proxied.
    for(const item of source.episodes)for(const value of Object.values(item.streams))validateStream(value);
-   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,source_release_id,completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) AND (source_release_id IS NULL OR source_release_id=$3) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id,source.release_id||null])).rows[0]:null;
-   res.json({...source,resume:resume&&!resume.completed?resume:null});
+   const resume=req.user?(await db.query("SELECT episode,season,position_seconds,source_release_id,completed,updated_at FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND provider='aniliberty' AND (position_seconds>0 OR manual_mark=FALSE) AND (source_release_id IS NULL OR source_release_id=$3) ORDER BY updated_at DESC LIMIT 1",[req.user.id,anime.id,source.release_id||null])).rows[0]:null;
+   res.json({...source,lastWatched:await lastWatched(req,anime.id),progressUpdatedAt:resume?.updated_at||null,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'aniliberty_lookup_error',anime_id:anime.id,message:'Release lookup failed'}));res.status(503).json({error:'AniLiberty временно недоступен. Попробуй позже или выбери Kodik.'});}
  });
  app.get('/api/player/:id/translations',lookupLimit,async(req,res)=>{res.set('Cache-Control','no-store');const anime=(await db.query('SELECT id,name,shikimori_id,blocked FROM anime WHERE id=$1',[req.params.id])).rows[0];if(!anime)return res.status(404).json({error:'Аниме не найдено.'});if(anime.blocked)return res.status(403).json({error:'Просмотр ограничен.'});try{const translations=await catalogueResolver(anime);const current=(await db.query('SELECT blocked FROM anime WHERE id=$1',[anime.id])).rows[0];if(!current||current.blocked)return res.status(403).json({error:'Просмотр ограничен.'});res.json({translations});}catch{res.status(503).json({error:'Список озвучек временно недоступен.'});}});
@@ -72,9 +73,9 @@ export function mountPlayback(app,db,resolver=resolveKodik,libertyResolver=resol
    const current=(await db.query('SELECT blocked FROM anime WHERE id=$1',[anime.id])).rows[0];if(!current||current.blocked)return res.status(403).json({error:'Просмотр ограничен администратором.'});
    if(!source.available)return res.status(404).json({error:'Kodik пока не предоставил плеер для этого аниме.'});
    if(req.viewerCountry&&!['admin','moderator'].includes(req.user?.role)&&process.env.KODIK_API_TOKEN){const tracks=await catalogueResolver(anime);if(!tracks.length)return res.status(403).json({error:'Kodik недоступен в твоей стране.'});const selected=tracks.find(t=>new URL(t.url).pathname===new URL(source.link).pathname)||tracks[0];source={...source,link:selected.url,translation:selected.name};}
-   const resume=req.user?(await db.query('SELECT episode,season,position_seconds,translation_id,completed FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1',[req.user.id,anime.id])).rows[0]:null;
-   const preferred=req.user?(await db.query("SELECT translation_id FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND provider='kodik' AND translation_id IS NOT NULL AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1",[req.user.id,anime.id])).rows[0]:null;
-   res.json({skipRules:normalizeSkipRules(anime.metadata?.kodik_skip_rules),url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,preferredTranslationId:preferred?.translation_id||null,resume:resume&&!resume.completed?resume:null});
+   const resume=req.user?(await db.query("SELECT episode,season,position_seconds,translation_id,completed,updated_at FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND provider='kodik' AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1",[req.user.id,anime.id])).rows[0]:null;
+   const preferred=req.user?(await db.query("SELECT translation_id,updated_at FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND provider='kodik' AND translation_id IS NOT NULL AND (position_seconds>0 OR manual_mark=FALSE) ORDER BY updated_at DESC LIMIT 1",[req.user.id,anime.id])).rows[0]:null;
+   res.json({lastWatched:await lastWatched(req,anime.id),skipRules:normalizeSkipRules(anime.metadata?.kodik_skip_rules),url:validatePlayerUrl(source.link),quality:source.quality,translation:source.translation,progressUpdatedAt:resume?.updated_at||null,preferredTranslationId:preferred?.translation_id||null,preferredTranslationUpdatedAt:preferred?.updated_at||null,resume:resume&&!resume.completed?resume:null});
   }catch(error){console.error(JSON.stringify({event:'kodik_lookup_error',anime_id:anime.id,message:'Public player lookup failed'}));res.status(503).json({error:'Не удалось связаться с Kodik. Попробуй открыть плеер чуть позже.'});}
  });
  const watchLimit=rateLimit({windowMs:15*60000,limit:240,standardHeaders:'draft-8',legacyHeaders:false});

@@ -1,0 +1,25 @@
+/* Dated calendar, separate from the plain navigation tabs used elsewhere. */
+.schedule-calendar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;margin:24px 0 0}
+.schedule-calendar .schedule-date{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-width:0;min-height:98px;padding:13px 14px;border:1px solid #e2d9ed;border-radius:14px;background:linear-gradient(145deg,#fff,#f5f0fa);color:#614c78;text-decoration:none;transition:background .16s,border-color .16s,transform .16s}
+.schedule-calendar .schedule-date:hover{border-color:#af91ca;transform:translateY(-2px);background:#f0e8f8}
+.schedule-calendar .schedule-date[aria-current]{background:linear-gradient(135deg,#8661b0,#674889);border-color:#8661b0;color:#fff;box-shadow:0 5px 16px #72509726}
+.schedule-calendar .schedule-date:focus-visible,.schedule-week-nav a:focus-visible{outline:2px solid #a984ce;outline-offset:3px}
+.schedule-date-top{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:20px;font-size:10px;font-weight:600;line-height:1.4}
+.schedule-date-count{display:inline-flex;align-items:center;justify-content:center;min-width:23px;min-height:20px;padding:1px 5px;border-radius:7px;background:#8c68ac14;font-size:10px}
+.schedule-date-main{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;line-height:1.1}
+.schedule-date-main strong{font-size:26px;font-weight:750;letter-spacing:-1px}
+.schedule-date-main>span{font-size:11px;font-weight:600}
+.schedule-date-main .schedule-date-all{font-size:14px;letter-spacing:0;line-height:1.45}
+.schedule-date[aria-current] .schedule-date-count{background:#ffffff26}
+.schedule-week-nav{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:16px 0 0}
+.schedule-week-nav a{padding:8px 12px;border-radius:9px;border:1px solid #e3d9ed;color:#795c93;font-size:11px;text-decoration:none;background:#f8f4fc}
+.schedule-week-nav a:hover{background:#eee5f7;border-color:#b89ed0}
+html[data-theme=dark] .schedule-calendar .schedule-date{background:linear-gradient(145deg,#352c42,#2e2839);border-color:#51415f;color:#e5d6f2}
+html[data-theme=dark] .schedule-calendar .schedule-date:hover{background:#45334f;border-color:#a481c3}
+html[data-theme=dark] .schedule-calendar .schedule-date[aria-current]{background:linear-gradient(135deg,#8761aa,#60437d);border-color:#ad86cc;color:#fff}
+html[data-theme=dark] .schedule-date-count{background:#c1a1df1c;color:#e4cdf6}
+html[data-theme=dark] .schedule-week-nav a{background:#362b41;border-color:#554263;color:#dec8ee}
+html[data-theme=dark] .schedule-week-nav a:hover{background:#483454;border-color:#a481c3}
+@media(max-width:1100px){.schedule-calendar{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:550px){.schedule-calendar{gap:7px;margin-top:20px}.schedule-calendar .schedule-date{min-height:93px;padding:10px 8px;border-radius:11px;gap:9px}.schedule-date-top{font-size:9px;gap:2px}.schedule-date-count{font-size:9px;min-width:18px;min-height:18px;padding:0 3px}.schedule-date-main strong{font-size:24px}.schedule-date-main>span{font-size:10px}.schedule-date-main .schedule-date-all{font-size:12px}.schedule-week-nav{justify-content:space-between}.schedule-week-nav a{font-size:10px;padding:8px}}
+@media(prefers-reduced-motion:reduce){.schedule-calendar .schedule-date{transition:none}.schedule-calendar .schedule-date:hover{transform:none}}
