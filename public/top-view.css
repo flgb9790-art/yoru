@@ -1,0 +1,10 @@
+.top-view-switch{display:inline-flex;gap:4px;margin:16px 0 0;padding:4px;border-radius:11px;border:1px solid #e1d6eb;background:#f4eef9}
+.top-view-switch a{display:inline-flex;align-items:center;justify-content:center;min-width:91px;padding:8px 14px;border-radius:8px;color:#7b6392;font-size:12px;font-weight:650;text-decoration:none}
+.top-view-switch a[aria-current]{background:#8564aa;color:#fff;box-shadow:0 2px 7px #75529726}
+.top-view-switch a:hover{color:#513169}.top-view-switch a[aria-current]:hover{color:#fff}
+.top-view-switch a:focus-visible{outline:2px solid #ab83cf;outline-offset:2px}
+.top-card-entry{min-width:0}.top-card-place{display:block;margin:0 0 9px;font-size:11px;font-weight:700;color:#876b9e}.top-card-entry .anime-card{width:100%}
+html[data-theme=dark] .top-view-switch{background:#302738;border-color:#594465}
+html[data-theme=dark] .top-view-switch a{color:#d7c2e7}
+html[data-theme=dark] .top-view-switch a[aria-current]{background:#795297;color:#fff}
+html[data-theme=dark] .top-card-place{color:#c8acd9}

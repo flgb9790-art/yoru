@@ -1,3 +1,4 @@
+import {promoteCompletedLibrary} from './library-completion.js';
 import {AsyncLocalStorage} from 'node:async_hooks';
 const viewers=new AsyncLocalStorage();
 export function isCardWatched(anime,state=viewers.getStore()){
@@ -13,6 +14,7 @@ export function isCardWatched(anime,state=viewers.getStore()){
 export function watchedCards(db){return async(req,res,next)=>{
  const state={library:new Map(),episodes:new Map()};
  if(req.user&&req.method==='GET'&&!req.path.startsWith('/api/')){
+  await promoteCompletedLibrary(db,req.user.id);
   const [lists,history]=await Promise.all([db.query('SELECT anime_id,status FROM library WHERE user_id=$1',[req.user.id]),db.query('SELECT DISTINCT anime_id,episode FROM watch_history WHERE user_id=$1 AND completed=TRUE AND season>0',[req.user.id])]);
   for(const row of lists.rows)state.library.set(row.anime_id,row.status);
   for(const row of history.rows){if(!state.episodes.has(row.anime_id))state.episodes.set(row.anime_id,new Set());state.episodes.get(row.anime_id).add(Number(row.episode));}

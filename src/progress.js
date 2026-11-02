@@ -1,3 +1,4 @@
+import {completedTitle} from './library-completion.js';
 import {uiIcon} from './icons.js';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
@@ -13,12 +14,11 @@ export async function knownEpisodes(db,a,season){
  return [...numbers].sort((x,y)=>x-y);
 }
 export async function syncLibraryProgress(db,userId,a){
- const expected=a.status==='released'?Number(a.episodes)||Number(a.aired)||0:0;
- const watched=expected?+(await db.query('SELECT COUNT(*) AS count FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season=1 AND completed=TRUE AND episode<=$3',[userId,a.id,expected])).rows[0].count:0;
- const status=expected&&watched>=expected?'completed':'watching';
+ const history=(await db.query('SELECT episode FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season>0 AND completed=TRUE',[userId,a.id])).rows;
+ const status=completedTitle(a,new Set(history.map(row=>Number(row.episode))))?'completed':'watching';
  const saved=(await db.query('SELECT status FROM library WHERE user_id=$1 AND anime_id=$2',[userId,a.id])).rows[0];
  if(!saved&&!(await db.query('SELECT id FROM watch_history WHERE user_id=$1 AND anime_id=$2 LIMIT 1',[userId,a.id])).rowCount)return;
- if(saved&&!['planned','watching','completed'].includes(saved.status))return;
+ if(status!=='completed'&&saved&&!['planned','watching','completed'].includes(saved.status))return;
  await db.query('INSERT INTO library(user_id,anime_id,status) VALUES($1,$2,$3) ON CONFLICT(user_id,anime_id) DO UPDATE SET status=$3',[userId,a.id,status]);
 }
 export function mountProgress(app,db){
