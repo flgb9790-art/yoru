@@ -1,3 +1,4 @@
+import {watchedCards} from './watched-cards.js';
 import {kodikTranslations} from './kodik-catalogue.js';
 import {countryMiddleware} from './kodik-geo.js';
 import {mountModeratorTimings} from './moderator-timings.js';
@@ -70,6 +71,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  app.use((req,res,next)=>{let csrfToken=cookie(req,'yoru_csrf');if(!csrfToken||!/^[a-f0-9]{64}$/.test(csrfToken)){csrfToken=token();res.cookie('yoru_csrf',csrfToken,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'});}req.session.csrf=csrfToken;
   if(['POST','PUT','PATCH','DELETE'].includes(req.method)&&(req.body?._csrf||req.get('x-csrf-token'))!==csrfToken)return res.status(403).send('Форма устарела. Обнови страницу.');next();});
  app.use(async(req,res,next)=>{if(req.user&&req.method==='GET'&&!req.path.startsWith('/api/')&&req.get('Accept')?.includes('text/html')&&req.user.visit_day!==new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Minsk',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){await dailyVisit(db,req.user.id);const stats=(await db.query('SELECT xp,visit_streak FROM users WHERE id=$1',[req.user.id])).rows[0];Object.assign(req.user,stats);}next();});
+ app.use(watchedCards(db));
  mountAndroidPush(app,db);
  mountGenreMenu(app,db);
  mountLegal(app,db);
