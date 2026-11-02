@@ -75,3 +75,8 @@ html[data-theme] body #player .player-heading-actions>button{display:inline-flex
  #player .player-bottom-actions>button[hidden]{display:none!important}
  html[data-theme] body #player .player-bottom-actions>.offline-entry{margin-left:auto!important}
 }
+/* Compact selects: 11px outer insets, with a separate lane for the arrow. */
+html[data-theme] body :is(.anime-hero .watch-actions,.rating-form) select[name]{padding-left:11px!important;padding-right:30px!important;background-position:calc(100% - 15px) 50%,calc(100% - 11px) 50%;background-size:4px 4px;background-repeat:no-repeat}
+html[data-theme] body .anime-hero .watch-actions select{width:138px;min-width:138px}
+html[data-theme] body .rating-form select{width:78px;min-width:78px}
+html[data-theme] body .rating-form label{flex:0 0 auto;width:auto;min-width:0}
