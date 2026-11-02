@@ -8,3 +8,11 @@ html[data-theme=dark] .top-view-switch{background:#302738;border-color:#594465}
 html[data-theme=dark] .top-view-switch a{color:#d7c2e7}
 html[data-theme=dark] .top-view-switch a[aria-current]{background:#795297;color:#fff}
 html[data-theme=dark] .top-card-place{color:#c8acd9}
+.top-controls{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px}
+.top-controls .top-tabs{margin:0;flex:1;min-width:0}
+.top-controls .top-view-switch{flex-shrink:0;margin:0;gap:3px;padding:3px;border-radius:10px}
+.top-controls .top-view-switch a{min-width:34px;width:34px;height:34px;padding:7px;border-radius:7px}
+.top-view-icon{display:block;width:18px;height:18px;background:currentColor;mask-position:center;mask-size:contain;mask-repeat:no-repeat}
+.top-view-icon-list{mask-image:url('/assets/icons/top-list.svg')}
+.top-view-icon-cards{mask-image:url('/assets/icons/top-cards.svg')}
+@media(max-width:550px){.top-controls{gap:10px}.top-controls .top-tabs{flex-direction:column;align-items:flex-start;gap:6px}.top-controls .top-tabs a{font-size:10px;padding:7px 9px}}

@@ -9,3 +9,5 @@ To add an icon: copy its original SVG from the pinned package into `lucide/`, ad
 The reusable glyphs cover navigation, account menus, chat, comments, notifications, profile controls, streaks, ratings and player controls. The favicon, brand artwork, user-provided content and achievement illustrations are separate assets.
 
 Source: https://github.com/lucide-icons/lucide · https://lucide.dev/license
+
+Additional view-toggle SVGs: `top-list.svg` and `top-cards.svg` downloaded from the official Lucide repository (`icons/list.svg`, `icons/layout-grid.svg`) on 2026-11-02. Same Lucide license notices in LICENSE apply. These two files are used locally as CSS masks to inherit theme colors.
