@@ -80,3 +80,5 @@ html[data-theme] body :is(.anime-hero .watch-actions,.rating-form) select[name]{
 html[data-theme] body .anime-hero .watch-actions select{width:138px;min-width:138px}
 html[data-theme] body .rating-form select{width:78px;min-width:78px}
 html[data-theme] body .rating-form label{flex:0 0 auto;width:auto;min-width:0}
+/* Breadcrumb markup remains available; the visual navigation is hidden on all screens. */
+html[data-theme] body .seo-breadcrumbs{display:none!important}
