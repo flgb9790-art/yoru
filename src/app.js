@@ -1,3 +1,6 @@
+import {mountInvitations} from './invitations.js';
+import {privateSite} from './site-mode.js';
+import {privateGate,privateAsset} from './private-site.js';
 import {watchedCards} from './watched-cards.js';
 import {kodikTranslations} from './kodik-catalogue.js';
 import {countryMiddleware} from './kodik-geo.js';
@@ -51,17 +54,18 @@ import {mountPlayback} from './playback.js';
 import {episodeFeed,enqueueEpisodeSync} from './episode-feed.js';
 const uuid=()=>randomUUID();
 export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver,kodikCatalogueResolver,countryLookup}={}){
- const access=requestAnimeAccess(db);db=access.db;const rawCatalogue=kodikCatalogueResolver||kodikTranslations;kodikCatalogueResolver=async anime=>access.filterTranslations(await rawCatalogue(anime));const app=express();app.use(access.middleware);app.set('trust proxy',1);app.use(countryMiddleware(countryLookup));app.use(canonicalSite);app.use(seoMiddleware);
+ const access=requestAnimeAccess(db);db=access.db;const rawCatalogue=kodikCatalogueResolver||kodikTranslations;kodikCatalogueResolver=async anime=>access.filterTranslations(await rawCatalogue(anime));const app=express();app.use((req,res,next)=>{if(privateSite())res.set('X-Robots-Tag','noindex, nofollow, noarchive');next();});app.use(access.middleware);app.set('trust proxy',1);app.use(countryMiddleware(countryLookup));app.use(canonicalSite);app.use(seoMiddleware);
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'",(req)=>"'nonce-"+req.seoNonce+"'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  // The standalone offline library fetches poster images as well as media; main-site CSP stays unchanged.
  app.use('/offline',helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'https:'],connectSrc:["'self'",'https:'],mediaSrc:["'self'",'blob:'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  mountSeo(app,db);
  app.use(express.urlencoded({extended:true,limit:'300kb'}));app.use(express.json({limit:'300kb'}));
  for(const path of ['/vendor/hls.min.js','/offline/hls.min.js'])app.get(path,(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/hls.js/dist/hls.min.js',import.meta.url))));
- app.get('/offline/library',(req,res)=>res.sendFile(fileURLToPath(new URL('../public/offline/index.html',import.meta.url))));
+
  app.get('/offline/icons.svg',(req,res)=>res.sendFile(fileURLToPath(new URL('../public/assets/icons/lucide.svg',import.meta.url))));
- mountApplicationDownloads(app);
- app.use(express.static(fileURLToPath(new URL('../public',import.meta.url))));
+
+ const publicFiles=express.static(fileURLToPath(new URL('../public',import.meta.url)));
+ app.use((req,res,next)=>(req.path.startsWith('/downloads/')||privateSite()&&!privateAsset(req))?next():publicFiles(req,res,next));
  app.get('/health',async(req,res)=>{await db.query('SELECT 1');res.json({ok:true});});
  app.use(async(req,res,next)=>{const raw=cookie(req,'yoru_session');if(raw){const s=(await db.query('SELECT * FROM sessions WHERE token_hash=$1 AND expires_at>NOW()',[hashToken(raw)])).rows[0];if(s){req.session=s;if(s.user_id)req.user=(await db.query('SELECT id,email,name,role,verified,avatar,cover,public_id,xp,visit_streak,visit_day FROM users WHERE id=$1',[s.user_id])).rows[0];}}
   if(!req.session){req.session={csrf:token()};}
@@ -71,6 +75,10 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  app.use((req,res,next)=>{let csrfToken=cookie(req,'yoru_csrf');if(!csrfToken||!/^[a-f0-9]{64}$/.test(csrfToken)){csrfToken=token();res.cookie('yoru_csrf',csrfToken,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'});}req.session.csrf=csrfToken;
   if(['POST','PUT','PATCH','DELETE'].includes(req.method)&&(req.body?._csrf||req.get('x-csrf-token'))!==csrfToken)return res.status(403).send('Форма устарела. Обнови страницу.');next();});
  app.use(async(req,res,next)=>{if(req.user&&req.method==='GET'&&!req.path.startsWith('/api/')&&req.get('Accept')?.includes('text/html')&&req.user.visit_day!==new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Minsk',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){await dailyVisit(db,req.user.id);const stats=(await db.query('SELECT xp,visit_streak FROM users WHERE id=$1',[req.user.id])).rows[0];Object.assign(req.user,stats);}next();});
+ app.use(privateGate);
+ app.get('/offline/library',(req,res)=>res.sendFile(fileURLToPath(new URL('../public/offline/index.html',import.meta.url))));
+ mountApplicationDownloads(app);
+ app.use((req,res,next)=>privateSite()?publicFiles(req,res,next):next());
  app.use(watchedCards(db));
  mountAndroidPush(app,db);
  mountGenreMenu(app,db);
@@ -115,12 +123,13 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  app.get('/schedule',async(req,res)=>{const rows=(await db.query("SELECT * FROM anime WHERE status='ongoing'")).rows;rows.sort((a,b)=>(Date.parse(a.metadata?.nextEpisode)||Infinity)-(Date.parse(b.metadata?.nextEpisode)||Infinity)||a.id.localeCompare(b.id));send(req,res,'Расписание',scheduleView(rows,req.query));});
  const authLimiter=rateLimit({windowMs:15*60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false});
  async function signIn(req,res,user){const raw=token();await db.query('INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,$3,$4)',[hashToken(raw),user.id,token(),new Date(Date.now()+30*86400000)]);res.cookie('yoru_session',raw,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:30*86400000,path:'/'});res.redirect('/profile');}
+ mountInvitations(app,db,signIn);
  mountTelegram(app,db,signIn);
- app.use((req,res,next)=>{if(process.env.AUTH_MODE!=='telegram')return next();const authPath=req.path.toLowerCase().replace(/\/+$/,'')||'/';if(authPath==='/login'&&req.method==='GET')return send(req,res,'Вход через Telegram','<section class="panel auth"><h1>С возвращением</h1><p>Вход и регистрация через Telegram.</p><a class="button" href="/auth/telegram">Войти через Telegram →</a><p class="muted">Номер телефона и доступ к сообщениям не запрашиваются.</p></section>');if(['/login','/register','/forgot','/reset','/verify','/verify/resend'].includes(authPath))return res.redirect('/login');next();});
+ app.use((req,res,next)=>{if(privateSite()||process.env.AUTH_MODE!=='telegram')return next();const authPath=req.path.toLowerCase().replace(/\/+$/,'')||'/';if(authPath==='/login'&&req.method==='GET')return send(req,res,'Вход через Telegram','<section class="panel auth"><h1>С возвращением</h1><p>Вход и регистрация через Telegram.</p><a class="button" href="/auth/telegram">Войти через Telegram →</a><p class="muted">Номер телефона и доступ к сообщениям не запрашиваются.</p></section>');if(['/login','/register','/forgot','/reset','/verify','/verify/resend'].includes(authPath))return res.redirect('/login');next();});
  mountApplications(app);mountAccounts(app,db);
- app.get('/login',(req,res)=>send(req,res,'Вход',`<section class="panel auth"><h1>С возвращением</h1><form method="post" action="/login">${csrf(req)}<label>Почта<input type="email" name="email" required></label><label>Пароль<input type="password" name="password" required></label><button>Войти</button></form><p><a href="/register">Регистрация по почте</a> · <a href="/forgot">Забыли пароль?</a></p><p class="muted">Telegram-вход будет подключён после настройки бота.</p></section>`));
+ app.get('/login',(req,res)=>send(req,res,'Вход',`<section class="panel auth"><h1>С возвращением</h1><form method="post" action="/login">${csrf(req)}<label>Почта<input type="email" name="email" required></label><label>Пароль<input type="password" name="password" required></label><button>Войти</button></form><p>${privateSite()?'':'<a href="/register">Регистрация по почте</a> · '}<a href="/forgot">Забыли пароль?</a></p>${privateSite()?'<p><a href="/auth/telegram">Войти через Telegram</a></p>':'<p class="muted">Telegram-вход будет подключён после настройки бота.</p>'}</section>`));
  app.get('/register',(req,res)=>send(req,res,'Регистрация',`<section class="panel auth"><h1>Создать аккаунт</h1><form method="post" action="/register">${csrf(req)}<label>Имя<input name="name" required maxlength="60"></label><label>Почта<input name="email" type="email" required></label><label>Пароль<input name="password" type="password" minlength="10" maxlength="200" required></label><button>Зарегистрироваться</button></form></section>`));
- app.post('/register',authLimiter,async(req,res)=>{const input=z.object({name:z.string().trim().min(1).max(60),email:z.email().transform(s=>s.toLowerCase()),password:z.string().min(10).max(200)}).parse(req.body);if((await db.query('SELECT id FROM users WHERE email=$1',[input.email])).rowCount)return send(req,res,'Регистрация','<p>Не удалось создать аккаунт. Попробуй войти.</p>',400);const id=uuid();await db.query('INSERT INTO users(id,email,name,password_hash) VALUES($1,$2,$3,$4)',[id,input.email,input.name,await hashPassword(input.password)]);await signIn(req,res,{id});});
+ app.post('/register',authLimiter,async(req,res)=>{if(privateSite())return res.sendStatus(403);const input=z.object({name:z.string().trim().min(1).max(60),email:z.email().transform(s=>s.toLowerCase()),password:z.string().min(10).max(200)}).parse(req.body);if((await db.query('SELECT id FROM users WHERE email=$1',[input.email])).rowCount)return send(req,res,'Регистрация','<p>Не удалось создать аккаунт. Попробуй войти.</p>',400);const id=uuid();await db.query('INSERT INTO users(id,email,name,password_hash) VALUES($1,$2,$3,$4)',[id,input.email,input.name,await hashPassword(input.password)]);await signIn(req,res,{id});});
  app.post('/login',authLimiter,async(req,res)=>{const input=z.object({email:z.email(),password:z.string().min(1).max(200)}).parse(req.body);const user=(await db.query('SELECT * FROM users WHERE email=$1',[input.email.toLowerCase()])).rows[0];if(!user||!await verifyPassword(input.password,user.password_hash))return send(req,res,'Вход','<p>Неверная почта или пароль.</p><a href="/login">Попробовать снова</a>',401);await signIn(req,res,user);});
  app.post('/logout',async(req,res)=>{const raw=cookie(req,'yoru_session');if(raw)await db.query('DELETE FROM sessions WHERE token_hash=$1',[hashToken(raw)]);res.clearCookie('yoru_session');res.redirect('/');});
  app.get('/profile',requireUser,async(req,res)=>{send(req,res,'Профиль',profileView(req,await profileData(db,req.user.id,{friends:true})));});

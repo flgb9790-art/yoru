@@ -1,3 +1,4 @@
+import {privateSite} from './site-mode.js';
 import {restrictedAnime,restrictedAnimeIds} from './restricted-anime.js';
 import {randomBytes} from 'node:crypto';
 import {siteOrigin} from './site-origin.js';
@@ -30,6 +31,7 @@ export function seoPolicy(req){
   if(integer(q.page)>1)params.set('page',String(integer(q.page)));
  }else if(entries.length)index=false;
  const origin=siteOrigin(),url=origin?origin+path+(params.size?'?'+params:''):null;
+ if(privateSite())index=false;
  return {index,url,path,page:integer(q.page)};
 }
 
@@ -37,8 +39,8 @@ export function seoMiddleware(req,res,next){
  req.seoNonce=randomBytes(18).toString('base64');req.seoResponseStatus=()=>res.statusCode;
  const lower=(req.path||'/').toLowerCase(),match=/^\/(?:catalog|schedule|new-episodes|collections|top|apps|levels|terms|privacy|copyright)(?:\/|$)/.test(lower)||/^\/anime\/[^/]+\/?$/.test(lower);
  if(['GET','HEAD'].includes(req.method)&&match){let normalized=req.path.replace(/^\/[^/]+/,v=>v.toLowerCase()).replace(/\/+$/,'');if(normalized!==req.path)return res.redirect(301,normalized+String(req.originalUrl||'').slice(req.path.length));}
- const policy=seoPolicy(req),staticAsset=/\.(?:js|css|png|jpe?g|webp|svg|ico|woff2?)$/i.test(req.path)&&!/^\/(?:api|media|offline)(?:\/|$)/.test(req.path);if(!staticAsset)res.set('X-Robots-Tag',policy.index?'index, follow, max-image-preview:large':'noindex, follow');
- const writeHead=res.writeHead;res.writeHead=function(status,...args){if(status>=400||req.seo?.noindex||req.seo?.anime&&!publicAnime(req.seo.anime))this.setHeader('X-Robots-Tag',status>=400?'noindex, nofollow':'noindex, follow');return writeHead.call(this,status,...args);};
+ const policy=seoPolicy(req),staticAsset=/\.(?:js|css|png|jpe?g|webp|svg|ico|woff2?)$/i.test(req.path)&&!/^\/(?:api|media|offline)(?:\/|$)/.test(req.path);if(privateSite())res.set('X-Robots-Tag','noindex, nofollow, noarchive');else if(!staticAsset)res.set('X-Robots-Tag',policy.index?'index, follow, max-image-preview:large':'noindex, follow');
+ const writeHead=res.writeHead;res.writeHead=function(status,...args){if(privateSite()){this.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');if(!staticAsset)this.setHeader('Cache-Control','private, no-store');}else if(status>=400||req.seo?.noindex||req.seo?.anime&&!publicAnime(req.seo.anime))this.setHeader('X-Robots-Tag',status>=400?'noindex, nofollow':'noindex, follow');return writeHead.call(this,status,...args);};
  next();
 }
 
@@ -70,7 +72,7 @@ export function seoHead(title,req){
  if(a){heading=a.name+(a.year?' ('+a.year+')':'')+' — смотреть аниме онлайн';description=short(a.description,145)||('Описание, серии и просмотр аниме «'+a.name+'» на YORU.');description+=' '+[a.year,a.aired? a.aired+' серий':'',...(a.genres||[]).slice(0,2)].filter(Boolean).join(' · ');}
  if(p.page>1){heading+=' — страница '+p.page;description+=' Страница '+p.page+'.';}
  const fullTitle=short(heading,115)+' · YORU',image=a?.poster||custom.image||(origin?origin+'/app-icon-512.png?v=5':null),safeImage=image&&/^https:\/\//.test(image)?image:null;
- const robots=index?'index, follow, max-image-preview:large':'noindex, '+(error?'nofollow':'follow');
+ const robots=privateSite()?'noindex, nofollow, noarchive':index?'index, follow, max-image-preview:large':'noindex, '+(error?'nofollow':'follow');
  const meta=(name,value,property=false)=>`<meta ${property?'property':'name'}="${name}" content="${html(value)}" data-seo>`;
  let head=`<title>${html(fullTitle)}</title>${meta('description',short(description,210))}${meta('robots',robots)}`;
  if(p.url&&!error)head+=`<link rel="canonical" href="${html(p.url)}" data-seo>`;
@@ -95,7 +97,8 @@ export function seoHead(title,req){
 
 const sitemapPageSize=1000;
 export function mountSeo(app,db){
- app.get('/robots.txt',(req,res)=>res.type('text/plain').set('Cache-Control','public, max-age=300').send('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\nDisallow: /moderation\nDisallow: /auth/\nDisallow: /offline/\nDisallow: /offline-sw.js\nDisallow: /downloads/\n'+(siteOrigin()?'\nSitemap: '+siteOrigin()+'/sitemap.xml\n':'')));
+ app.use((req,res,next)=>{const path=req.path.toLowerCase().replace(/\/+$/,'');if(privateSite()&&(path==='/sitemap.xml'||path.startsWith('/sitemaps/')))return res.status(410).set({'X-Robots-Tag':'noindex, nofollow, noarchive','Cache-Control':'no-store'}).send('Sitemap disabled');next();});
+ app.get('/robots.txt',(req,res)=>privateSite()?res.type('text/plain').set('Cache-Control','no-store').send('User-agent: *\nAllow: /\n# Private library: authentication required, all responses noindex.\n'):res.type('text/plain').set('Cache-Control','public, max-age=300').send('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\nDisallow: /moderation\nDisallow: /auth/\nDisallow: /offline/\nDisallow: /offline-sw.js\nDisallow: /downloads/\n'+(siteOrigin()?'\nSitemap: '+siteOrigin()+'/sitemap.xml\n':'')));
  const entries=async()=>{const rows=(await db.query("SELECT id,shikimori_id,genres,country,kind,metadata->>'manual_staff_anime' AS staff_only FROM anime WHERE blocked=FALSE AND status IN ('ongoing','released') AND aired>0 ORDER BY id")).rows;return rows.filter(a=>!restrictedAnime(a)&&a.staff_only!=='true'&&!a.genres.some(staffOnlyGenre));};
  const xml=(res,body)=>res.type('application/xml').set({'Cache-Control':'public, max-age=300','X-Robots-Tag':'noindex'}).send('<?xml version="1.0" encoding="UTF-8"?>\n'+body);
  app.get('/sitemap.xml',async(req,res)=>{const origin=siteOrigin();if(!origin)return res.sendStatus(503);const rows=await entries();return xml(res,'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+['/sitemaps/pages.xml',...Array.from({length:Math.ceil(rows.length/sitemapPageSize)},(_,i)=>'/sitemaps/anime-'+(i+1)+'.xml')].map(path=>'<sitemap><loc>'+html(origin+path)+'</loc></sitemap>').join('')+'</sitemapindex>');});

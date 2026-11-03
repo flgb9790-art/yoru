@@ -8,6 +8,7 @@ const script=await readFile(new URL('../public/account-dialog.js',import.meta.ur
 // so binding a listener to [data-auth] containers reproduces the original bug.
 class Element{
  constructor(tag,attrs={},parent=null){this.tag=tag;this.attrs=attrs;this.parent=parent;this.listeners={};this.classList={add(){},remove(){}};}
+ hasAttribute(name){return Object.hasOwn(this.attrs,name);}
  matches(selector){return selector.split(',').some(part=>{const [,tag,attr]=/^([a-z]+)?(?:\[([^\]]+)\])?$/.exec(part.trim())||[];return (!tag||tag===this.tag)&&(!attr||Object.hasOwn(this.attrs,attr));});}
  closest(selector){return this.matches(selector)?this:this.parent?.closest(selector)||null;}
  click(){const event={target:this,button:0,preventDefault(){this.defaultPrevented=true;},defaultPrevented:false};for(let e=this;e;e=e.parent)for(const listener of e.listeners.click||[])listener(event);return event;}

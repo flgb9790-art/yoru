@@ -3,7 +3,7 @@ window.yoruPages.register(page=>{
  let closing=false;
  const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
  const finish=()=>{dialog.close();dialog.classList.remove('is-closing');document.documentElement.classList.remove('account-modal-open');closing=false;};
- const close=()=>{if(closing||!dialog.open)return;closing=true;if(reduced())return finish();dialog.classList.add('is-closing');page.timeout(finish,180);};
+ const close=()=>{if(dialog.hasAttribute('data-private-entry')||closing||!dialog.open)return;closing=true;if(reduced())return finish();dialog.classList.add('is-closing');page.timeout(finish,180);};
  // data-auth also stores the player's history permission on a container.
  // Bind only actionable entry controls, never containers whose child clicks bubble.
  for(const trigger of document.querySelectorAll('a[data-account-open],button[data-account-open],a[data-auth],button[data-auth]'))page.listen(trigger,'click',event=>{
