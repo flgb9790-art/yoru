@@ -1,3 +1,4 @@
+import {restrictedAnime,restrictedAnimeIds} from './restricted-anime.js';
 import {randomBytes} from 'node:crypto';
 import {siteOrigin} from './site-origin.js';
 import {staffOnlyGenre} from './anime-access.js';
@@ -8,12 +9,13 @@ const short=(value,max=180)=>{const s=seoText(value);return s.length>max?s.slice
 const integer=v=>/^\d+$/.test(String(v))&&Number.isSafeInteger(+v)&&+v>0?+v:1;
 const publicPages=new Set(['/','/catalog','/schedule','/new-episodes','/collections','/top','/apps','/levels','/terms','/privacy','/copyright']);
 const tracking=k=>/^(utm_.+|gclid|fbclid|yclid)$/.test(k);
-export const publicAnime=a=>!a.blocked&&a.status!=='anons'&&Number(a.aired)>0&&!a.metadata?.manual_staff_anime&&!a.staff_only&&!a.genres?.some(staffOnlyGenre);
+export const publicAnime=a=>!restrictedAnime(a)&&!a.blocked&&a.status!=='anons'&&Number(a.aired)>0&&!a.metadata?.manual_staff_anime&&!a.staff_only&&!a.genres?.some(staffOnlyGenre);
 
 // The same rules power headers, SSR metadata and client-side navigation.
 export function seoPolicy(req){
  const path=(req.path||'/').replace(/\/+$/,'')||'/',q=req.query||{},params=new URLSearchParams(),anime=/^\/anime\/[^/]+$/.test(path),collection=/^\/collections\/[a-z0-9-]+$/.test(path);
  let index=publicPages.has(path)||anime||collection;
+ if(restrictedAnimeIds.some(id=>path==='/anime/'+id||path.startsWith('/anime/'+id+'/')))index=false;
  const entries=Object.entries(q).filter(([k,v])=>!tracking(k)&&String(v).trim()!=='');
  if(anime){/* Playback and discussion parameters share the title's canonical URL. */}
  else if(path==='/catalog'){
@@ -94,7 +96,7 @@ export function seoHead(title,req){
 const sitemapPageSize=1000;
 export function mountSeo(app,db){
  app.get('/robots.txt',(req,res)=>res.type('text/plain').set('Cache-Control','public, max-age=300').send('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\nDisallow: /moderation\nDisallow: /auth/\nDisallow: /offline/\nDisallow: /offline-sw.js\nDisallow: /downloads/\n'+(siteOrigin()?'\nSitemap: '+siteOrigin()+'/sitemap.xml\n':'')));
- const entries=async()=>{const rows=(await db.query("SELECT id,genres,country,kind,metadata->>'manual_staff_anime' AS staff_only FROM anime WHERE blocked=FALSE AND status IN ('ongoing','released') AND aired>0 ORDER BY id")).rows;return rows.filter(a=>a.staff_only!=='true'&&!a.genres.some(staffOnlyGenre));};
+ const entries=async()=>{const rows=(await db.query("SELECT id,shikimori_id,genres,country,kind,metadata->>'manual_staff_anime' AS staff_only FROM anime WHERE blocked=FALSE AND status IN ('ongoing','released') AND aired>0 ORDER BY id")).rows;return rows.filter(a=>!restrictedAnime(a)&&a.staff_only!=='true'&&!a.genres.some(staffOnlyGenre));};
  const xml=(res,body)=>res.type('application/xml').set({'Cache-Control':'public, max-age=300','X-Robots-Tag':'noindex'}).send('<?xml version="1.0" encoding="UTF-8"?>\n'+body);
  app.get('/sitemap.xml',async(req,res)=>{const origin=siteOrigin();if(!origin)return res.sendStatus(503);const rows=await entries();return xml(res,'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+['/sitemaps/pages.xml',...Array.from({length:Math.ceil(rows.length/sitemapPageSize)},(_,i)=>'/sitemaps/anime-'+(i+1)+'.xml')].map(path=>'<sitemap><loc>'+html(origin+path)+'</loc></sitemap>').join('')+'</sitemapindex>');});
  app.get('/sitemaps/pages.xml',async(req,res)=>{const origin=siteOrigin();if(!origin)return res.sendStatus(503);return xml(res,'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+[...publicPages,...[...new Set((await entries()).flatMap(a=>[...a.genres.filter(g=>!staffOnlyGenre(g)).map(g=>'/catalog?genre='+encodeURIComponent(g)),...(a.country?['/catalog?country='+encodeURIComponent(a.country)]:[]),...(a.kind?['/catalog?kind='+encodeURIComponent(a.kind)]:[])]))].sort()].map(path=>'<url><loc>'+html(origin+path)+'</loc></url>').join('')+'</urlset>');});

@@ -1,3 +1,4 @@
+import {restrictedAnimeVisibility} from './restricted-anime.js';
 import {playerCatalogueVisibility} from './player-catalogue.js';
 import {AsyncLocalStorage} from 'node:async_hooks';
 export const staffOnlyGenre=g=>['хентай','hentai','эротика','erotica','яой','yaoi'].includes(String(g||'').normalize('NFKC').trim().toLowerCase());
@@ -13,10 +14,11 @@ export function requestAnimeAccess(pool){
    const hasAlias=next&&!/^(where|join|left|right|inner|outer|full|cross|on|order|group|limit|offset|for|union|having|as)$/i.test(next)||next?.toLowerCase()==='as';
    const alias=hasAlias?'':' AS anime';
    const isStaff=['admin','moderator'].includes(req.user?.role);
+   const restricted=!isStaff||/^\/sitemap|^\/sitemaps\//.test(req.path||'')?' AND '+restrictedAnimeVisibility:'';
    const availability=/^\/(admin|moderation)(?:\/|$)/.test(req.path||'')?'':' AND '+playerCatalogueVisibility;
    const country=!isStaff&&/^[A-Z]{2}$/.test(req.viewerCountry||'')&&!/^\/(?:sitemap\.xml|sitemaps\/[^/]+\.xml|robots\.txt)$/.test(req.path||'')?req.viewerCountry:null;
    const geography=country?" AND (shikimori_id IS NULL OR shikimori_id NOT IN (SELECT shikimori_id FROM kodik_geo WHERE '"+country+"'=ANY(blocked_countries)))":'';
-   return keyword+" (SELECT * FROM anime WHERE "+(isStaff?"TRUE":"COALESCE(metadata->>'manual_staff_anime','false')<>'true' AND NOT ('Хентай'=ANY(genres) OR 'Эротика'=ANY(genres) OR 'Hentai'=ANY(genres) OR 'Erotica'=ANY(genres) OR 'хентай'=ANY(genres) OR 'эротика'=ANY(genres) OR 'hentai'=ANY(genres) OR 'erotica'=ANY(genres) OR 'Яой'=ANY(genres) OR 'яой'=ANY(genres) OR 'Yaoi'=ANY(genres) OR 'yaoi'=ANY(genres))")+geography+availability+")"+alias;
+   return keyword+" (SELECT * FROM anime WHERE "+(isStaff?"TRUE":"COALESCE(metadata->>'manual_staff_anime','false')<>'true' AND NOT ('Хентай'=ANY(genres) OR 'Эротика'=ANY(genres) OR 'Hentai'=ANY(genres) OR 'Erotica'=ANY(genres) OR 'хентай'=ANY(genres) OR 'эротика'=ANY(genres) OR 'hentai'=ANY(genres) OR 'erotica'=ANY(genres) OR 'Яой'=ANY(genres) OR 'яой'=ANY(genres) OR 'Yaoi'=ANY(genres) OR 'yaoi'=ANY(genres))")+restricted+geography+availability+")"+alias;
   });
   return object.query(sql,...args);
  };if(key==='connect')return async()=>wrap(await object.connect());const value=object[key];return typeof value==='function'?value.bind(object):value;}});
