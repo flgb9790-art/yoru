@@ -1080,3 +1080,64 @@ Iframe обычного плеера и комнат получает only_seaso
 - Отдельная PostgreSQL, приватный режим/noindex, WORKER_ENABLED=false, без SMTP/Firebase/TG. Снимок users/anime и таблиц доступности/новых серий без сессий/переписки/истории; исходный DATABASE_URL не передан в сервис. Seed JSON только в игнорируемом upload bundle, не Git/public. Публичный TCP не создавался. Для следующего обычного деплоя выключить REDESIGN_SEED (идемпотентный импорт).
 - Ветка codex/portal-redesign. Первая итерация portal.css и быстрых переходов главной; полноценные экраны и видеоматериалы ещё не завершены. 313 тестов прошли; Chrome 320/390/768/1440: no overflow, вход/каталог/плеер на тестовом аккаунте. Оба живых сайта проверены guest/noindex. Telegram-only администратору нужен новый разрешённый callback либо отдельный email-вход; вопрос отправлен пользователю.
 
+
+## 2026-11-18 — план портала и начало второй итерации
+- Порядок: 1 главная/общая визуальная система; 2 каталог и поиск с компактными фильтрами; 3 страница тайтла и франшиза; 4 режим просмотра; 5 библиотека/профиль; 6 слайдер с проверенными медиаматериалами, таймер сна, совместный просмотр. Экономику/магазин/лишние панели не добавлять без отдельного решения. Существующие истории, роли, плееры и закрытый режим сохранять.
+- Начато локально в codex/portal-redesign: portalDiscovery выводит настоящее продолжение просмотра с provider/episode/season/resume URL и популярные тайтлы в основной колонке. Пустые секции не выводятся, устаревшая мобильная ссылка-дубль скрыта. Уточнена прозрачная подложка секций.
+- Private-site 3/3, Chrome 320/390/768/1440 без переполнения/JS-ошибок, вход и страница плеера доступны тестовому аккаунту. Без нового деплоя. Следующее: визуальная компоновка главной на реальных постерах, настройки медиаслайдера, затем каталог.
+
+
+## 2026-11-18 — боковая навигация портала
+- portalNavigation: постоянная боковая панель от 1001px, логотип/разделы/личная библиотека, активная страница aria-current, admin/mod ссылки по роли. Основное старое desktop-меню скрыто, шапка содержит поиск/быстрые действия. До 1000px сохранена исходная адаптивная навигация; privateDocument не получает sidebar.
+- portal.css согласует ширину шапки/main/footer, устраняет прежние фоновые контейнеры карточек на главной. Исправлена иконка подборок на существующую layout-grid.
+- Chrome 320/390/768/1440, обе темы, переходы вход/главная/каталог/плеер без переполнения и JS-ошибок; private-site 3/3. Изменения локально, без деплоя. Продолжение: каталог с фильтрами и страница аниме; видеоматериалы слайдера пока не настроены.
+
+
+## 2026-11-18 — переходы портала
+- Доработан существующий AJAX lifecycle: View Transitions для main (140/220мс), неизменная DOM-панель sidebar с обновлением активной ссылки, верхний индикатор загрузки, reduced-motion. Non-supporting браузеры сохраняют обычный AJAX без ViewTransitions.
+- Уникальные history keys и позиции прокрутки по записям; Back/Forward восстанавливают координаты, новая страница получает фокус main без скачка. Fragment updates сохраняют history key. Версия navigation.js поднята до v6, чтобы не смешивать старые mounts с новым HTML.
+- Chrome qa-portal-navigation.mjs: реальный клик home→catalog сохраняет window/document и тот же sidebar, Back возвращает home/scroll450. Все 4 размера и обе темы без ошибок JS/overflow; вход/плеер доступны. Без деплоя.
+
+
+## 2026-11-18 — компактный каталог портала
+- portalCatalogControls: поиск/сортировка постоянно доступны, расширенная форма в закрытой details-панели без зависимости от JS. Плашки активных условий снимают одно значение, сохраняют остальные и q/sort, сбрасывают page. Общая серверная фильтрация сохранена.
+- 5/5 targeted tests (escape/filter preservation/private gate). Chrome qa-portal-catalog.mjs: применение year и снятие через плашку по AJAX, все 4 ширины без overflow, window/sidebar сохраняются, Back восстанавливает scroll. Скриншоты backups/qa-portal-catalog-*.png. Без деплоя.
+
+
+## 2026-11-18 — страница тайтла портала
+- Верхний блок portal-anime: выделены summary/facts, постер/рейтинги/действия/метаданные, удалена из визуальной компоновки дублирующая release-sidebar. Якорная навигация к player/story/сезонам/кадрам; ссылка сезонов только при наличии частей. Плеер/формы/история не переписаны.
+- Мобильная версия — одна колонка, без узкой полосы текста рядом с постером; навигация прокручивается горизонтально. Проверены 320/390/768/1440, исправлена старая центровка. Chrome qa-portal-anime.mjs: no overflow, AJAX/Back/фильтры, 5 targeted tests passed. Нового деплоя нет.
+
+
+## 2026-11-18 — режим кинотеатра
+- portal-player.js через существующий lifecycle: переключатель обычный/кинотеатр, aria-pressed, Escape вне dialog/fullscreen, cleanup при AJAX. Меняется только класс body; тот же host/iframe/video не перемещается и не пересоздаётся. Дополнительный внешний селектор Kodik не добавлен.
+- Компоновка скрывает шапку/sidebar/подвал и информационные блоки, оставляет плеер/озвучки/статус/кнопки/сезоны. Выход доступен кнопкой, мобильный overflow отсутствует.
+- Chrome qa-portal-theater.mjs 320/390/768/1440: mode toggle/Escape, идентичность host до/после, screenshot; реальный внешний стрим не запускался, непрерывность iframe проверена по DOM. Player preferences/progress/private-site 12/12 passed. Без деплоя.
+
+
+## 2026-11-18 — библиотека и профиль
+- Библиотека: счётчики всех статусов пакетным user-scoped GROUP BY, учитывают q и не зависят от выбранного status; общий total/поиск/пагинация и сохранение прежние. Компактные вкладки/поиск/карточные инструменты. Профиль: единая геометрия обложки/identity/nav/statistics/history/settings, адаптивные отступы, публичные и личные данные не менялись.
+- 12/12 profile-social/profile-assets/library-completion/progress. Chrome qa-portal-library.mjs: 320/390/768/1440, страницы profile/library без overflow, library карточка/плашка/селектор, AJAX/Back. Приватность чужого профиля и контактов тестируется. Локально, без деплоя.
+
+- Общий прогон: 314 прошли, 1 старый detail-page regex упал из-за добавленного id якоря. Regex обновлён для атрибутов section, все 5 detail-page тестов повторно прошли (порядок/дубли/локальная доступность сезонов сохраняются). Содержательная регрессия не найдена.
+
+
+## 2026-11-18 — управляемый видеослайдер
+- Миграция 029_portal_hero: 8 слотов с anime FK, logo/video URLs, enabled. /admin/slider admin-only+CSRF, порядок/скрытие/удаление/проверка тайтла, audit по slot. Ручные настройки отдельно от импортируемой metadata; fallback popular. JOIN сохраняет request anime visibility, blocked исключён.
+- Видео только data-src, активный слайд muted loop playsinline, pause вне видимости/табвкладки и при кнопке паузы; reduced-motion/saveData без загрузки; cleanup снимает src при AJAX. Лого с alt + текстовый fallback при error; video error сохраняет poster. CSP не расширялась: self /assets /media либо *.libria.fun, прочие видеохосты отвергаются. YouTube не выдаётся за MP4. Подбор реальных видеоматериалов/логотипов не выполнен.
+- 7 targeted tests passed. Chrome qa-portal-hero.mjs: сгенерирован собственный WebM (640x360), videoWidth подтверждён, неактивный источник не загружается, mute/pause/switch/ошибкаlogo/reduced-motion/сохранениеадминформы проверены. Ширины320/390/768/1440 безoverflow. Скриншоты backups/qa-portal-hero-*.png. Локально, без деплоя.
+
+
+## 2026-11-18 — реальные источники логотипов и опенингов
+- Read-only DOM Senku: логотип Lain /assets/logos/339-en-yj9px7s3lv.png, видео edge.senku.one/at-v/SerialExperimentsLain-OP1.webm и ShadowGarden-OP1.webm. API AnimeThemes возвращает эти basename; первоисточник логотипов Senku не доказан (PNG без source metadata, Taizen Lain отличается по пикселям). Не утверждать TMDB как установленный источник Senku.
+- Найден актуальный официальный GraphQL https://rs.animethemes.moe/graphql (старый graphql.animethemes.moe403); оригинальные v.animethemes.moe WebM доступны GET Range206. Taizen keyless API даёт MAL ID→логотип Fanart.tv/TheTVDB, явные optionalnull. Скрипт scripts/collect-hero-media.mjs собрал4 подтверждённых ID/год:48316/44511/52991/37450. Логотипы локальноPNG, ссылкивидео исходные, source provenance в src/hero-media.json. Senku edge не используется.
+- portalHeroItems: ручные слоты→подтверждённые доступныеpresetID/year→popular. media CSP расширена только v.animethemes.moe; никакого общего https media или внешнего iframe. Начало ролика с5сек при duration>10сек.
+- Chrome qa-real-hero.mjs: настоящие4тайтла из снимка каталога, реальные PNGлоготипы, реальный AnimeThemes ролик декодирован1280x720 mutedplaying, widths320/390/768/1440 nooverflow. 4 targeted tests passed. Новый деплой не выполнялся; рабочий YORU не менялся.
+
+
+## 2026-11-18 — завершение редизайна и разрешённый деплой только копии
+- Пользователь попросил продолжать до завершения и задеплоить; цель — YORU-Redesign, не основной YORU. Активная ветка codex/portal-redesign, main не меняется.
+- Проверен весь снимок9328тайтлов через Taizen/AnimeThemes, src/catalog-media.json:4857logo/3768video, год/ID, безNSFW/spoiler entries. Остальные используют кадры/постер/название. Автоданные отдельно от metadata и пользовательских ручных настроек. Страница аниме использует логотип и видео по запросу; ручной слайдер дополняется данными каталога.
+- Четыре24секундные заставки без аудио подготовлены ffmpeg-static(dev-only) локально:48316/44511/52991/37450. ProfileAssets допускает4видеопресета, хранит безопасный URL резервногоизображения в существующем cover; произвольный videourl профиля не принимается. Pause/visibility/reduced-motion/saveData/lifecycle cleanup. Статичные обложки сохраняются. Локальные webm/mp4 исключены из публичных технических assets до privateGate.
+- Chrome qa-profile-video: все4реальные видеозаставки декодируются, выборvideocover черезUI, pause/mute/cleanup и widths320/390/768/1440 безoverflow. Полный npm test320/320 passed, backups/qa-portal-complete-tests.log. Настройки Railway копии проверены:PRIVATE_SITE=true WORKER_ENABLED=false REDESIGN_SEED=false AUTH_MODE=telegram. При деплое не переносить account snapshot заново, не создавать TCP/sourceDB доступ.
+

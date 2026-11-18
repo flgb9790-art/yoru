@@ -2,7 +2,7 @@ import {posix} from 'node:path';
 import {privateSite} from './site-mode.js';
 import {privateDocument} from './private-entry.js';
 const entryPaths=new Set(['/login','/logout','/auth/telegram','/auth/telegram/callback','/forgot','/reset','/verify','/verify/resend','/terms','/privacy','/copyright','/contact']);
-export function privateAsset(req){let path;try{path=posix.normalize(decodeURIComponent(req.path));}catch{return false;}return path==='/kodik.txt'||/^\/(?:[^/]+\.(?:css|js|ico|png|svg|webmanifest)|assets\/|vendor\/|\.well-known\/|offline\/(?:[^/]+\.(?:js|css|svg)))/i.test(path);}
+export function privateAsset(req){let path;try{path=posix.normalize(decodeURIComponent(req.path));}catch{return false;}if(/\.(?:webm|mp4)$/i.test(path))return false;return path==='/kodik.txt'||/^\/(?:[^/]+\.(?:css|js|ico|png|svg|webmanifest)|assets\/|vendor\/|\.well-known\/|offline\/(?:[^/]+\.(?:js|css|svg)))/i.test(path);}
 export function privateGate(req,res,next){
  if(!privateSite())return next();
  res.set({'X-Robots-Tag':'noindex, nofollow, noarchive','Cache-Control':'private, no-store'});
