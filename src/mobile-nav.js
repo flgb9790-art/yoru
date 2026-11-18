@@ -6,7 +6,7 @@ export function mobileNavigation(req,esc){
  const icon=name=>uiIcon(mobileIcons[name]||'star');
  const selected=href=>{const url=new URL(href,'http://local');return path===url.pathname&&[...url.searchParams].every(([k,v])=>String(req.query?.[k]||'')===v)||(href==='/messages'&&path.startsWith('/messages/'));};
  const link=(href,label,extra='')=>`<a href="${esc(href)}" ${selected(href)?'aria-current="page"':''} ${extra}>${label}</a>`;
- const entry=user?'data-account-open aria-haspopup="dialog" aria-controls="account-dialog"':'data-auth aria-haspopup="dialog" aria-controls="auth-dialog"';
+ const entry=user?'':'data-auth aria-haspopup="dialog" aria-controls="auth-dialog"';
  const avatar=user?.avatar?`<img class="mobile-nav-avatar" src="${esc(user.avatar)}" alt="" width="24" height="24">`:icon('profile');
  const item=(href,label,name,extra='')=>link(href,`${icon(name)}<span>${label}</span>`,extra);
  const downloads=link('/offline/library',`${icon('download')}<span><strong>Загрузки</strong><small>Серии без интернета · на устройстве</small></span>${uiIcon('chevron-right',{size:14})}`,'class="mobile-downloads-link" data-no-ajax');

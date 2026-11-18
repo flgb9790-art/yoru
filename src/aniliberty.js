@@ -27,7 +27,7 @@ export function normalizeRelease(raw,shikimoriId){
   const number=Number(item.ordinal);if(!Number.isInteger(number)||number<1||number>100000)return [];
   const streams={};for(const quality of ['480','720','1080'])if(item['hls_'+quality])streams[quality]=validateStream(item['hls_'+quality]);
   if(!Object.keys(streams).length)return [];
-  return [{number,season:1,name:String(item.name||'').slice(0,250),duration:Number(item.duration)||0,streams,skips:{opening:normalizeSkip(item.opening,Number(item.duration)||0),ending:normalizeSkip(item.ending,Number(item.duration)||0)}}];
+  const preview=item.preview?.optimized?.thumbnail||item.preview?.thumbnail||item.preview?.src||'',thumbnail=typeof preview==='string'&&/^https:\/\//.test(preview)?preview:'';return [{number,season:1,thumbnail,name:String(item.name||'').slice(0,250),duration:Number(item.duration)||0,streams,skips:{opening:normalizeSkip(item.opening,Number(item.duration)||0),ending:normalizeSkip(item.ending,Number(item.duration)||0)}}];
  }).sort((a,b)=>a.number-b.number);
  return {skip_version:1,available:episodes.length>0,restricted:false,release_id:raw.id,episodes};
 }

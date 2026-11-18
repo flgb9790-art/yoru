@@ -1,3 +1,4 @@
+import {resumeCard} from './resume-card.js';
 import {rewardInbox} from './rewards.js';
 import {notificationCard} from './views.js';
 import {socialPreview} from './social-store.js';
@@ -18,11 +19,10 @@ export async function notifyEpisodes(client,anime,releaseId,items,{newEdition=fa
  }
 }
 export async function continueWatching(db,userId,{all=false}={}){
- const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 ${all?'':'AND (position_seconds>0 OR manual_mark=FALSE)'} GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
+ const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.duration_seconds AS resume_duration,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 ${all?'':'AND (position_seconds>0 OR manual_mark=FALSE)'} GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
  const seen=new Set();return rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return all||!a.completed&&a.resume_position>0;});
 }
-export function resumeLink(a){const params=new URLSearchParams({source:a.resume_provider||'kodik',episode:a.resume_episode,season:a.resume_season,resume:'1'});if(a.resume_provider==='aniliberty'&&a.resume_release)params.set('release',a.resume_release);return '/anime/'+a.id+'?'+params+'#player';}
-export function resumeCard(a){const label=`${a.resume_season>1?a.resume_season+' сезон · ':''}${a.resume_episode} серия · ${Math.floor(a.resume_position/60)}:${String(a.resume_position%60).padStart(2,'0')}`;return `<div class="resume-card">${card(a,false,{href:resumeLink(a),episodeLabel:label})}</div>`;}
+export {resumeLink,resumeCard} from './resume-card.js';
 export function mountFollows(app,db){
  app.get('/continue',requireUser,async(req,res)=>{const page=Math.max(1,Math.min(100000,parseInt(req.query.page,10)||1)),rows=await continueWatching(db,req.user.id,{all:req.query.all==='1'});res.send(layout('Продолжить просмотр',`<div class="panel page-controls browse-heading"><h1>Продолжить просмотр</h1><div class="continue-tabs"><a href="/continue">Не досмотрено</a><a href="/continue?all=1">Все просмотренные</a></div></div><div class="grid resume-grid">${rows.slice((page-1)*24,page*24).map(a=>resumeCard(a)).join('')||(req.query.all==='1'?'<p class="muted">История просмотра пока пуста.</p>':'<p class="muted">Пока нет незавершённых серий.</p>')}</div>${pagination(page,rows.length,24,n=>'/continue?page='+n+(req.query.all==='1'?'&all=1':''))}`,req));});
 
