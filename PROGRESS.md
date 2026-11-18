@@ -1141,3 +1141,9 @@ Iframe обычного плеера и комнат получает only_seaso
 - Четыре24секундные заставки без аудио подготовлены ffmpeg-static(dev-only) локально:48316/44511/52991/37450. ProfileAssets допускает4видеопресета, хранит безопасный URL резервногоизображения в существующем cover; произвольный videourl профиля не принимается. Pause/visibility/reduced-motion/saveData/lifecycle cleanup. Статичные обложки сохраняются. Локальные webm/mp4 исключены из публичных технических assets до privateGate.
 - Chrome qa-profile-video: все4реальные видеозаставки декодируются, выборvideocover черезUI, pause/mute/cleanup и widths320/390/768/1440 безoverflow. Полный npm test320/320 passed, backups/qa-portal-complete-tests.log. Настройки Railway копии проверены:PRIVATE_SITE=true WORKER_ENABLED=false REDESIGN_SEED=false AUTH_MODE=telegram. При деплое не переносить account snapshot заново, не создавать TCP/sourceDB доступ.
 
+
+## 2026-11-18 — редизайн опубликован в отдельной копии
+- GitHub codex/portal-redesign commit73dd150. Railway YORU-Redesign web deployment a8f004d9-dfe1-4a9e-9695-469f08f52287 SUCCESS; URL https://web-production-4dc00efb.up.railway.app. Миграция029 применена штатным стартом, сервер YORU is listening. База/аккаунты не пересоздавались, REDESIGN_SEED=false, workerfalse/private/Telegramсохранены.
+- Livecheck:root200privateentry;catalog/anime/API/media/download/admin401;register403;sitemaps410;noindexнаответах. portal/profilevideo/catalogmedia/previewjs/logos/covers200noindex;все4previewwebm401гостю;OAuth302сновымcallback. Основной YORU жив, его последнийdeployment65e8a966-da59-4901-bab4-d569a9d27c49 SUCCESS не менялся.
+- Дополнительные локальные Chromeпроверки:320/390/768/1001/1024/1280/1440, обе темы; library/profile/catalog/anime, AJAX/Back, cinema. Полныйнабор320/320 прошёл до деплоя. Материалы 9328checked/4857logo/3768video, fallbackкадры/постер/текст. Видеопрофиль выбирается кнопкой «Обложка», 4варианта с пометкой видео.
+
