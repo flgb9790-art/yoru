@@ -10,4 +10,6 @@ test('Kodik uses the public embed configuration and honours provider permission'
 test('player addresses cannot point to an unrelated site or unsupported endpoint',()=>{
  for(const url of ['https://evil.example/serial/1/abcdef/720p','https://kodikplayer.com.evil.example/serial/1/abcdef/720p','http://kodikplayer.com/serial/1/abcdef/720p','https://kodikplayer.com/admin','https://user:pass@kodikplayer.com/serial/1/abcdef/720p'])assert.throws(()=>validatePlayerUrl(url));
  assert.equal(validatePlayerUrl('//kodikplayer.com/video/1/abcdef/720p'),'https://kodikplayer.com/video/1/abcdef/720p');
+ for(const quality of [1080,1440,2160])assert.equal(validatePlayerUrl(`//kodikplayer.com/video/1/abcdef/${quality}p`),`https://kodikplayer.com/video/1/abcdef/${quality}p`);
+ assert.throws(()=>validatePlayerUrl('//kodikplayer.com/video/1/abcdef/9999p'));
 });
