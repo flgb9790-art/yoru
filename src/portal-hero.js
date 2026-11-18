@@ -10,10 +10,10 @@ export function heroAsset(value,{video=false}={}){
 export async function portalHeroItems(db,fallback){
  const rows=(await db.query('SELECT a.*,h.logo_url AS hero_logo,h.video_url AS hero_video FROM portal_hero h JOIN anime a ON a.id=h.anime_id WHERE h.enabled=TRUE AND a.blocked=FALSE ORDER BY h.slot')).rows;
  const enrich=rows=>rows.map(row=>{const found=catalogMediaFor(row);return found.logo||found.video?{...row,hero_logo:row.hero_logo||found.logo,hero_video:row.hero_video||found.video}:row;});
- if(rows.length)return enrich(rows);
+
  const presets=(await db.query('SELECT * FROM anime WHERE blocked=FALSE AND shikimori_id IN ('+media.map((_,i)=>'$'+(i+1)).join(',')+')',media.map(item=>item.shikimori_id))).rows;
  const featured=media.flatMap(item=>{const anime=presets.find(a=>Number(a.shikimori_id)===item.shikimori_id&&Number(a.year)===item.year);return anime?[{...anime,hero_logo:item.logo,hero_video:item.video}]:[];});
- return featured.length?featured:enrich(fallback);
+ const disabled=new Set((await db.query('SELECT anime_id FROM portal_hero WHERE enabled=FALSE')).rows.map(r=>r.anime_id)),seen=new Set();return [...enrich(rows),...featured,...enrich(fallback)].filter(a=>{if(seen.has(a.id)||disabled.has(a.id))return false;seen.add(a.id);return true;}).slice(0,8);
 }
 export function mountPortalHero(app,db){
  app.get('/admin/slider',requireAdmin,async(req,res)=>{const rows=(await db.query('SELECT h.*,a.name,a.shikimori_id FROM portal_hero h JOIN anime a ON a.id=h.anime_id ORDER BY h.slot')).rows;

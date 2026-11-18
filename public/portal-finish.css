@@ -1,0 +1,160 @@
+/* Final portal surfaces override the legacy stylesheet cascade. */
+html[data-theme] body[data-skin=portal]{min-height:100dvh;display:flex;flex-direction:column}
+html[data-theme] body[data-skin=portal]>main{flex:1}
+html[data-theme] body[data-skin=portal]>footer{margin-top:auto;background:var(--theme-bg)!important;border-color:var(--theme-border)!important;color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] a{text-decoration:none!important}
+html[data-theme] body[data-skin=portal] :is(button,.button,.pagination a,.top-tabs a,.top-view-switch a,.library-tabs a,.activity-nav a,.admin-nav a){border-radius:999px!important;transition:transform .26s cubic-bezier(.2,.8,.2,1),background-color .2s,color .2s,box-shadow .2s!important}
+html[data-theme] body[data-skin=portal] :is(button,.button):hover:not(:disabled){transform:translateY(-2px)!important;box-shadow:0 5px 18px #0002!important}
+html[data-theme] body[data-skin=portal] :is(button,.button):active:not(:disabled){transform:translateY(0) scale(.97)!important}
+html[data-theme] body[data-skin=portal] :is(a,button,input,select,textarea,summary):focus-visible{outline:2px solid #92988d!important;outline-offset:3px;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] :is(input,textarea):focus{outline:none!important;border-color:#92988d80!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] :is(.admin-nav,.activity-nav,.library-tabs,.top-tabs,.top-view-switch){background:transparent!important;border:0!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] :is(.admin-nav,.activity-nav,.library-tabs,.top-tabs,.top-view-switch,.pagination) a{background:var(--theme-panel)!important;border:1px solid var(--theme-border)!important;color:var(--theme-muted)!important;padding:10px 16px}
+html[data-theme] body[data-skin=portal] :is(.admin-nav,.activity-nav,.library-tabs,.top-tabs,.top-view-switch,.pagination) a:is([aria-current],.selected){background:var(--control-soft)!important;color:var(--portal-accent)!important;border-color:var(--control-border)!important}
+html[data-theme] body[data-skin=portal] :is(.admin-row,.history-row,.top-list li){border-color:var(--theme-border)!important}
+html[data-theme] body[data-skin=portal] :is(.admin-row,.history-row,.top-anime,footer) a{color:var(--theme-text)!important}
+html[data-theme] body[data-skin=portal] :is(.admin-row,.history-row,.top-anime,footer) a:hover{color:var(--portal-accent)!important}
+html[data-theme] body[data-skin=portal] :is(.eyebrow,.top-rank,.top-card-place){color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] :is(.catalog-results strong,.history-row .badge,.history-row .tag){background:var(--control-soft)!important;color:var(--portal-accent)!important}
+html[data-theme] body[data-skin=portal] :is(.notifications-drawer,.notifications-drawer .drawer-body,.notification,.notification-card,.drawer-toolbar,.drawer-heading){background:var(--theme-panel)!important;color:var(--theme-text)!important;border-color:var(--theme-border)!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .notifications-drawer{border-radius:26px!important;padding:22px!important}
+html[data-theme] body[data-skin=portal] .notifications-drawer :is(p,small,time){color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] .notifications-drawer .drawer-all{background:var(--control-soft)!important;color:var(--portal-accent)!important}
+html[data-theme] body[data-skin=portal] :is(.comment-editor-toolbar,.comment-editor-tabs,.comment-editor,.comment-preview){background:var(--theme-bg)!important;border-color:var(--theme-border)!important;color:var(--theme-text)!important}
+html[data-theme] body[data-skin=portal] .comment-editor-toolbar{padding:8px;gap:5px}
+html[data-theme] body[data-skin=portal] .comment-editor-toolbar button{background:var(--theme-panel)!important;color:var(--theme-text)!important;border:0!important;min-width:32px;min-height:32px}
+html[data-theme] body[data-skin=portal] .discussion{padding:24px 0!important}
+html[data-theme] body[data-skin=portal] .comment-composer{margin:0!important}
+html[data-theme] body[data-skin=portal] .anime-frame{border:1px solid var(--theme-border)!important;background:transparent!important;box-shadow:none!important;border-radius:16px!important;padding:0!important;overflow:hidden}
+html[data-theme] body[data-skin=portal] .anime-frame:hover{border-color:var(--theme-border)!important}
+html[data-theme] body[data-skin=portal] .anime-card :is(.card-watched,.card-resume){transition:opacity .2s,visibility .2s!important}
+@media(hover:hover){html[data-theme] body[data-skin=portal] .anime-card:is(:hover,:focus-within) :is(.card-watched,.card-resume){opacity:0!important;visibility:hidden!important;top:auto!important;bottom:10px!important}}
+html[data-theme] body[data-skin=portal] .resume-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))!important;gap:20px!important;padding:0!important;background:none!important;border:0!important;overflow:visible!important}
+html[data-theme] body[data-skin=portal] .resume-grid>.portal-resume{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important}
+/* Mouse-draggable shelves keep their scrollbar out of the presentation. */
+.portal-shelf{min-width:0;margin:38px 16px}.portal-shelf-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.portal-shelf-heading h2{margin:0 0 6px}.portal-shelf-heading p{margin:0;color:var(--theme-muted);font-size:12px}.shelf-actions{display:flex;align-items:center;gap:8px;flex:none}.shelf-actions button,.shelf-all{display:grid!important;place-items:center;width:36px;height:36px;min-height:36px!important;padding:0!important;border:1px solid var(--theme-border)!important;background:var(--theme-panel)!important;color:var(--theme-text)!important;border-radius:50%!important;margin:0!important}.shelf-all img{width:18px;height:18px}html[data-theme=dark] .shelf-all img{filter:invert(1)}
+html[data-theme] body[data-skin=portal] .portal-shelf-track{display:flex!important;gap:18px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x pan-y;padding:0 0 8px;cursor:grab;overscroll-behavior-x:contain}.portal-shelf-track::-webkit-scrollbar{display:none}.portal-shelf-track.is-dragging{cursor:grabbing;user-select:none}.portal-shelf-track>*{flex:0 0 175px;min-width:0}.portal-shelf-track.portal-shelf-resume>*{flex-basis:310px}.portal-shelf-track img{-webkit-user-drag:none}
+/* Player controls form one row; the actual picture aligns with the episode rail. */
+html[data-theme] body[data-skin=portal] .portal-anime #player{display:block!important;padding:18px 0!important;max-width:none!important}
+html[data-theme] body[data-skin=portal] #player .player-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 16px}
+html[data-theme] body[data-skin=portal] #player :is(.player-toolbar,.player-translation){width:auto!important;margin:0!important;flex:none}
+html[data-theme] body[data-skin=portal] #player .player-caption{flex:1 0 100%;margin:0;padding:0;font-size:11px}
+html[data-theme] body[data-skin=portal] #player .player-stage{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:20px;align-items:start}
+html[data-theme] body[data-skin=portal] #player .player-stage.is-single{grid-template-columns:minmax(0,1fr)}
+html[data-theme] body[data-skin=portal] #player .player-screen{min-width:0}
+html[data-theme] body[data-skin=portal] #player .player.kodik-shell{width:100%!important;aspect-ratio:16/9!important;min-height:0!important;height:auto!important;padding:0!important;margin:0!important}
+html[data-theme] body[data-skin=portal] #player .player-stage>.watch-episode-list{display:block!important;position:relative!important;top:0!important;grid-column:auto!important;grid-row:auto!important;max-height:min(650px,65vw);margin:0!important;padding:18px 10px!important;border-radius:22px;background:var(--theme-panel);overflow:auto;scrollbar-width:thin;min-width:0}
+html[data-theme] body[data-skin=portal] #player .player-stage.is-single>.watch-episode-list{display:none!important}
+html[data-theme] body[data-skin=portal] #player .player-bottom-actions{display:flex;justify-content:space-between;gap:12px;margin:0!important;padding:12px 0 0!important}
+html[data-theme] body[data-skin=portal] #player .watch-episode{border-radius:16px!important;justify-content:flex-start!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal].portal-theater{overflow:hidden!important}
+html[data-theme] body[data-skin=portal].portal-theater .portal-anime #player{position:fixed!important;inset:0!important;z-index:200!important;background:#090a0a!important;width:100vw!important;height:100dvh!important;box-sizing:border-box!important;padding:16px 24px!important;display:flex!important;flex-direction:column!important;gap:8px!important;margin:0!important;overflow:auto!important;border-radius:0!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-heading{margin:0!important;flex:none;color:#f4f3ee}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-controls{flex:none;margin:0!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-stage{display:flex!important;flex:1;min-height:0;align-items:center!important;justify-content:center!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-stage>.watch-episode-list{display:none!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-screen{width:min(100%,calc((100dvh - 180px)*16/9));margin:auto}
+html[data-theme] body[data-skin=portal].portal-theater #player :is(.player-bottom-actions,.franchise-order){display:none!important}
+/* Poster-backed season links. */
+html[data-theme] body[data-skin=portal] .franchise-order{background:none!important;border:0!important;padding:24px 0!important}
+html[data-theme] body[data-skin=portal] .franchise-cards{display:flex!important;gap:14px;overflow:auto;list-style:none!important;padding:0!important;scrollbar-width:none}
+html[data-theme] body[data-skin=portal] .franchise-cards li{flex:0 0 220px;display:block!important;padding:0!important;border:0!important;background:var(--theme-panel)!important;border-radius:18px;overflow:hidden}
+html[data-theme] body[data-skin=portal] .franchise-cards li.current{box-shadow:inset 0 0 0 1px var(--control-border)}
+.franchise-cards a{display:flex;align-items:center;gap:12px;padding:12px;color:var(--theme-text)!important}.franchise-cards a>img,.franchise-placeholder{width:58px;height:82px;object-fit:cover;border-radius:10px;flex:none}.franchise-cards strong{font-size:12px;line-height:1.5;display:block}.franchise-cards small{display:block;color:var(--theme-muted);font-size:10px;margin-top:7px}
+/* The hero swaps overlapping scenes, rather than replacing a whole block. */
+html[data-theme] body[data-skin=portal] .audience-hero .audience-stage{position:relative;height:100%}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-slide{position:absolute!important;inset:0;isolation:isolate;z-index:0;min-height:0!important}
+html[data-theme] body[data-skin=portal] .audience-hero:after{display:none!important}
+.audience-slide:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#101313 0%,#10131333 70%),linear-gradient(90deg,#101313bb,transparent 85%);pointer-events:none}
+.audience-slide.is-entering{animation:hero-enter .55s ease both;z-index:1!important}.audience-slide.is-leaving{animation:hero-leave .55s ease both;pointer-events:none}
+@keyframes hero-enter{from{opacity:0;transform:scale(1.015)}to{opacity:1;transform:scale(1)}}@keyframes hero-leave{from{opacity:1}to{opacity:0}}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-title-logo{display:block;width:auto!important;height:auto!important;max-width:min(420px,70vw)!important;max-height:125px!important;object-fit:contain;object-position:left center;margin:0 0 14px}
+html[data-theme] body[data-skin=portal] .audience-hero h3:has(.audience-title-logo:not([hidden])) [data-hero-title]{display:block!important;font-size:14px!important;font-weight:400!important;letter-spacing:.2px;line-height:1.5}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-controls{display:flex;gap:8px}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-controls button{border-radius:50%!important;width:40px!important;height:40px!important;min-height:40px!important;padding:0!important}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-timeline{width:min(320px,45%);right:142px;left:auto;bottom:38px;z-index:5;gap:6px}
+html[data-theme] body[data-skin=portal] .audience-timeline progress::-webkit-progress-value{background:#fff!important}
+/* Compact calendar rows and image-led collections. */
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date{min-height:78px!important;padding:12px 14px!important;border-radius:18px!important}
+html[data-theme] body[data-skin=portal] .schedule-date-main strong{font-size:24px!important}.schedule-date-main .schedule-date-all{font-size:14px!important}
+html[data-theme] body[data-skin=portal] .schedule-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))!important;background:none!important;padding:0!important;border:0!important;gap:14px!important}
+.schedule-entry{display:flex;gap:15px;align-items:center;min-width:0;padding:15px;border:1px solid var(--theme-border);border-radius:20px;background:var(--theme-panel)}.schedule-entry>a{flex:none}.schedule-entry img{width:66px;height:94px;object-fit:cover;border-radius:12px}.schedule-entry-copy{min-width:0;flex:1}.schedule-entry h2{font-size:13px;line-height:1.5;margin:0 0 7px}.schedule-entry h2 a{color:var(--theme-text)!important}.schedule-entry p{margin:0;color:var(--theme-muted);font-size:11px}.schedule-entry .schedule-time{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:10px}.schedule-entry time{font-size:14px;font-weight:800;color:var(--portal-accent)}
+html[data-theme] body[data-skin=portal] .collections-grid{gap:20px}.collection-card{overflow:hidden;position:relative;border-radius:24px!important;background:var(--theme-panel)!important;border:1px solid var(--theme-border)!important;transition:transform .3s!important}.collection-card:hover{transform:translateY(-4px)}
+@media(min-width:1001px){
+ html[data-theme] body[data-skin=portal]>header{height:96px;min-height:96px;padding-top:22px;padding-bottom:12px}
+ html[data-theme] body[data-skin=portal]>header>.search{transition:opacity .18s,flex-basis .35s cubic-bezier(.2,.8,.2,1),max-width .35s cubic-bezier(.2,.8,.2,1)!important;transform:none!important}
+ html[data-theme] body[data-skin=portal]>header>.search:focus-within{flex-basis:540px;max-width:540px}
+ html[data-theme] body[data-skin=portal] .portal-brand-row{position:relative;flex-direction:row!important;height:52px;min-height:52px;gap:0!important;margin-bottom:20px}
+ html[data-theme] body[data-skin=portal] .portal-brand{padding:0;margin:0!important;gap:10px;overflow:hidden;flex:1;min-width:0}
+ html[data-theme] body[data-skin=portal] [data-rail-toggle]{position:absolute;right:-27px;top:12px;background:var(--theme-panel)!important;color:var(--theme-muted)!important;border:1px solid var(--theme-border)!important;z-index:2}
+ html[data-theme] body[data-skin=portal] [data-rail-toggle]:is(:hover,:focus){background:var(--control-soft)!important;color:var(--portal-accent)!important}
+ html[data-theme] body[data-skin=portal] .portal-nav-group>p{display:block!important;height:15px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
+ html[data-theme] body[data-skin=portal] :is(.portal-brand>span,.portal-nav-group a>span,.portal-foot-link>span:not(.unread-dot)){display:block!important;white-space:nowrap;opacity:1;transition:opacity .16s}
+ html[data-theme] body[data-skin=portal] :is(.portal-nav-group a,.portal-foot-link){justify-content:flex-start!important;padding:0 14px!important;position:relative;transform:none!important}
+ html[data-theme] body[data-skin=portal] .portal-foot-link>.unread-dot{display:block!important;position:absolute!important;width:5px!important;height:5px!important;right:13px!important;top:50%!important;bottom:auto!important;left:auto!important;margin:0!important;transform:translateY(-50%)!important;border:0!important;border-radius:50%;background:#f1cb54!important}
+ html.portal-rail-collapsed[data-theme] body[data-skin=portal] :is(.portal-brand>span,.portal-nav-group>p,.portal-nav-group a>span,.portal-foot-link>span:not(.unread-dot)){opacity:0!important;pointer-events:none}
+ html[data-theme] body[data-skin=portal] .portal-profile-menu>summary{height:52px;box-sizing:border-box;display:flex!important;justify-content:flex-start!important;padding:10px!important;overflow:hidden}
+ html[data-theme] body[data-skin=portal] .portal-profile-menu>summary>:first-child{flex:0 0 32px!important;width:32px!important;height:32px!important;max-width:none!important;border-radius:50%}
+ html[data-theme] body[data-skin=portal] .portal-profile-menu>summary>:not(:first-child){display:block!important;white-space:nowrap;transition:opacity .16s}
+ html.portal-rail-collapsed[data-theme] body[data-skin=portal] .portal-profile-menu>summary>:not(:first-child){opacity:0!important;pointer-events:none}
+ html[data-theme] body[data-skin=portal] .portal-sidebar{overflow:visible!important}
+}
+html[data-theme] body[data-skin=portal] .search-results{background:var(--theme-panel)!important;border:1px solid var(--theme-border)!important;color:var(--theme-text)!important;border-radius:24px!important;box-shadow:0 20px 70px #0005!important;animation:search-surface .22s ease}
+html[data-theme] body[data-skin=portal] .search-results a{background:none!important;border:0!important;color:var(--theme-text)!important;border-radius:14px!important;padding:10px!important}
+html[data-theme] body[data-skin=portal] .search-results a:is(:hover,[aria-selected=true]){background:var(--control-soft)!important}
+html[data-theme] body[data-skin=portal] .search-results :is(small,p){color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] header .search input:focus{outline:none!important;border-color:#ffffff26!important;box-shadow:none!important}
+@keyframes search-surface{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@media(max-width:760px){html[data-theme] body[data-skin=portal] #player .player-stage{grid-template-columns:minmax(0,1fr)!important;width:100%}html[data-theme] body[data-skin=portal] #player .player-stage>.watch-episode-list{max-height:300px!important;width:auto!important}.portal-shelf{margin:28px 0}.portal-shelf-track>*{flex-basis:150px}.portal-shelf-track.portal-shelf-resume>*{flex-basis:280px}.shelf-actions button{display:none!important}.portal-shelf-heading h2{font-size:19px}.portal-shelf-heading p{font-size:11px}html[data-theme] body[data-skin=portal] .audience-hero .audience-timeline{width:45%;right:118px;bottom:26px}html[data-theme] body[data-skin=portal] .audience-hero .audience-title-logo{max-height:88px!important;max-width:65vw!important}html[data-theme] body[data-skin=portal].portal-theater .portal-anime #player{padding:12px!important}html[data-theme] body[data-skin=portal].portal-theater #player .player-screen{width:100%}}
+@media(prefers-reduced-motion:reduce){html[data-theme] body[data-skin=portal] *,html[data-theme] body[data-skin=portal] *:after{animation:none!important;transition:none!important}}
+html[data-theme] body[data-skin=portal]>main{min-width:0;box-sizing:border-box}
+@media(max-width:1000px){html[data-theme] body[data-skin=portal]>main{width:100%;max-width:100%}}
+html[data-theme] body[data-skin=portal] .collection-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:20px}
+html[data-theme] body[data-skin=portal] .collection-card{padding:0 0 20px!important;background:var(--theme-panel)!important;box-shadow:none!important;color:var(--theme-text)!important}
+html[data-theme] body[data-skin=portal] .collection-card h2{margin:18px 20px 8px;font-size:19px}
+html[data-theme] body[data-skin=portal] .collection-card p{margin:0 20px;color:var(--theme-muted)!important;font-size:12px}
+html[data-theme] body[data-skin=portal] .collection-art{height:190px!important;border-radius:0!important;display:flex;gap:5px;padding:0!important;background:#242724!important;position:relative;overflow:hidden}
+html[data-theme] body[data-skin=portal] .collection-art img{width:34%;height:100%;object-fit:cover;transform:rotate(-7deg) scale(1.13);transition:transform .4s}
+html[data-theme] body[data-skin=portal] .collection-card:hover .collection-art img{transform:rotate(-3deg) scale(1.2)}
+html[data-theme] body[data-skin=portal] .collection-count{position:absolute;bottom:12px;left:14px;right:auto;top:auto;background:#151a18dd!important;color:#f4f3ee!important;padding:5px 10px;border-radius:999px;font-size:10px;backdrop-filter:blur(8px)}
+html[data-theme] body[data-skin=portal] .audience-hero :is(.audience-meta,.audience-meta>span,.audience-more){color:#eee!important}
+html[data-theme] body[data-skin=portal] .audience-hero .audience-meta .icon{color:#f1cb54!important}
+html[data-theme] body[data-skin=portal] :is(.audience-watch,.audience-more){transition:transform .25s,background .2s!important}
+html[data-theme] body[data-skin=portal] :is(.audience-watch,.audience-more):hover{transform:translateY(-3px)!important}
+html[data-theme] body[data-skin=portal] footer :is(a,p){color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] footer .brand-wordmark{color:var(--portal-accent)!important}
+html[data-theme] body[data-skin=portal] .top-list{padding:12px 20px!important}
+html[data-theme] body[data-skin=portal] .top-list li{padding:14px 0!important;border-color:var(--theme-border)!important}
+html[data-theme] body[data-skin=portal] .top-list li:hover{background:var(--control-soft)!important;border-radius:16px}
+html[data-theme] body[data-skin=portal] .top-score strong{color:var(--theme-text)!important}
+html[data-theme] body[data-skin=portal] .top-score .icon{color:var(--portal-accent)!important}
+html[data-theme] body[data-skin=portal] main button.anime-frame,html[data-theme] body[data-skin=portal] main button.anime-frame:is(:hover,:focus-visible,:active){border-radius:16px!important;border:1px solid var(--theme-border)!important;background:transparent!important;box-shadow:none!important;transform:none!important}
+html[data-theme] body[data-skin=portal] main button.anime-frame img{border-radius:15px!important}
+html[data-theme] body[data-skin=portal] main section#discussion.discussion{background:none!important;border:0!important;box-shadow:none!important;padding:24px 0!important}
+html[data-theme] body[data-skin=portal] #player .player-translation>p{white-space:nowrap;min-width:auto!important}
+html[data-theme] body[data-skin=portal] .watch-actions .detail-library select{border-radius:999px!important;margin-right:6px!important}
+html[data-theme] body[data-skin=portal] .watch-actions .detail-library button{border-radius:50%!important}
+html[data-theme] body[data-skin=portal]{--ink:var(--theme-text);--muted:var(--theme-muted);--surface:var(--theme-panel);--line:var(--theme-border);--theme-accent:var(--portal-accent)}
+html[data-theme] body[data-skin=portal] :is(h1,h2,h3,label){color:var(--theme-text)}
+html[data-theme] body[data-skin=portal] .muted{color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] .catalog-results{border-color:var(--theme-border)!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date{height:84px!important;min-height:84px!important;gap:8px!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main .schedule-date-all{font-size:14px!important;white-space:nowrap}
+html[data-theme] body[data-skin=portal] .schedule-week-nav a{border:1px solid var(--theme-border)!important;border-radius:999px!important;background:var(--theme-panel)!important;color:var(--theme-muted)!important;padding:9px 14px}
+html[data-theme] body[data-skin=portal] dialog::backdrop{background:#05080799!important;backdrop-filter:blur(5px)}
+html[data-theme] body[data-skin=portal] .schedule-entry .schedule-time{background:none!important;border:0!important;padding:0!important}
+html[data-theme] body[data-skin=portal] input::placeholder,html[data-theme] body[data-skin=portal] textarea::placeholder{color:var(--theme-muted)!important;opacity:.8}
+html[data-theme] body[data-skin=portal] .schedule-entry .schedule-time span{color:var(--theme-muted)!important}
+html[data-theme] body[data-skin=portal] .schedule-entry .schedule-time time{color:var(--portal-accent)!important}
+@media(max-width:760px){html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main .schedule-date-all{white-space:normal!important;font-size:12px!important}}
+@media(max-width:760px){html[data-theme] body[data-skin=portal] #player .player-controls{width:100%;min-width:0;box-sizing:border-box}html[data-theme] body[data-skin=portal] #player .player-translation{width:100%!important;min-width:0;flex:1 1 100%!important}html[data-theme] body[data-skin=portal] #player .translation-mobile{flex:1;width:0!important;min-width:0!important;max-width:100%!important}html[data-theme] body[data-skin=portal] #player .player-toolbar{max-width:100%;min-width:0}}
+html[data-theme] body[data-skin=portal] .franchise-cards li:before{content:none!important;display:none!important}
+html[data-theme] body[data-skin=portal] .search-results{animation:surface-in .22s ease}
+html[data-theme] body[data-skin=portal] header .search-results{animation:search-surface .22s ease}
+@media(max-width:650px){html[data-theme] body[data-skin=portal] .detail-identity .anime-heading{display:block!important;position:relative;min-width:0}html[data-theme] body[data-skin=portal] .detail-identity .anime-heading h1{min-width:0;overflow-wrap:anywhere}html[data-theme] body[data-skin=portal] .detail-identity .anime-heading-actions{position:absolute;right:0;top:-42px}}
+html[data-theme] body[data-skin=portal] .franchise-cards li.current-part{box-shadow:inset 0 0 0 1px var(--control-border)}
+html[data-theme] body[data-skin=portal] .franchise-cards li.current-part a:after{content:none!important}
+html[data-theme] body[data-skin=portal].portal-theater .portal-anime #player{align-items:stretch!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-stage{width:100%!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-heading{width:100%!important;justify-content:space-between!important}
+html[data-theme] body[data-skin=portal].portal-theater #player .player-screen{flex:1 1 auto;max-width:calc((100dvh - 180px)*16/9)}

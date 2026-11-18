@@ -1,6 +1,5 @@
-import {card,esc} from './views.js';
+import {card} from './views.js';
 import {resumeCard} from './resume-card.js';
-export function portalDiscovery(popular,continuing){
- const section=(title,note,href,items)=>`<section class="portal-shelf"><div class="portal-shelf-heading"><div><h2>${title}</h2><p>${note}</p></div><a href="${href}">Смотреть всё →</a></div><div class="grid home-grid${href==='/continue'?' portal-resume-grid':''}">${items}</div></section>`;
- return `${continuing.length?section('Продолжить просмотр','Твои истории ждут тебя','/continue',continuing.slice(0,6).map(resumeCard).join('')):''}${popular.length?section('Стоит посмотреть','Истории с высокой популярностью в каталоге','/catalog?sort=popular',popular.slice(0,12).map(a=>card(a)).join('')):''}`;
-}
+import {uiIcon} from './icons.js';
+export function portalShelf(title,note,href,items,{resume=false,id=''}={}){return `<section class="portal-shelf"${id?` id="${id}"`:''}><div class="portal-shelf-heading"><div><h2>${title}</h2><p>${note}</p></div><div class="shelf-actions"><button type="button" data-shelf-step="-1" aria-label="Прокрутить назад">${uiIcon('chevron-left',{size:16})}</button><button type="button" data-shelf-step="1" aria-label="Прокрутить вперёд">${uiIcon('chevron-right',{size:16})}</button><a class="shelf-all" href="${href}" aria-label="${title}: смотреть всё" title="Смотреть всё"><img src="/assets/icons/shelf-all.svg" width="19" height="19" alt=""></a></div></div><div class="portal-shelf-track${resume?' portal-shelf-resume':''}" data-drag-shelf role="region" aria-label="${title}" tabindex="0">${items}</div></section>`;}
+export function portalDiscovery(popular,continuing){return `${continuing.length?portalShelf('Продолжить просмотр','С того места, где ты остановился','/continue',continuing.slice(0,30).map(resumeCard).join(''),{resume:true}):''}${popular.length?portalShelf('Стоит посмотреть','Истории с высокой популярностью в каталоге','/catalog?sort=popular',popular.slice(0,20).map(a=>card(a)).join('')):''}`;}
