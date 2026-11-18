@@ -1,0 +1,19 @@
+/* Isolated portal direction, deployed from codex/portal-redesign only. */
+html[data-theme=dark]{--theme-bg:#0c0d12;--theme-panel:#15161e;--theme-border:#ffffff12;--theme-text:#f0eff7;--theme-muted:#9594a7}
+html[data-theme=dark] body{background:radial-gradient(ellipse at 80% 0,#25203766,transparent 45%),#0c0d12;color:#f0eff7}
+body>main{max-width:1480px;margin-inline:auto;padding:28px clamp(16px,3vw,48px)}
+body .panel,body .cards-surface{border-radius:20px;box-shadow:none}
+body .home-columns{display:block;margin-top:32px}body .home-columns>aside{display:none}
+body .audience-hero{border:0;border-radius:26px;background:#171520;box-shadow:0 24px 90px #0003}
+body .audience-hero .audience-stage{min-height:460px}body .audience-hero .audience-slide{min-height:460px}
+body .audience-hero .audience-slide-content{min-height:460px;padding:60px clamp(24px,5vw,72px);align-items:center}
+body .audience-hero .audience-story{max-width:650px}body .audience-hero .audience-story h3{font-size:clamp(28px,4vw,56px);line-height:1.1;font-weight:800;letter-spacing:-1.6px}
+body .audience-hero .audience-story p{font-size:14px;line-height:1.75;max-width:520px;color:#dedbe8}
+body .audience-hero .audience-cover{display:none}body .audience-hero .audience-backdrop{opacity:.55}
+body .audience-watch{border-radius:12px;padding:14px 24px;font-weight:750}
+body .browse-heading h2{font-size:25px;font-weight:800;letter-spacing:-.6px}body .cards-surface{padding:0;border:0;background:transparent;margin-bottom:42px}
+body .anime-card{border:0;border-radius:14px;background:transparent;box-shadow:none;transition:transform .2s ease}body .anime-card:hover{transform:translateY(-4px)}
+body .anime-card img{border-radius:14px}body .home-grid{gap:20px}
+.portal-paths{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0 36px}.portal-paths a{display:flex;flex-direction:column;gap:8px;padding:22px;border:1px solid var(--theme-border);border-radius:18px;text-decoration:none;background:var(--theme-panel);color:inherit}.portal-paths strong{font-size:15px}.portal-paths span{font-size:12px;color:var(--theme-muted)}.portal-paths a:hover{border-color:#aa8bdf}
+@media(max-width:760px){body>main{padding:16px}.portal-paths{grid-template-columns:repeat(2,1fr);gap:10px}.portal-paths a{padding:16px}body .audience-hero .audience-story h3{letter-spacing:-.7px}body .audience-hero .audience-slide-content{padding:36px 22px;min-height:380px}body .audience-hero .audience-stage,body .audience-hero .audience-slide{min-height:380px}body .home-grid{gap:12px}}
+@media(prefers-reduced-motion:reduce){body .anime-card{transition:none}}
