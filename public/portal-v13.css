@@ -1,0 +1,26 @@
+/* Mobile editor controls occupy intentional, equal-width slots. */
+@media(max-width:760px){
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;max-width:100%!important;justify-self:stretch!important;margin:3px 0 0!important;box-sizing:border-box!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs button{width:100%!important;min-width:0!important;margin:0!important;text-align:center!important;justify-content:center!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .check input{appearance:none!important;-webkit-appearance:none!important;width:16px!important;min-width:16px!important;max-width:16px!important;height:16px!important;min-height:16px!important;max-height:16px!important;border:1px solid #727474!important;border-radius:5px!important;padding:0!important;background:#121313!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .check input:checked{background:#f2ce55 url('/assets/icons/lucide/check.svg') center/12px no-repeat!important;border-color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .check input:focus-visible{outline:2px solid #f2ce5566!important;outline-offset:3px!important}
+}
+/* Library cards reserve two title lines and keep the status/actions on a common baseline. */
+html[data-theme] body[data-skin=portal] main .library-grid{align-items:stretch!important}
+html[data-theme] body[data-skin=portal] .library-item{display:flex!important;flex-direction:column!important;height:100%!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .library-item>.anime-card{display:block!important;flex:none!important}
+html[data-theme] body[data-skin=portal] .library-item .anime-title{height:2.9em!important;min-height:2.9em!important;max-height:2.9em!important;line-height:1.45!important;overflow:hidden!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important}
+html[data-theme] body[data-skin=portal] .library-item .meta{height:1.5em!important;line-height:1.5!important;color:#909292!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html[data-theme] body[data-skin=portal] .library-item-tools{margin-top:auto!important;padding-top:16px!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .library-controls{margin:0!important;padding:0!important;border:0!important;width:100%!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .library-controls .select-menu{width:100%!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .library-controls .select-menu-trigger{width:100%!important;min-height:40px!important;height:40px!important;background:#1b1c1c!important;color:#ddd!important;border-color:#ffffff0e!important}
+html[data-theme] body[data-skin=portal] .library-item-links{display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:32px!important;gap:6px!important;margin-top:8px!important;color:#999!important}
+html[data-theme] body[data-skin=portal] .library-item-links>a,html[data-theme] body[data-skin=portal] .personal-score{color:#aaa!important;font-size:10px!important}
+html[data-theme] body[data-skin=portal] .library-item-links form{margin:0!important}
+html[data-theme] body[data-skin=portal] .library-item-links .library-remove{display:grid!important;place-items:center!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;margin:0!important;padding:6px!important;background:#ffffff08!important;border:1px solid #ffffff0b!important;color:#999!important;border-radius:50%!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .library-item-links .library-remove:hover{background:#ffffff10!important;color:#eee!important}
+html[data-theme] body[data-skin=portal][data-page=library] :is(.catalog-results,.catalog-results .muted,.catalog-results small,.library-progress,.library-progress a){color:#999!important}
+html[data-theme] body[data-skin=portal][data-page=library] .library-tabs a{color:#aaa!important;background:#1b1c1c!important;border-color:#ffffff0d!important}
+html[data-theme] body[data-skin=portal][data-page=library] .library-tabs a[aria-current]{color:#f2ce55!important;background:#f2ce550d!important}
