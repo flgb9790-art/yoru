@@ -1,0 +1,105 @@
+/* Search owns the foreground. The dimmer never covers its header. */
+html[data-theme] body[data-skin=portal].portal-search-open>header{z-index:110!important;overflow:visible!important;isolation:isolate;pointer-events:auto!important}
+html[data-theme] body[data-skin=portal].portal-search-open:before{z-index:90!important;backdrop-filter:none!important;background:#0008!important}
+html[data-theme] body[data-skin=portal]>header .search-suggest{position:relative;min-width:0;width:100%}
+html[data-theme] body[data-skin=portal]>header .search-results{z-index:120!important;pointer-events:auto!important;backdrop-filter:none!important;background:#1b1c1c!important}
+html[data-theme] body[data-skin=portal]>header .search-results>a{min-width:0}
+html[data-theme] body[data-skin=portal]>header .search-results>a>span{min-width:0;overflow-wrap:anywhere}
+/* The expanded rail retains its section label without shifting the home row. */
+@media(min-width:1001px){
+html:not(.portal-rail-collapsed)[data-theme] body[data-skin=portal] #portal-sidebar .portal-nav-group:first-child>p{display:flex!important;align-items:center!important;font-size:8px!important;line-height:1!important;letter-spacing:1.4px!important;height:1px!important;min-height:0!important;overflow:visible!important;width:auto!important;padding:0 14px!important;margin:10px 0!important;background:none!important;color:#8e9090!important}
+}
+/* Desktop messenger fills all space next to the rail, including the former search area. */
+@media(min-width:761px){
+html[data-theme] body[data-skin=portal].messenger-page{overflow:hidden!important;height:100dvh!important}
+html[data-theme] body[data-skin=portal].messenger-page>header,html[data-theme] body[data-skin=portal].messenger-page>footer{display:none!important}
+html[data-theme] body[data-skin=portal].messenger-page>main{height:100dvh!important;min-height:0!important;max-width:none!important;padding:0!important;margin-top:0!important;overflow:hidden!important;box-sizing:border-box!important}
+html[data-theme] body[data-skin=portal].messenger-page .panel.messenger{height:100%!important;min-height:0!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;width:100%!important;grid-template-columns:310px minmax(0,1fr)!important}
+html[data-theme] body[data-skin=portal].messenger-page .chat{height:100%!important}
+}
+/* Profile: softer cover treatment, a deliberate center line and lighter information cards. */
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4{max-width:1180px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-header{position:relative!important;padding-bottom:0!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-cover{height:310px!important;min-height:310px!important;max-height:310px!important;border:0!important;border-radius:22px!important;box-shadow:none!important;isolation:isolate}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-cover:after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,#0000 35%,#11121250 75%,#111212c9);z-index:0}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-cover-signature{display:none!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-cover :is(.profile-edit-cover,.profile-video-toggle){z-index:1!important;background:#171818a8!important;border:1px solid #ffffff17!important;backdrop-filter:blur(12px);color:#ddd!important;font-weight:500!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-baseline{margin-top:-62px!important;gap:14px!important;z-index:1}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-avatar-wrap,html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-avatar{width:124px!important;height:124px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-avatar{border-width:5px!important;box-shadow:0 0 0 1px #ffffff0c!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-identity h1{font-size:38px!important;font-weight:700!important;letter-spacing:-1.3px!important;margin-bottom:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-identity-meta{gap:10px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-identity-meta>span{padding:4px 9px!important;border:1px solid #ffffff0b!important;border-radius:999px!important;background:#ffffff04!important;font-size:10px!important;line-height:1.2!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-hero-actions{margin:20px 0 30px!important;gap:8px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-hero-actions a{background:#ffffff07!important;border:1px solid #ffffff0d!important;font-size:11px!important;min-height:38px!important;padding:9px 15px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-stat-strip{max-width:960px!important;margin:0 auto!important;background:linear-gradient(110deg,#202121,#1b1c1c)!important;border:1px solid #ffffff09!important;border-radius:20px!important;padding:23px 26px!important;gap:26px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-level-ring{width:54px!important;height:54px!important;padding:3px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-level-ring>span{background:#202121!important;font-size:17px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-summary strong{font-size:27px!important;font-weight:550!important;letter-spacing:-.8px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-summary span{font-size:10px!important;color:#929494!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-streak-line{margin:16px auto 0!important;opacity:.8}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-nav{width:100%!important;max-width:none!important;background:transparent!important;border:0!important;border-bottom:1px solid #ffffff0c!important;border-radius:0!important;margin:25px 0 28px!important;padding:0!important;gap:20px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-nav a{position:relative!important;padding:13px 0!important;min-height:44px!important;font-size:12px!important;border-radius:0!important;background:none!important;color:#8f9191!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-nav a:is([aria-current=page],:hover){background:none!important;color:#f0f0f0!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-nav a[aria-current=page]:after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#efcf62;border-radius:2px}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics{display:grid!important;grid-template-columns:1fr 1.15fr .9fr!important;gap:16px!important;background:transparent!important;border:0!important;overflow:visible!important;border-radius:0!important;align-items:stretch!important;margin-bottom:24px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics>div{padding:24px!important;background:#191a1a!important;border:1px solid #ffffff08!important;border-radius:20px!important;min-height:0!important;grid-column:auto!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics h2{font-size:16px!important;font-weight:600!important;letter-spacing:-.3px!important;margin-bottom:20px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics dl>div{margin:12px 0!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl{display:block!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl>div{display:flex!important;flex-direction:row!important;align-items:center!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-caption{font-size:10px!important;line-height:1.6!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity>.profile-analytics-caption{display:none!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics li{margin:15px 0!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-list-spectrum{height:5px!important;margin:0 0 20px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 :is(.profile-columns .panel,#profile-favorites .panel){background:#191a1a!important;border:1px solid #ffffff08!important;border-radius:20px!important;padding:24px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-columns .section-heading{border:0!important;margin-bottom:16px!important;padding-bottom:0!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-columns h2{font-size:16px!important;font-weight:600!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-history-row{padding:16px 0!important}
+/* Mobile inputs use 16px to avoid Safari's automatic focus zoom. */
+@media(max-width:1000px){
+html[data-theme] body[data-skin=portal]>header .search input{font-size:16px!important;line-height:normal!important}
+html[data-theme] body[data-skin=portal]>header .search input::placeholder{font-size:12px!important}
+html[data-theme] body[data-skin=portal]>header .search-results{position:absolute!important;top:calc(100% + 10px)!important;left:auto!important;right:0!important;width:min(560px,calc(100vw - 32px))!important;transform:none!important;max-height:min(55dvh,480px)!important;overscroll-behavior:contain}
+html[data-theme] body[data-skin=portal]>header>.search,html[data-theme] body[data-skin=portal]>header>.search:focus-within{width:100%!important;max-width:100%!important;transform:none!important;opacity:1!important;visibility:visible!important}
+html[data-theme] body[data-skin=portal]>header{overflow:visible!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics{grid-template-columns:1fr 1fr!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity{grid-column:1/-1!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl>div{flex-direction:column!important;align-items:flex-start!important}
+}
+@media(max-width:760px){
+html[data-theme] body[data-skin=portal] .comment-composer-v3{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;padding:14px!important;border-radius:18px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading{display:grid!important;grid-template-columns:32px minmax(0,1fr)!important;gap:9px 10px!important;align-items:center!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-avatar{width:32px!important;height:32px!important;min-width:32px!important;flex-basis:32px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading strong{font-size:12px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading small{font-size:10px!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs{grid-column:2!important;justify-self:start!important;display:flex!important;margin:0!important;padding:3px!important;gap:2px!important;max-width:100%!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs button{font-size:10px!important;min-height:28px!important;padding:6px 10px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-box{min-width:0!important;width:100%!important;box-sizing:border-box!important;border-radius:12px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 textarea{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;font-size:16px!important;min-height:140px!important;padding:12px!important;line-height:1.6!important;resize:vertical!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 textarea::placeholder{font-size:12px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-toolbar{display:flex!important;flex-wrap:wrap!important;gap:2px!important;padding:6px!important;box-sizing:border-box!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-toolbar .comment-tool{min-width:28px!important;min-height:30px!important;padding:6px!important;flex:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-compose-actions{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px 8px!important;align-items:center!important;width:100%!important;margin:12px 0 0!important;padding:0!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-compose-actions .check{grid-column:1/-1!important;display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important;font-size:10px!important;white-space:normal!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .check input{width:14px!important;height:14px!important;min-width:14px!important;flex:none!important;margin:0!important;accent-color:#efd05b!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-character-count{grid-column:1!important;justify-self:start!important;margin:0!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-submit{grid-column:2!important;min-width:0!important;padding:9px 13px!important;font-size:11px!important;margin:0!important;justify-self:end!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-cover{height:205px!important;min-height:205px!important;max-height:205px!important;border-radius:18px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-baseline{margin-top:-48px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-avatar-wrap,html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-avatar{width:96px!important;height:96px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-identity h1{font-size:29px!important;letter-spacing:-.7px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-stat-strip{padding:20px 16px!important;border-radius:18px!important;gap:20px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-hero-actions{margin-bottom:24px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3.profile-v4 .profile-nav{justify-content:flex-start!important;gap:20px!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none;margin:20px 0 22px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-nav a{white-space:nowrap!important;flex:none!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics{grid-template-columns:1fr!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity{grid-column:auto!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics>div{padding:22px!important;border-radius:18px!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl{display:block!important}
+html[data-theme] body[data-skin=portal] .profile-v4 .profile-analytics-activity dl>div{flex-direction:row!important;align-items:center!important}
+}
+html[data-theme] body[data-skin=portal]>header .search-results{animation:none!important;opacity:1!important;filter:none!important}
+@media(min-width:761px){html[data-theme] body[data-skin=portal].messenger-page>.mobile-bottom-nav{display:none!important}}
+@media(min-width:761px) and (max-width:1000px){html[data-theme] body[data-skin=portal].messenger-page .messenger-exit{display:inline-flex!important}}

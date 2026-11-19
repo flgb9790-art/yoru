@@ -43,7 +43,7 @@
    mounts.forEach(start);const saved=fromHistory&&positions.get(currentKey);if(saved)window.scrollTo({...saved,behavior:'instant'});else if(preserved)window.scrollTo({...preserved,behavior:'instant'});else position(final,scroll);
    const main=document.querySelector('main');main.setAttribute('tabindex','-1');main.focus({preventScroll:true});document.dispatchEvent(new CustomEvent('yoru:navigated'));
    };
-   if(document.startViewTransition&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const transition=document.startViewTransition(()=>{if(id===visit)swap();});await transition.updateCallbackDone;}else swap();
+   if(document.startViewTransition&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const transition=document.startViewTransition(()=>{if(id===visit)swap();});transition.ready.catch(()=>{});transition.finished.catch(()=>{});await transition.updateCallbackDone;}else swap();
   }catch(error){if(error.name!=='AbortError'&&id===visit)message('Не удалось загрузить страницу. Проверь соединение и повтори действие.');}
   finally{if(id===visit)document.documentElement.classList.remove('is-navigating');}
  }
