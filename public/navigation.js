@@ -20,7 +20,7 @@
  const eligible=url=>url.origin===location.origin&&/^https?:$/.test(url.protocol)&&!/^\/(auth|logout|api|media|vendor)(\/|$)/.test(url.pathname)&&! /\.(?:js|css|png|jpe?g|webp|svg|zip|json|mp4|m3u8)$/i.test(url.pathname);
  function position(url,scroll){if(scroll===false)return;const target=url.hash&&document.getElementById(decodeURIComponent(url.hash.slice(1)));if(target)target.scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});}
  function message(text){let box=document.querySelector('[data-navigation-error]');if(!box){box=document.createElement('p');box.dataset.navigationError='';box.setAttribute('role','alert');document.querySelector('main').prepend(box);}box.textContent=text;}
- async function navigate(input,{replace=false,scroll=true,method='GET',body,fromHistory=false,fragment}={}){
+ async function navigate(input,{replace=false,scroll=true,method='GET',body,fromHistory=false,fragment,preserveRail=false}={}){
   const preserved=scroll===false?{left:scrollX,top:scrollY}:null;const url=new URL(input,location.href);if(!eligible(url)){location.assign(url.href);return;}
   const id=++visit;request?.abort();request=new AbortController();document.documentElement.classList.add('is-navigating');
   try{const response=await fetch(url.href,{method,body,credentials:'same-origin',signal:request.signal,headers:{Accept:'text/html','X-Requested-With':'YoruNavigation'}});
@@ -36,7 +36,7 @@
    cleanups.splice(0).forEach(dispose=>dispose());document.querySelectorAll('dialog[open]').forEach(d=>d.close());
    const nonce=document.querySelector('script[src*="/navigation.js"][nonce]')?.nonce||'';document.head.querySelectorAll('[data-seo]').forEach(n=>n.remove());for(const node of doc.head.querySelectorAll('[data-seo]')){const copy=document.importNode(node,true);if(copy.tagName==='SCRIPT')copy.nonce=nonce;document.head.append(copy);}
    doc.querySelectorAll('script').forEach(s=>s.remove());const nextBody=document.importNode(doc.body,true),rail=document.querySelector('body>.portal-sidebar'),nextRail=nextBody.querySelector('.portal-sidebar');
-   if(rail&&nextRail){rail.innerHTML=nextRail.innerHTML;nextRail.replaceWith(rail);}
+   if(rail&&nextRail){if(!preserveRail)rail.innerHTML=nextRail.innerHTML;nextRail.replaceWith(rail);}
    document.body.replaceWith(nextBody);document.title=doc.title;
    if(final.pathname===url.pathname&&final.search===url.search)final.hash=url.hash;
    if(!fromHistory){currentKey=replace?currentKey:newKey();history[replace?'replaceState':'pushState']({yoruKey:currentKey},'',final.href);}else{currentKey=history.state?.yoruKey||newKey();history.replaceState({...history.state,yoruKey:currentKey},'',final.href);}

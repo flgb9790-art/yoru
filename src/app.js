@@ -59,7 +59,7 @@ import {enqueueImport} from './worker.js';
 import {mountPlayback} from './playback.js';
 import {episodeFeed,enqueueEpisodeSync} from './episode-feed.js';
 const uuid=()=>randomUUID();
-export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver,kodikCatalogueResolver,countryLookup,characterResolver,ratingsResolver}={}){
+export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResolver,kodikCatalogueResolver,countryLookup,characterResolver,ratingsResolver,studioCatalogueResolver}={}){
  const access=requestAnimeAccess(db);db=access.db;const rawCatalogue=kodikCatalogueResolver||kodikTranslations;kodikCatalogueResolver=async anime=>{const raw=await rawCatalogue(anime);await rememberStudios(db,anime,raw);return access.filterTranslations(raw);};const app=express();app.use((req,res,next)=>{if(privateSite())res.set('X-Robots-Tag','noindex, nofollow, noarchive');next();});app.use(access.middleware);app.set('trust proxy',1);app.use(countryMiddleware(countryLookup));app.use(canonicalSite);app.use(seoMiddleware);
  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'https:'],scriptSrc:["'self'",(req)=>"'nonce-"+req.seoNonce+"'"],styleSrc:["'self'"],frameSrc:['https://kodikplayer.com'],connectSrc:["'self'",'https://*.libria.fun'],mediaSrc:["'self'",'blob:','https://*.libria.fun','https://v.animethemes.moe'],workerSrc:["'self'",'blob:'],upgradeInsecureRequests:process.env.NODE_ENV==='production'?[]:null}}}));
  // The standalone offline library fetches poster images as well as media; main-site CSP stays unchanged.
@@ -102,7 +102,7 @@ export function createApp(db,{importer=fetchAnime,playerResolver,anilibertyResol
  mountAutoparse(app,db);
  mountProgress(app,db);
  mountCommunity(app,db);
- mountPlayback(app,db,playerResolver,anilibertyResolver,kodikCatalogueResolver);mountPortalDetails(app,db,{characterResolver});mountViewerRatings(app,db,{ratingsResolver});
+ mountPlayback(app,db,playerResolver,anilibertyResolver,kodikCatalogueResolver);mountPortalDetails(app,db,{characterResolver,studioCatalogueResolver});mountViewerRatings(app,db,{ratingsResolver});
  mountOfflineTrial(app,db);mountKodikDownloadTrial(app,db);
  mountWatchRooms(app,db,anilibertyResolver,kodikCatalogueResolver,playerResolver);
  const send=(req,res,title,body,status=200)=>res.status(status).send(layout(title,body,req));
