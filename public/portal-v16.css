@@ -75,3 +75,6 @@ html[data-theme] body[data-skin=portal] .asset-dialog .asset-options .asset-opti
 @media(max-width:1000px){html[data-theme] body[data-skin=portal] .footer-v2{width:auto!important}}
 html[data-theme] body[data-skin=portal] .asset-dialog .asset-options.cover .asset-option img{aspect-ratio:3.3!important;border-radius:8px!important;height:auto!important;object-fit:cover!important}
 html[data-theme] body[data-skin=portal] .asset-dialog .asset-options.cover .asset-option{padding:10px!important}
+/* Footer links stay text links in every interaction state. */
+html[data-theme] body[data-skin=portal] footer.footer-v2 nav a:is(:link,:visited,:hover,:focus,:focus-visible,:active){background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important;padding:0!important;color:#a1a89c!important;transform:none!important}
+html[data-theme] body[data-skin=portal] footer.footer-v2 nav a:is(:hover,:focus-visible){color:#e8d17b!important;text-decoration:underline!important;text-underline-offset:4px!important;text-decoration-thickness:1px!important}
