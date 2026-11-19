@@ -1,0 +1,4 @@
+ALTER TABLE library ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE library ALTER COLUMN updated_at SET DEFAULT NOW();
+CREATE INDEX IF NOT EXISTS library_activity ON library(user_id,status,updated_at);
+CREATE TABLE IF NOT EXISTS data_changes(name TEXT PRIMARY KEY,applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),snapshot JSONB NOT NULL DEFAULT '{}');

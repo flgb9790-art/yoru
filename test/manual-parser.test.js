@@ -20,16 +20,16 @@ async function setup(t){const {Pool}=newDb().adapters.createPg(),db=new Pool();a
 function requestFor(list,paths=[]){return async(path,fetcher,body)=>{paths.push(path);if(path==='/api/graphql'){const ids=(body.query.match(/ids: "([^"]*)"/)?.[1]||'').split(',').map(Number);return {data:{animes:list.filter(a=>ids.includes(a.id)).map(a=>({...a,id:String(a.id),poster:{originalUrl:'https://shikimori.one'+a.image.original}}))}};}return list;};}
 async function state(db){return (await manualStatus(db))[0];}
 
-test('source dictionary uses current GraphQL anime themes, rejects banned genres and keeps an explicit stale fallback',async t=>{
+test('source dictionary uses current GraphQL anime themes, includes configurable genres and keeps an explicit stale fallback',async t=>{
  const db=await setup(t);let calls=0;
  const r=await sourceGenres(db,{refresh:true,request:async(path,f,b)=>{calls++;assert.equal(path,'/api/graphql');assert.match(b.query,/genres\(entryType: Anime\)/);return {data:{genres:[{id:'130',russian:'Исэкай',name:'Isekai',kind:'theme'},{id:'1',russian:'Хентай',name:'Hentai'}]}};}});
- assert.equal(calls,1);assert.deepEqual(r.genres.map(g=>g.id),[130]);assert.equal((await sourceGenres(db,{request:()=>{throw Error('cached');}})).stale,false);
+ assert.equal(calls,1);assert.deepEqual(r.genres.map(g=>g.id),[130,1]);assert.equal((await sourceGenres(db,{request:()=>{throw Error('cached');}})).stale,false);
  assert.equal((await sourceGenres(db,{refresh:true,request:()=>{throw Error('offline');}})).stale,true);
 });
 test('manual config validates all limits, snapshots its own rules and requires known allowed genres',()=>{
  const c=manualConfig(body(),dictionary);assert.deepEqual(c.genres,['Исэкай']);assert.equal(c.requireEpisodes,true);assert.equal(c.requirePoster,true);assert.equal(c.limit,2);
- for(const changes of [{genreIds:[]},{genreIds:[999]},{minYear:2026,maxYear:2020},{limit:0},{limit:1001},{minRating:11},{country:'США'},{format:'music'}])assert.throws(()=>manualConfig({...body(),...changes},dictionary));
- assert.throws(()=>manualConfig({...body(),genreIds:[9]},[{id:9,name:'Хентай'}]));
+ for(const changes of [{genreIds:[]},{genreIds:[999]},{minYear:2026,maxYear:2020},{limit:0},{minRating:11},{country:'США'}])assert.throws(()=>manualConfig({...body(),...changes},dictionary));
+ assert.throws(()=>manualConfig({...body(),genreIds:[9]},[{id:9,name:'Хентай'}]));assert.equal(manualConfig({...body(),limit:1001,format:'music'},dictionary).limit,1001);assert.equal(manualConfig({...body(),genreIds:[9],policyConfigured:'1'},[{id:9,name:'Хентай'}]).rejectGenres,false);
 });
 test('manual run bypasses disabled automatic schedule, persists its queue, imports complete titles and publishes only actual genres',async t=>{
  const db=await setup(t),paths=[],list=[raw(1),raw(2),raw(3)],request=requestFor(list,paths),key=randomUUID(),id=await createManualRun(db,body(),key);

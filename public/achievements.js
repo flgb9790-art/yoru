@@ -6,7 +6,7 @@ window.yoruPages.register(page=>{
  for(const root of document.querySelectorAll('[data-achievement-carousel]')){
   const viewport=root.querySelector('.achievement-window'),track=root.querySelector('.achievement-strip');if(!viewport||!track)continue;
   const items=[...track.children],total=items.length,reduced=matchMedia('(prefers-reduced-motion:reduce)');let index=0,busy=false,hover=false,focus=false,drag=null,last=performance.now(),suppressUntil=0;
-  const visible=()=>innerWidth<=760?3:4,normalize=n=>(n%total+total)%total;
+  const visible=()=>innerWidth<=760?4:5,normalize=n=>(n%total+total)%total;
   // Keep decoded image nodes alive: replacing them after every step flashes in Safari.
   for(const img of track.querySelectorAll('img')){img.loading='eager';img.decoding='sync';}
   function render(){for(const [i,node] of [...track.children].entries()){node.tabIndex=i<visible()?0:-1;if(i>=visible())node.setAttribute('aria-hidden','true');else node.removeAttribute('aria-hidden');}}

@@ -8,7 +8,7 @@ export function assertAllowedGenres(a){const genre=forbiddenGenre(a);if(genre)th
 export function assertRussianTitle(a){if(!String(a.name||'').trim()||a.metadata?.russian_title===false||a.metadata?.russian_title!==true&&!/[а-яё]/i.test(String(a.name||'')))throw policyError('ANIME_NO_RUSSIAN','Нет русского названия в Shikimori');}
 export function sourceCountry(value){const code=String(value||'').toUpperCase();if(!/^[A-Z]{2}$/.test(code))return 'Не определена';return ({JP:'Япония',CN:'Китай',KR:'Южная Корея'})[code]||'Другие страны';}
 export function selectionReason(a,c){
- if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';
+ if(c.requireRated!==false&&Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';
  if(c.requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';
  if(c.requireEpisodes&&!hasEpisodes(a))return 'Нет серий';
  if(c.countries?.length&&!c.countries.includes(a.country))return a.country==='Не определена'?'Страна не подтверждена':'Страна';
@@ -26,7 +26,7 @@ export function selectionReason(a,c){
 
 export function hasRealPoster(value){try{const u=new URL(String(value||''));return ['https:','http:'].includes(u.protocol)&&!/(?:missing|no[_-]?(?:image|poster)|placeholder|questionmark|default[_-]?(?:image|poster)|\/404(?:[._/-]|$))/i.test(u.pathname);}catch{return false;}}
 export function hasEpisodes(a){return Number(a.episodes)>0||Number(a.aired)>0;}
-export function catalogueQualityReason(a,{requirePoster=true,requireEpisodes=true}={}){const content=nonAnimeReason(a);if(content)return content;try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';if(requireEpisodes&&!hasEpisodes(a))return 'Нет серий';return '';}
+export function catalogueQualityReason(a,c={}){const {requirePoster=true,requireEpisodes=true}=c;const content=c.excludeNonAnime!==false?nonAnimeReason(a):'';if(content)return content;if(c.requireRussian!==false)try{assertRussianTitle(a);}catch{return 'Нет русского названия';}if(requirePoster&&!hasRealPoster(a.poster))return 'Нет постера или заглушка';if(c.requireRated!==false&&Number(a.metadata?.shikimori_score??a.rating)<=0)return 'Нулевой рейтинг Shikimori';if(requireEpisodes&&!hasEpisodes(a))return 'Нет серий';return '';}
 
 // TV anime and story specials are valid. Only explicitly non-story/promotional releases are excluded.
 export function nonAnimeReason(a){

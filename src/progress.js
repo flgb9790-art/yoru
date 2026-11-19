@@ -13,13 +13,13 @@ export async function knownEpisodes(db,a,season){
  const numbers=new Set(rows.map(r=>r.episode));for(let n=1;n<=Math.min(count,100000);n++)numbers.add(n);
  return [...numbers].sort((x,y)=>x-y);
 }
-export async function syncLibraryProgress(db,userId,a){
+export async function syncLibraryProgress(db,userId,a,{activity=false}={}){
  const history=(await db.query('SELECT episode FROM watch_history WHERE user_id=$1 AND anime_id=$2 AND season>0 AND completed=TRUE',[userId,a.id])).rows;
  const status=completedTitle(a,new Set(history.map(row=>Number(row.episode))))?'completed':'watching';
  const saved=(await db.query('SELECT status FROM library WHERE user_id=$1 AND anime_id=$2',[userId,a.id])).rows[0];
  if(!saved&&!(await db.query('SELECT id FROM watch_history WHERE user_id=$1 AND anime_id=$2 LIMIT 1',[userId,a.id])).rowCount)return;
- if(status!=='completed'&&saved&&!['planned','watching','completed'].includes(saved.status))return;
- await db.query('INSERT INTO library(user_id,anime_id,status) VALUES($1,$2,$3) ON CONFLICT(user_id,anime_id) DO UPDATE SET status=$3',[userId,a.id,status]);
+ if(saved?.status==='favorite')return;if(status!=='completed'&&saved&&!activity&&!['planned','watching','completed'].includes(saved.status))return;
+ await db.query('INSERT INTO library(user_id,anime_id,status,updated_at) VALUES($1,$2,$3,NOW()) ON CONFLICT(user_id,anime_id) DO UPDATE SET status=$3,updated_at=CASE WHEN library.status<>$3 THEN NOW() ELSE library.updated_at END',[userId,a.id,status]);
 }
 export function mountProgress(app,db){
  app.get('/anime/:id/progress',requireUser,async(req,res)=>{

@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import {z} from 'zod';
 import {requireAdmin} from './security.js';
 import {layout,esc,csrf,pagination} from './views.js';
-import {terms,privacy,copyrightIntro,legalVersion} from './legal-content.js';
+import {offer,terms,privacy,copyrightIntro,legalVersion} from './legal-content.js';
 const categories={rights:'Права на материалы',privacy:'Персональные данные',support:'Вопрос по сайту'};
 const states={new:'Новое',review:'На рассмотрении',closed:'Закрыто'};
 const input=z.object({request_id:z.uuid(),category:z.enum(['rights','privacy','support']),sender_name:z.string().trim().min(1).max(100),email:z.email().max(254).transform(v=>v.toLowerCase()),organization:z.string().trim().max(200).default(''),subject:z.string().trim().min(3).max(160),body:z.string().trim().min(20).max(12000),links:z.string().trim().max(6000).default(''),acknowledged:z.literal('on'),truthful:z.string().optional()}).superRefine((v,ctx)=>{if(v.category==='rights'&&(!v.links||v.truthful!=='on'))ctx.addIssue({code:'custom',message:'Укажите ссылки и подтвердите полномочия'});if(v.links){const links=v.links.split(/\r?\n/).filter(v=>v.trim());if(links.length>20||links.some(v=>{try{return !['http:','https:'].includes(new URL(v.trim()).protocol);}catch{return true;}}))ctx.addIssue({code:'custom',message:'Укажите до 20 HTTP(S)-ссылок, каждую с новой строки'});}});
@@ -14,6 +14,7 @@ export function appealForm(req,{category='rights',values={},error=''}={}){if(!Ob
 export function mountLegal(app,db){const send=(req,res,title,body,status=200)=>res.status(status).send(layout(title,body,req));
  const limiter=rateLimit({windowMs:3600000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,message:'Слишком много обращений. Попробуйте позже.'});
  app.use(async(req,res,next)=>{if(req.user?.role==='admin'&&req.method==='GET'&&(req.path.startsWith('/messages')||req.path.startsWith('/admin')||req.path==='/api/inbox-state'))req.unreadAppeals=+(await db.query("SELECT COUNT(*) AS count FROM private_appeals WHERE status='new'")).rows[0].count;next();});
+ app.get('/offer',(req,res)=>send(req,res,'Условия бесплатного использования',offer()));
  app.get('/terms',(req,res)=>send(req,res,'Пользовательское соглашение',terms()));
  app.get('/privacy',(req,res)=>send(req,res,'Политика конфиденциальности',privacy()));
  app.get('/rules.html',(req,res)=>res.redirect('/terms'));

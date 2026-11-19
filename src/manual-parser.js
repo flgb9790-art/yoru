@@ -14,7 +14,7 @@ export async function sourceGenres(db,{request=shikiRequest,refresh=false}={}){
  try{
   const response=await request('/api/graphql',fetch,{query:'{ genres(entryType: Anime) { id name russian kind } }'}),data=response.data?.genres;
   if(response.errors?.length||!Array.isArray(data))throw Error('Не удалось прочитать справочник Shikimori');
-  const genres=data.filter(g=>Number.isSafeInteger(Number(g.id))&&Number(g.id)>0&&g.russian&&!forbiddenGenre({genres:[g.name,g.russian]})).map(g=>({id:Number(g.id),name:g.russian,english:g.name||'',kind:g.kind})).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+  const genres=data.filter(g=>Number.isSafeInteger(Number(g.id))&&Number(g.id)>0&&g.russian).map(g=>({id:Number(g.id),name:g.russian,english:g.name||'',kind:g.kind})).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
   if(!genres.length)throw Error('Shikimori вернул пустой справочник жанров');
   await db.query('UPDATE parser_genres SET genres=$1,fetched_at=NOW() WHERE id=1',[JSON.stringify(genres)]);
   return {genres,stale:false};
@@ -22,26 +22,25 @@ export async function sourceGenres(db,{request=shikiRequest,refresh=false}={}){
 }
 
 const inputSchema=z.object({
- genreIds:z.array(z.coerce.number().int().positive()).min(1).max(30),
+ genreIds:z.array(z.coerce.number().int().positive()).min(1),
  genreMatch:z.enum(['any','all']).default('any'),
  country:z.enum(['','Япония','Китай','Южная Корея','Другие страны']).default(''),
- minYear:z.coerce.number().int().min(1900).max(2100),maxYear:z.coerce.number().int().min(1900).max(2100),
- minRating:z.coerce.number().min(0).max(10),limit:z.coerce.number().int().min(1).max(1000),
+ minYear:z.coerce.number().int().min(1).max(9999),maxYear:z.coerce.number().int().min(1).max(9999),
+ minRating:z.coerce.number().min(0).max(10),limit:z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
  order:z.enum(['ranked','popularity','aired_on','id']).default('ranked'),
- format:z.enum(['','tv','movie','ova','ona','special','tv_special']).default(''),
- status:z.enum(['','ongoing','released']).default(''),search:z.string().trim().max(120).default(''),
+ format:z.enum(['','tv','movie','ova','ona','special','tv_special','music','pv','cm']).default(''),
+ status:z.enum(['','ongoing','released','anons']).default(''),search:z.string().trim().max(120).default(''),
 }).refine(c=>c.minYear<=c.maxYear,'Проверь диапазон лет');
 export function manualConfig(body,dictionary){
- const value=inputSchema.parse({...body,genreIds:[].concat(body.genreIds||[])}),ids=[...new Set(value.genreIds)],selected=ids.map(id=>dictionary.find(g=>g.id===id));
+ const flags=Object.fromEntries(['requireRussian','requireRated','rejectGenres','excludeNonAnime','allowUnreleased','requirePoster','requireEpisodes'].map(key=>[key,body.policyConfigured==='1'?body[key]==='on':defaults()[key]]));const value=inputSchema.parse({...body,genreIds:[].concat(body.genreIds||[])}),ids=[...new Set(value.genreIds)],selected=ids.map(id=>dictionary.find(g=>g.id===id));
  if(selected.some(g=>!g))throw Error('Обнови список жанров и выбери их заново');
- const config=validateConfig({...defaults(),minYear:value.minYear,maxYear:value.maxYear,minRating:value.minRating,genres:selected.map(g=>g.name),genreMatch:value.genreMatch,countries:value.country?[value.country]:[],kinds:value.format?[value.format]:defaults().kinds,statuses:value.status?[value.status]:['ongoing','released'],search:value.search,order:value.order,requirePoster:true,requireEpisodes:true});
+ const config=validateConfig({...defaults(),minYear:value.minYear,maxYear:value.maxYear,minRating:value.minRating,genres:selected.map(g=>g.name),genreMatch:value.genreMatch,countries:value.country?[value.country]:[],kinds:value.format?[value.format]:defaults().kinds,statuses:value.status?[value.status]:(flags.allowUnreleased?['ongoing','released','anons']:['ongoing','released']),search:value.search,order:value.order,...flags});
  return {...config,genreIds:ids,limit:value.limit};
 }
 export const manualDefaults=()=>({minYear:1900,maxYear:currentYear(),minRating:6,limit:50});
 export async function createManualRun(db,body,requestKey,{request=shikiRequest}={}){
  if(!z.string().uuid().safeParse(requestKey).success)throw Error('Обнови форму запуска');
  const duplicate=(await db.query('SELECT id FROM manual_parse_runs WHERE request_key=$1',[requestKey])).rows[0];if(duplicate)return duplicate.id;
- if(+(await db.query("SELECT COUNT(*) AS count FROM manual_parse_runs WHERE status IN('queued','running','paused','failed')")).rows[0].count>=5)throw Error('Можно сохранить до 5 незавершённых запусков. Останови ненужный.');
  const {genres}=await sourceGenres(db,{request}),config=manualConfig(body,genres),id=randomUUID();
  await db.query('INSERT INTO manual_parse_runs(id,request_key,config) VALUES($1,$2,$3) ON CONFLICT(request_key) DO NOTHING',[id,requestKey,JSON.stringify(config)]);
  return (await db.query('SELECT id FROM manual_parse_runs WHERE request_key=$1',[requestKey])).rows[0].id;
@@ -92,11 +91,11 @@ export async function runManualStep(db,{request=shikiRequest,importer=fetchAnime
     if(existing)state=existing.metadata?.manual_parse_run===run.id?'added':'existing';
     else if((await db.query('SELECT id FROM deleted_anime WHERE shikimori_id=$1',[item.shikimori_id])).rowCount){state='skipped';reason='Ранее удалённый тайтл';}
     else{
-     const anime=await importer(item.shikimori_id);
+     const anime=await importer(item.shikimori_id,{policy:c});
      if(Number(anime.shikimori_id)!==item.shikimori_id)throw Error('Источник вернул другой ID');
      assertSelected(anime,c);
      if(!await active()){await db.query("UPDATE manual_parse_items SET status=$1 WHERE run_id=$2 AND shikimori_id=$3",[(await db.query('SELECT status FROM manual_parse_runs WHERE id=$1',[run.id])).rows[0].status==='stopped'?'cancelled':'pending',run.id,item.shikimori_id]);return true;}
-     anime.metadata={...anime.metadata,catalogue_seed:false,manual_parse_run:run.id};await saveImported(db,anime);
+     anime.metadata={...anime.metadata,catalogue_seed:false,manual_parse_run:run.id};await saveImported(db,anime,{policy:c});
      await catalogueGenres(db,{refresh:true});
     }
    }catch(error){if(isImportSkip(error)){state='skipped';reason=error.message;}else if(item.attempts+1<3){await db.query("UPDATE manual_parse_items SET status='pending',reason='Повтор после ошибки источника' WHERE run_id=$1 AND shikimori_id=$2",[run.id,item.shikimori_id]);throw error;}else{state='error';reason='Источник не ответил после 3 попыток';}}
@@ -111,7 +110,7 @@ export async function runManualStep(db,{request=shikiRequest,importer=fetchAnime
    for(const genre of queries){if(!await active())return true;const query=new URLSearchParams({limit:'50',page:String(run.page),season:c.minYear+'_'+c.maxYear,order:c.order,kind:c.kinds.join(','),status:c.statuses.join(','),genre_v2:String(genre),score:String(c.minRating)});if(c.search)query.set('search',c.search);const list=await request('/api/animes?'+query);if(!Array.isArray(list))throw Error('Некорректный список Shikimori');more ||= list.length===50;all.push(...list);}
    const unique=[...new Map(all.map(a=>[Number(a.id),a])).values()];
    // At most 50 IDs per GraphQL request.
-   for(let offset=0;offset<unique.length;offset+=50){if(!await active())return true;const candidates=await enrichCandidates(unique.slice(offset,offset+50),request,{countryLookup,countriesRequired:!!c.countries.length});if(!await active())return true;for(const candidate of candidates){let state='pending',reason='';try{assertSelected(candidate,c);}catch(error){if(!isImportSkip(error))throw error;state='skipped';reason=error.message;}await db.query('INSERT INTO manual_parse_items(run_id,shikimori_id,name,status,reason) VALUES($1,$2,$3,$4,$5) ON CONFLICT(run_id,shikimori_id) DO NOTHING',[run.id,candidate.shikimori_id,candidate.name||candidate.original_name,state,reason]);}}
+   for(let offset=0;offset<unique.length;offset+=50){if(!await active())return true;const candidates=await enrichCandidates(unique.slice(offset,offset+50),request,{countryLookup,countriesRequired:!!c.countries.length,policy:c});if(!await active())return true;for(const candidate of candidates){let state='pending',reason='';try{assertSelected(candidate,c);}catch(error){if(!isImportSkip(error))throw error;state='skipped';reason=error.message;}await db.query('INSERT INTO manual_parse_items(run_id,shikimori_id,name,status,reason) VALUES($1,$2,$3,$4,$5) ON CONFLICT(run_id,shikimori_id) DO NOTHING',[run.id,candidate.shikimori_id,candidate.name||candidate.original_name,state,reason]);}}
    if(!await active())return true;
    await db.query('UPDATE manual_parse_runs SET page=page+1,exhausted=$1 WHERE id=$2 AND lease_token=$3',[!more||run.page>=1000,run.id,token]);
   }
