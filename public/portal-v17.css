@@ -1,0 +1,41 @@
+/* Current navigation and catalogue controls. */
+html[data-theme] body[data-skin=portal] .mobile-download-banner{display:none!important}
+html[data-theme] body[data-skin=portal] .continue-tabs{display:flex!important;flex-wrap:wrap;gap:8px!important}
+html[data-theme] body[data-skin=portal] .continue-tabs a{display:inline-flex;align-items:center;justify-content:center;padding:10px 15px!important;border:1px solid #ffffff0c!important;border-radius:22px!important;background:#202222!important;color:#a8ada6!important;font-size:12px;text-decoration:none!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .continue-tabs a[aria-current]{background:#303024!important;color:#efd77b!important;border-color:#d5c26833!important}
+html[data-theme] body[data-skin=portal] .continue-tabs a:hover{background:#292c29!important;color:#ecefe8!important}
+html[data-theme] body[data-skin=portal] :is(.seo-breadcrumbs,.breadcrumbs,.breadcrumb) a{color:#a0a69b!important;text-decoration:none!important}
+html[data-theme] body[data-skin=portal] :is(.seo-breadcrumbs,.breadcrumbs,.breadcrumb) a:hover{color:#e6cf75!important}
+html[data-theme] body[data-skin=portal] .apps-page .install-help a{display:inline-flex;align-items:center;gap:4px;color:#e6d083!important;text-decoration:none!important}
+html[data-theme] body[data-skin=portal] .apps-page .install-help a:hover{color:#f5e6ad!important}
+html[data-theme] body[data-skin=portal] .genre-picker .genre-count{background:#292c29!important;color:#c4cbbf!important;border:1px solid #ffffff0a!important;border-radius:14px!important}
+html[data-theme] body[data-skin=portal] .portal-filter-tags a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px!important;background:#242724!important;color:#c5cdbf!important;border:1px solid #ffffff0c!important;border-radius:18px!important;text-decoration:none!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .portal-filter-tags a:hover{background:#30332e!important;color:#f1e0a3!important}
+html[data-theme] body[data-skin=portal] .genres .genre-chip input:checked+span{background:#303024!important;color:#e6d185!important;border-color:#c6b45b50!important}
+html[data-theme] body[data-skin=portal] .genres .genre-chip span{background:#202321!important;color:#a8b0a2!important;border-color:#ffffff0c!important}
+html[data-theme] body[data-skin=portal] .genres .genre-chip input:focus-visible+span{outline:1px solid #bcb58d!important;outline-offset:2px!important}
+/* Date and month have their own lines and enough vertical space. */
+html[data-theme] body[data-skin=portal] .schedule-calendar a.schedule-date{height:auto!important;min-height:110px!important;gap:12px!important;padding:12px!important;box-sizing:border-box!important;overflow:hidden!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-top{display:flex!important;align-items:center;justify-content:space-between;gap:3px!important;min-height:18px!important;line-height:1.2!important;font-size:10px!important;white-space:nowrap}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;line-height:1.2!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main strong{font-size:26px!important;line-height:1.1!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main>span{display:block!important;font-size:11px!important;line-height:1.3!important}
+html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main .schedule-date-all{font-size:14px!important;line-height:1.4!important;white-space:normal!important}
+html[data-theme] body[data-skin=portal] .schedule-week-nav a{background:#202321!important;color:#b0b7aa!important;border-color:#ffffff0d!important;text-decoration:none!important}
+html[data-theme] body[data-skin=portal] .schedule-week-nav a:hover{background:#2a2d27!important;color:#e7d27d!important}
+/* One moving segment behind the three messenger destinations. */
+html[data-theme] body[data-skin=portal] .messenger .messenger-tabs{position:relative!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;isolation:isolate;overflow:hidden}
+html[data-theme] body[data-skin=portal] .messenger .messenger-tabs a,html[data-theme] body[data-skin=portal] .messenger .messenger-tabs a[aria-current]{position:relative;z-index:1;min-width:0;background:transparent!important;border:0!important;box-shadow:none!important;text-decoration:none!important}
+.messenger-tab-indicator{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);background:#303231;border-radius:9px;pointer-events:none;z-index:0;transform:translateX(0)}
+.messenger[data-tab=contacts] .messenger-tab-indicator{transform:translateX(100%)}
+.messenger[data-tab=people] .messenger-tab-indicator{transform:translateX(200%)}
+/* Keep the same fox motion in both sidebar sizes. */
+html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand{overflow:visible!important}
+html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand img{transform:rotate(0deg) scale(1)!important;transform-origin:center!important;transition:transform .4s cubic-bezier(.2,.8,.2,1)!important;filter:none!important;box-shadow:none!important;background:transparent!important}
+html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand:is(:hover,:focus-visible) img{transform:rotate(-10deg) scale(1.1)!important;filter:none!important;box-shadow:none!important}
+@media(max-width:760px){html[data-theme] body[data-skin=portal] .schedule-calendar{gap:8px!important}html[data-theme] body[data-skin=portal] .schedule-calendar a.schedule-date{min-height:112px!important;padding:10px 8px!important}html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-top{font-size:9px!important}html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-count{min-width:16px!important;min-height:16px!important;font-size:9px!important;padding:0 3px!important}html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-main>span{font-size:10px!important}}
+@media(max-width:360px){html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-top{font-size:8px!important}html[data-theme] body[data-skin=portal] .schedule-calendar .schedule-date-count{min-width:14px!important;font-size:8px!important;padding:0 2px!important}}
+@media(prefers-reduced-motion:reduce){html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand img{transition:none!important}html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand:is(:hover,:focus-visible) img{transform:none!important}}
+html[data-theme] body[data-skin=portal] :is(.progress-back,.collection-back,.watch-page-back){color:#a0a69b!important;text-decoration:none!important}
+html[data-theme] body[data-skin=portal] :is(.progress-back,.collection-back,.watch-page-back):hover{color:#e6cf75!important}
+html[data-theme] body[data-skin=portal][data-page=schedule] :is(.catalog-results,.catalog-results>span,.catalog-results .muted,.schedule-entry-copy>p){color:#949c8e!important}
