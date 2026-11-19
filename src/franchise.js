@@ -10,3 +10,6 @@ export function franchiseParts(current,rows){
  return queue.map(id=>{const a=bySource.get(id),raw=a.metadata?.airDate,date=/^\d{4}-\d{2}-\d{2}$/.test(raw||'')&&Number.isFinite(Date.parse(raw))?raw:null;return {id:a.id,name:a.name,poster:a.poster,kind:a.kind,date,year:a.year,current:a.id===current.id};}).sort((a,b)=>String(a.date||(a.year?a.year+'-01-01':'9999')).localeCompare(String(b.date||(b.year?b.year+'-01-01':'9999')))||a.id.localeCompare(b.id));
 }
 export async function loadFranchiseParts(db,current){return franchiseParts(current,(await db.query('SELECT id,name,poster,year,kind,metadata,blocked,shikimori_id FROM anime WHERE blocked=FALSE')).rows);}
+
+export function franchiseChronology(current,rows){const kinds=new Set(['prequel','sequel','side_story','parent_story','full_story','summary','alternative_version','alternative_setting','spin_off']);return franchiseParts(current,rows.map(a=>({...a,metadata:{...a.metadata,related:(a.metadata?.related||[]).filter(r=>kinds.has(String(r.relation_key||r.relation||'').toLowerCase())).map(r=>({...r,relation_key:'sequel'}))}})));}
+export async function loadFranchiseData(db,current){const rows=(await db.query('SELECT id,name,poster,year,kind,metadata,blocked,shikimori_id FROM anime WHERE blocked=FALSE')).rows;return {parts:franchiseParts(current,rows),chronology:franchiseChronology(current,rows)};}

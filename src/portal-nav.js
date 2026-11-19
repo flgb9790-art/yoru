@@ -1,6 +1,6 @@
 import {uiIcon} from './icons.js';
 const menuIcons={house:'house-fill',search:'search','calendar-days':'calendar-week-fill',star:'star-fill',play:'play-fill',bookmark:'bookmark-fill',bell:'bell-fill',clock:'clock-fill','layout-grid':'grid-fill',settings:'gear-fill',mail:'envelope-fill','user-round':'person-fill'};
-const menuIcon=name=>menuIcons[name]?'<svg class="icon menu-solid" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><use href="/assets/icons/bootstrap-menu.svg?v=1#'+menuIcons[name]+'"></use></svg>':uiIcon(name);
+export const menuIcon=name=>menuIcons[name]?'<svg class="icon menu-solid" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><use href="/assets/icons/bootstrap-menu.svg?v=1#'+menuIcons[name]+'"></use></svg>':uiIcon(name);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function portalNavigation(req){if(!req.user)return '';
  const path=req.path||'/',groups=[['Смотреть',[['/','Главная','house'],['/catalog','Каталог','search'],['/schedule','Расписание','calendar-days'],['/top','Топ аниме','star']]],['Библиотека',[['/continue','Продолжить','play'],['/library','Мой список','bookmark'],['/following','Отслеживаемое','bell'],['/history','История','clock'],['/collections','Подборки','layout-grid']]]];
