@@ -1,0 +1,68 @@
+/* Quiet panels give the profile structure without heavy contrast. */
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics{gap:16px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics>div,html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics>div:first-child,html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics>div:last-child{padding:23px!important;border:1px solid #ffffff07!important;border-radius:18px!important;background:rgba(255,255,255,.018)!important}
+html[data-theme] body[data-skin=portal] .profile-v6 #profile-favorites .profile-showcase,html[data-theme] body[data-skin=portal] .profile-v6 #profile-achievements .achievement-showcase,html[data-theme] body[data-skin=portal] .profile-v6 .profile-history{padding:23px!important;border:1px solid #ffffff07!important;border-radius:18px!important;background:rgba(255,255,255,.018)!important;box-sizing:border-box!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-columns{border:0!important;padding-top:0!important;gap:22px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-main-column{gap:22px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 #profile-achievements .achievement-showcase{padding-bottom:23px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-section-kicker{display:none!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-history h2{font-size:17px!important;margin:0!important}
+.profile-recent-count{font-size:10px;font-weight:400;color:#727676;margin-left:7px}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-grid{display:grid!important;grid-template-columns:1fr!important;gap:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card{display:grid!important;grid-template-columns:96px minmax(0,1fr) auto 29px!important;align-items:center!important;gap:14px!important;min-height:81px!important;padding:12px 0!important;background:none!important;border:0!important;border-bottom:1px solid #ffffff07!important;border-radius:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card:last-child{border-bottom:0!important;padding-bottom:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card:first-child{padding-top:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-art{width:96px!important;height:58px!important;aspect-ratio:auto!important;border-radius:9px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-art:after{background:linear-gradient(transparent 55%,#0005)!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-caption{display:flex!important;flex-direction:column!important;gap:6px!important;padding:0!important;min-width:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-caption strong{font-size:12px!important;line-height:1.5!important;-webkit-line-clamp:2!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-meta{font-size:10px!important;color:#8c9090!important;line-height:1.5!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card>time{font-size:9px!important;color:#777b7b!important;white-space:nowrap!important}
+.profile-viewing-open{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#ffffff06;border:1px solid #ffffff0b;color:#999;transition:color .2s,background .2s}
+.profile-viewing-card:hover .profile-viewing-open{background:#f0cd5612;color:#f0cd56}
+/* Settings are grouped controls, with the same visual rhythm as the rest of the profile. */
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2{padding:24px!important;background:rgba(255,255,255,.022)!important;border:1px solid #ffffff08!important;border-radius:18px!important}
+.profile-settings-heading>span{font-size:7px;letter-spacing:1.6px;color:#797d7d}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 h2{font-size:18px!important;margin:8px 0 24px!important;font-weight:600!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-name-form{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-name-form label{font-size:11px!important;color:#a4a7a7!important;display:flex!important;flex-direction:column!important;gap:9px!important;width:100%!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 input[name=name]{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;height:42px!important;min-height:42px!important;background:#111313!important;border:1px solid #ffffff0e!important;border-radius:11px!important;padding:10px 12px!important;font-size:13px!important;color:#eee!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-name-form button{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;min-height:38px!important;margin:0!important;padding:9px 12px!important;border-radius:11px!important;background:#e9c85d!important;color:#201c10!important;border:0!important;box-shadow:none!important;font-size:11px!important}
+.profile-settings-section{margin-top:23px;padding-top:19px;border-top:1px solid #ffffff08}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-settings-section h3{font-size:11px!important;color:#8c9090!important;font-weight:500!important;margin:0 0 12px!important}
+.profile-appearance-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-appearance-actions button{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;min-height:42px!important;background:#ffffff04!important;border:1px solid #ffffff0b!important;border-radius:11px!important;color:#bbb!important;box-shadow:none!important;margin:0!important;font-size:11px!important;padding:10px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-showcase-settings{gap:0!important;margin:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .showcase-settings-link{padding:11px 0!important;grid-template-columns:24px minmax(0,1fr) 13px!important;gap:10px!important;background:none!important;border:0!important;border-radius:0!important;margin:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .showcase-settings-link+.showcase-settings-link{border-top:1px solid #ffffff07!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .settings-link-icon{width:24px!important;height:24px!important;background:none!important;color:#d2c183!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .showcase-settings-link strong{font-size:11px!important;color:#d0d3d3!important;font-weight:500!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .showcase-settings-link small{font-size:9px!important;color:#767b7b!important;margin-top:3px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting strong{font-size:11px!important;color:#c2c6c6!important;font-weight:500!important;display:block!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting small{font-size:9px!important;color:#767b7b!important;display:block!important;margin-top:5px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting input{appearance:none!important;-webkit-appearance:none!important;position:relative!important;flex:none!important;box-sizing:border-box!important;width:34px!important;min-width:34px!important;height:20px!important;min-height:20px!important;border:1px solid #ffffff12!important;border-radius:999px!important;background:#353838!important;padding:0!important;margin:0!important;cursor:pointer}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting input:after{content:'';position:absolute;top:3px;left:3px;width:12px;height:12px;background:#ddd;border-radius:50%;transition:left .18s}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting input:checked{background:#e9c85d!important;border-color:#e9c85d!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .notification-sound-setting input:checked:after{left:17px;background:#252319}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-account-actions{margin:23px 0 0!important;padding-top:18px!important;border-top:1px solid #ffffff08!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-logout{width:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border-radius:11px!important;background:none!important;border:1px solid #ffffff0a!important;color:#929797!important;padding:9px 12px!important;min-height:38px!important;font-size:11px!important;box-shadow:none!important}
+@media(max-width:1000px){html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics-activity{margin-top:0!important}}
+@media(max-width:760px){
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics{gap:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-analytics>div+div{margin:0!important;border:1px solid #ffffff07!important}
+html[data-theme] body[data-skin=portal] .profile-v6 #profile-favorites .profile-showcase,html[data-theme] body[data-skin=portal] .profile-v6 #profile-achievements .achievement-showcase,html[data-theme] body[data-skin=portal] .profile-v6 .profile-history,html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2{padding:18px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-history .section-heading{align-items:center!important;flex-wrap:wrap!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-history h2{font-size:16px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card{grid-template-columns:70px minmax(0,1fr) 25px!important;gap:10px!important;min-height:76px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-art{width:70px!important;height:48px!important;border-radius:7px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card>time{display:none!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-caption strong{font-size:11px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-meta{font-size:8px!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 input[name=name]{font-size:16px!important}
+.profile-viewing-open{width:25px;height:25px}
+}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-card{box-sizing:border-box!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .profile-viewing-meta{display:block!important;width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-account-actions{display:block!important}
+html[data-theme] body[data-skin=portal] .profile-v6 .settings-v2 .profile-account-actions form{width:100%!important;margin:0!important}
