@@ -1,0 +1,206 @@
+/* Neutral charcoal surfaces and shared yellow accents. */
+html[data-theme] body[data-skin=portal] {--theme-bg:#111212!important;--theme-panel:#1b1c1c!important;--theme-text:#f3f3f3!important;--theme-muted:#999b9b!important;--theme-border:#ffffff0d!important;--control-ink:#d7d7d7!important;--control-soft:#ffffff08!important;--control-soft-hover:#ffffff10!important;--control-border:#ffffff10!important;--control-quiet-hover:#ffffff05!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3{max-width:1100px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3:before{display:none!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-cover{height:270px!important;min-height:270px!important;max-height:270px!important;background-color:#202121!important;border-radius:24px!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-avatar{border-color:#111212!important;background:#262727!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-edit-avatar{background:#252626!important;border-color:#444!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-identity h1{color:#f5f5f5!important;font-size:36px!important;letter-spacing:-1px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-identity-meta>span,html[data-theme] body[data-skin=portal] .profile-v3 .profile-public-id{color:#999!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-hero-actions a{color:#e0e0e0!important;background:#252626!important;font-size:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-stat-strip{display:grid!important;grid-template-columns:minmax(270px,1.25fr) minmax(0,2fr)!important;padding:24px!important;background:#1b1c1c!important;border-radius:22px!important;gap:22px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-level-cell{margin:0!important;max-width:none!important;padding:0!important;width:100%!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-level-ring{background:conic-gradient(#f2ce55 var(--level-progress,0%),#353636 0)!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-level-ring>span{background:#1b1c1c!important;color:#f4f4f4!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-summary{width:100%!important;align-items:center!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-summary>*{color:#f4f4f4!important;text-align:center!important;padding:6px 14px!important;border-color:#ffffff0c!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-summary strong{font-size:29px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-summary span{color:#a2a2a2!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .experience-heading>.level-badge{color:#f2ce55!important;background:transparent!important;text-decoration:none!important;font-size:12px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .experience-heading>span,html[data-theme] body[data-skin=portal] .profile-v3 .experience-caption{color:#999!important;font-size:10px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .experience-track{background:#333!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .visit-streak strong,html[data-theme] body[data-skin=portal] .profile-v3 .visit-streak .streak-symbol{color:#aaa!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-nav{background:#1d1e1e!important;border-radius:16px!important;gap:4px!important;margin:24px auto!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-nav a{font-size:12px!important;color:#aaa!important;padding:10px 14px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-nav a[aria-current=page],html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-nav a:hover{color:#fff!important;background:#303131!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics{background:#1b1c1c!important;border-radius:22px!important;margin-bottom:24px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics>div{padding:26px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics h2{font-size:18px!important;color:#eee!important;margin-bottom:22px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics-caption,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics-empty{font-size:11px!important;color:#888!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics dl>div,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics li{font-size:12px!important;margin:15px 0!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics dt,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics li>span,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics li small,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics dd small{color:#999!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics dd,html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics li>div>div:first-child{color:#e3e3e3!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-genre-track,html[data-theme] body[data-skin=portal] .profile-v3 .profile-list-spectrum{background:#303131!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-genre-track>i{background:#f1cc55!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics li:not(:first-child) .profile-genre-track>i{background:#8a8c8c!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .list-color-watching{background:#d4bf6f!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .list-color-planned{background:#7c939f!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .list-color-completed{background:#efd05c!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .list-color-paused{background:#999!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .list-color-dropped{background:#595b5b!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-columns .panel,html[data-theme] body[data-skin=portal] .profile-v3 #profile-favorites .panel{background:#1b1c1c!important;border-color:#ffffff0c!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-columns{display:grid!important;grid-template-columns:minmax(0,1fr) 320px!important;align-items:start!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-side{align-content:start!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-main-column{gap:24px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-friend,html[data-theme] body[data-skin=portal] .profile-v3 .showcase-settings-link{color:#ddd!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3{padding:20px!important;background:#1b1c1c!important;border:1px solid #ffffff0e!important;border-radius:22px!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-composer-eyebrow,html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-author,html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-hint{display:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading{padding:0!important;margin:0 0 16px!important;gap:12px!important;border:0!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading strong{font-size:13px!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading small{font-size:11px!important;color:#929494!important;margin-top:4px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-avatar{width:36px!important;height:36px!important;flex-basis:36px!important;border-radius:50%!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs{background:#111212!important;border:0!important;padding:3px!important;border-radius:999px!important;gap:3px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs button{color:#969898!important;background:transparent!important;border:0!important;border-radius:999px!important;min-height:30px!important;padding:6px 11px!important;font-size:11px!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs button[aria-pressed=true]{background:#303131!important;color:#f4f4f4!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-box{display:flex!important;flex-direction:column!important;border:1px solid #ffffff0c!important;background:#131414!important;border-radius:16px!important;overflow:hidden!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 textarea,html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-preview{order:0!important;background:transparent!important;border:0!important;border-radius:0!important;color:#ddd!important;min-height:125px!important;padding:16px!important;font-size:13px!important;line-height:1.8!important;resize:vertical!important;box-shadow:none!important;outline:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-toolbar{order:1!important;background:#131414!important;border:0!important;border-top:1px solid #ffffff08!important;padding:8px 10px!important;gap:3px!important;border-radius:0!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-toolbar .comment-tool{color:#aaa!important;background:transparent!important;border:0!important;min-height:32px!important;min-width:32px!important;padding:7px!important;border-radius:9px!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-toolbar .comment-tool:hover{color:#f4f4f4!important;background:#ffffff0d!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-compose-actions{margin-top:14px!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-compose-actions .check{padding:0!important;background:none!important;color:#999!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-character-count{color:#777!important;font-size:10px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-submit{background:#f2ce55!important;color:#191919!important;border:0!important;min-height:38px!important;padding:9px 17px!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-status{color:#aaa!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-emoji-grid{order:2!important;background:#232424!important}
+html[data-theme] body[data-skin=portal] .achievements-heading{background:radial-gradient(ellipse at 100% 0,#f2ce5516,transparent 65%),#1b1c1c!important;color:#f4f4f4!important;border-radius:24px!important;padding:30px!important}
+html[data-theme] body[data-skin=portal] .achievements-heading h1{font-size:32px!important;letter-spacing:-1px!important}
+html[data-theme] body[data-skin=portal] .achievements-heading p,html[data-theme] body[data-skin=portal] .achievements-heading .eyebrow,html[data-theme] body[data-skin=portal] .achievements-heading a,html[data-theme] body[data-skin=portal] .achievement-completion small{color:#aaa!important}
+html[data-theme] body[data-skin=portal] .achievements-heading:after{display:none!important}
+html[data-theme] body[data-skin=portal] .achievement-completion strong{font-size:38px!important;color:#fff!important}
+html[data-theme] body[data-skin=portal] .achievement-completion>span{color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .achievement-tabs a{color:#aaa!important;border:1px solid #ffffff0c!important;background:#1b1c1c!important;border-radius:999px!important;padding:10px 16px!important;font-size:12px!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .achievement-tabs a[aria-current]{background:#f2ce5512!important;color:#f2ce55!important;border-color:#f2ce5530!important}
+html[data-theme] body[data-skin=portal] .achievement-help{color:#888!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .achievement-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-row{display:grid!important;grid-template-columns:100px minmax(0,1fr)!important;gap:15px!important;padding:22px!important;background:#1b1c1c!important;border:1px solid #ffffff0b!important;border-radius:22px!important;transition:background .2s,border-color .2s!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-row:hover{background:#202121!important;border-color:#ffffff1c!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-art{grid-row:1/3!important;align-self:center!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-artwork{width:100px!important;height:100px!important;filter:none!important;opacity:1!important}
+html[data-theme] body[data-skin=portal] .achievement-list .is-locked .achievement-artwork{filter:saturate(.45)!important;opacity:.6!important}
+html[data-theme] body[data-skin=portal] .achievement-copy>small,html[data-theme] body[data-skin=portal] .achievement-copy p,html[data-theme] body[data-skin=portal] .achievement-reward small{color:#949696!important}
+html[data-theme] body[data-skin=portal] .achievement-copy h2{color:#f0f0f0!important;font-size:16px!important}
+html[data-theme] body[data-skin=portal] .achievement-progress{height:4px!important;background:#333!important;margin-top:14px!important}
+html[data-theme] body[data-skin=portal] .achievement-progress>span{background:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .achievement-reward{grid-column:2!important;flex-direction:row!important;justify-content:space-between!important;text-align:left!important}
+html[data-theme] body[data-skin=portal] .achievement-reward strong{color:#f2ce55!important;font-size:18px!important}
+html[data-theme] body[data-skin=portal] .achievement-reward button{border-radius:999px!important;background:#ffffff09!important;color:#ddd!important;border-color:#ffffff10!important;padding:7px 11px!important;min-height:32px!important}
+html[data-theme] body[data-skin=portal] .achievement-lock{background:#262727!important;color:#aaa!important;border-color:#444!important}
+html[data-theme] body[data-skin=portal] .is-earned .achievement-lock{color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .reward-toast{background:#222323!important;color:#eee!important;border-color:#f2ce552e!important}
+html[data-theme] body[data-skin=portal] .reward-toast small{color:#aaa!important}
+html[data-theme] body[data-skin=portal] .level-guide{max-width:1100px!important;background:transparent!important;border:0!important;padding:0!important}
+html[data-theme] body[data-skin=portal] .level-guide>h1{font-size:36px!important;letter-spacing:-1px!important;margin:8px 0 12px!important}
+html[data-theme] body[data-skin=portal] .level-guide>.muted{font-size:13px!important;color:#999!important;line-height:1.8!important}
+html[data-theme] body[data-skin=portal] .level-journey{display:grid!important;grid-template-columns:240px minmax(0,1fr)!important;gap:42px!important;align-items:center!important;padding:36px!important;margin:28px 0 0!important;background:radial-gradient(ellipse at 0 40%,#f2ce5512,transparent 60%),#1b1c1c!important;border:1px solid #ffffff0a!important;border-radius:26px!important;overflow:hidden!important}
+html[data-theme] body[data-skin=portal] .level-orbit{width:200px!important;height:200px!important;border:1px solid #f2ce553d!important;border-radius:50%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 0 12px #f2ce5505,0 0 0 24px #f2ce5503!important}
+html[data-theme] body[data-skin=portal] .level-orbit>span{font-size:9px!important;letter-spacing:3px!important;color:#aaa!important}
+html[data-theme] body[data-skin=portal] .level-orbit strong{font-size:76px!important;font-weight:650!important;line-height:1.2!important;letter-spacing:-4px!important;color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .level-orbit small{font-size:12px!important;color:#ccc!important}
+html[data-theme] body[data-skin=portal] .level-journey-copy h2{font-size:32px!important;line-height:1.3!important;letter-spacing:-.7px!important;margin:10px 0!important}
+html[data-theme] body[data-skin=portal] .level-journey-copy p{color:#999!important;font-size:12px!important;line-height:1.8!important}
+html[data-theme] body[data-skin=portal] .level-guide>.profile-experience{max-width:none!important;margin:0 0 26px!important;padding:24px 30px!important;border:1px solid #ffffff08!important;background:#1b1c1c!important;border-radius:0 0 22px 22px!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid{gap:18px!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid article{background:#1b1c1c!important;border:1px solid #ffffff09!important;border-radius:22px!important;padding:26px!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid strong{color:#f2ce55!important;font-size:30px!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid h2{font-size:20px!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid p{color:#999!important;font-size:12px!important}
+html[data-theme] body[data-skin=portal] .reward-symbol{display:grid!important;place-items:center!important;width:44px!important;height:44px!important;border-radius:14px!important;background:#f2ce5510!important;color:#f2ce55!important;margin-bottom:18px!important}
+html[data-theme] body[data-skin=portal] .level-guide .level-groups{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;margin:24px 0!important}
+html[data-theme] body[data-skin=portal] .level-guide .level-groups>span{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important;padding:22px 18px!important;border:1px solid #ffffff0c!important;background:#1b1c1c!important;border-radius:18px!important;color:#999!important}
+html[data-theme] body[data-skin=portal] .level-groups i{color:#666!important;font-style:normal!important}
+html[data-theme] body[data-skin=portal] .level-guide .level-groups>.is-reached{border-color:#f2ce5525!important;background:#f2ce5507!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .level-groups .is-reached i{color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .level-groups b{font-size:13px!important}
+html[data-theme] body[data-skin=portal] .level-groups small{font-size:11px!important;color:#999!important}
+html[data-theme] body[data-skin=portal] .messenger{background:#191a1a!important;border:1px solid #ffffff0d!important;border-radius:24px!important;overflow:hidden!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .messenger-sidebar{background:#1b1c1c!important;border-color:#ffffff0d!important}
+html[data-theme] body[data-skin=portal] .messenger-sidebar-heading{padding:22px 18px 14px!important}
+html[data-theme] body[data-skin=portal] .messenger-sidebar-heading h2{font-size:21px!important;letter-spacing:-.5px!important}
+html[data-theme] body[data-skin=portal] .messenger-search{background:#111212!important;border:1px solid #ffffff09!important;border-radius:14px!important;margin:0 16px 14px!important}
+html[data-theme] body[data-skin=portal] .messenger-search input{background:transparent!important;color:#ddd!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .messenger-tabs{padding:4px!important;background:#121313!important;border:0!important;border-radius:12px!important;margin:0 16px 14px!important;gap:3px!important}
+html[data-theme] body[data-skin=portal] .messenger-tabs a{border:0!important;color:#999!important;background:none!important;border-radius:9px!important;padding:9px!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .messenger-tabs a[aria-current]{color:#eee!important;background:#303131!important}
+html[data-theme] body[data-skin=portal] .messenger-person{border:0!important;border-radius:14px!important;margin:4px 10px!important;padding:14px 12px!important;gap:12px!important;color:#eee!important;transform:none!important}
+html[data-theme] body[data-skin=portal] .messenger-person.is-active{background:#f2ce550c!important}
+html[data-theme] body[data-skin=portal] .messenger-person:hover{background:#ffffff07!important}
+html[data-theme] body[data-skin=portal] .messenger-person-text strong{font-size:13px!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .messenger-person-text small,html[data-theme] body[data-skin=portal] .messenger-person-meta,html[data-theme] body[data-skin=portal] .messenger-list-empty{color:#929494!important;font-size:11px!important}
+html[data-theme] body[data-skin=portal] .messenger-avatar{background:#333!important;color:#ccc!important;border-radius:50%!important}
+html[data-theme] body[data-skin=portal] .message-count,html[data-theme] body[data-skin=portal] .messenger-send{background:#f2ce55!important;color:#161616!important}
+html[data-theme] body[data-skin=portal] .messenger-main,html[data-theme] body[data-skin=portal] .chat,html[data-theme] body[data-skin=portal] .chat-scroll{background:#141515!important}
+html[data-theme] body[data-skin=portal] .chat-heading{background:#1b1c1c!important;border-color:#ffffff0b!important;padding:16px 22px!important}
+html[data-theme] body[data-skin=portal] .chat-peer h1{font-size:16px!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .chat-peer small{color:#999!important}
+html[data-theme] body[data-skin=portal] .chat-thread{padding:22px!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .message-bubble{background:#272828!important;border:1px solid #ffffff07!important;color:#eee!important;border-radius:18px 18px 18px 5px!important;box-shadow:none!important;padding:12px 15px!important}
+html[data-theme] body[data-skin=portal] .message-bubble.is-own{background:#f2ce5510!important;border-color:#f2ce5514!important;border-radius:18px 18px 5px 18px!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .message-bubble p{font-size:13px!important;line-height:1.7!important}
+html[data-theme] body[data-skin=portal] .message-time,html[data-theme] body[data-skin=portal] .chat-day,html[data-theme] body[data-skin=portal] .chat-compose-hint,html[data-theme] body[data-skin=portal] .message-receipt{color:#929494!important}
+html[data-theme] body[data-skin=portal] .message-receipt.is-read{color:#f2ce55!important}
+html[data-theme] body[data-skin=portal] .message-composer{background:#1b1c1c!important;border-color:#ffffff0b!important;padding:14px 18px!important}
+html[data-theme] body[data-skin=portal] .chat-compose-row{background:#111212!important;border:1px solid #ffffff0b!important;border-radius:18px!important;padding:6px!important;gap:4px!important}
+html[data-theme] body[data-skin=portal] .chat-compose-row textarea{background:transparent!important;border:0!important;color:#eee!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .messenger-icon,html[data-theme] body[data-skin=portal] .contact-toggle{background:none!important;color:#aaa!important;border-color:#ffffff0d!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .messenger-icon:hover,html[data-theme] body[data-skin=portal] .contact-toggle:hover{background:#ffffff09!important;color:#eee!important}
+html[data-theme] body[data-skin=portal] .messenger-send{border:0!important;border-radius:12px!important;box-shadow:none!important}
+html[data-theme] body[data-skin=portal] .messenger-welcome>span{background:#f2ce550b!important;color:#f2ce55!important;border:1px solid #f2ce551e!important;border-radius:28px!important;padding:24px!important}
+html[data-theme] body[data-skin=portal] .messenger-welcome h1{font-size:28px!important;color:#eee!important;letter-spacing:-.7px!important}
+html[data-theme] body[data-skin=portal] .messenger-welcome p{color:#999!important;line-height:1.8!important;max-width:340px!important}
+html[data-theme] body[data-skin=portal] .messenger-welcome>a{display:inline-flex!important;border:1px solid #ffffff14!important;background:#272828!important;padding:12px 18px!important;border-radius:999px!important;color:#eee!important;text-decoration:none!important}
+html[data-theme] body[data-skin=portal] .messenger-appeals,html[data-theme] body[data-skin=portal] .message-anime,html[data-theme] body[data-skin=portal] .message-action-menu,html[data-theme] body[data-skin=portal] .dialog-actions form,html[data-theme] body[data-skin=portal] .anime-picker{background:#232424!important;color:#ccc!important;border-color:#ffffff10!important}
+@media(min-width:1001px){html[data-theme] body[data-skin=portal] #portal-sidebar .portal-brand-row{height:88px!important;min-height:88px!important;margin:0 0 4px!important;padding:0!important;width:100%!important}
+html[data-theme] body[data-skin=portal] #portal-sidebar .portal-nav-group:first-child>p{font-size:0!important;line-height:0!important;height:1px!important;min-height:0!important;width:26px!important;padding:0!important;margin:10px auto!important;background:#ffffff10!important}
+}
+@media(max-width:1000px){html[data-theme] body[data-skin=portal] .profile-v3 .profile-stat-strip{grid-template-columns:1fr!important;gap:22px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-level-cell{max-width:420px!important;margin:0 auto!important}
+html[data-theme] body[data-skin=portal] .achievement-list{grid-template-columns:1fr!important}
+}
+@media(max-width:760px){html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-cover{height:180px!important;min-height:180px!important;max-height:180px!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-identity h1{font-size:29px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-stat-strip{padding:20px 16px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-summary strong{font-size:25px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-summary span{font-size:10px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-analytics>div{padding:23px!important}
+html[data-theme] body[data-skin=portal] .profile-v3 .profile-columns{display:flex!important;flex-direction:column!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-nav a{font-size:11px!important;padding:8px 10px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3{padding:16px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-heading{flex-wrap:wrap!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-editor-tabs{margin-left:48px!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-compose-actions{flex-wrap:wrap!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 .comment-character-count{margin-left:auto!important}
+html[data-theme] body[data-skin=portal] .comment-composer-v3 textarea{font-size:13px!important;min-height:140px!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-row{grid-template-columns:75px minmax(0,1fr)!important;padding:18px!important;gap:12px!important}
+html[data-theme] body[data-skin=portal] .achievement-list .achievement-artwork{width:75px!important;height:75px!important}
+html[data-theme] body[data-skin=portal] .achievement-copy h2{font-size:14px!important}
+html[data-theme] body[data-skin=portal] .achievements-heading{padding:24px!important}
+html[data-theme] body[data-skin=portal] .achievements-heading h1,html[data-theme] body[data-skin=portal] .level-guide>h1{font-size:28px!important}
+html[data-theme] body[data-skin=portal] .level-journey{grid-template-columns:1fr!important;justify-items:center!important;gap:30px!important;padding:32px 22px!important;text-align:center!important}
+html[data-theme] body[data-skin=portal] .level-orbit{width:155px!important;height:155px!important}
+html[data-theme] body[data-skin=portal] .level-orbit strong{font-size:60px!important}
+html[data-theme] body[data-skin=portal] .level-journey-copy h2{font-size:26px!important}
+html[data-theme] body[data-skin=portal] .level-guide .level-groups{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html[data-theme] body[data-skin=portal] .level-guide .level-groups>span:last-child{grid-column:1/-1!important}
+html[data-theme] body[data-skin=portal] .level-guide .reward-grid{grid-template-columns:1fr!important}
+html[data-theme] body[data-skin=portal] .level-guide>.profile-experience{padding:20px!important}
+html[data-theme] body[data-skin=portal] .chat-heading{padding:13px!important}
+html[data-theme] body[data-skin=portal] .chat-thread{padding:15px!important}
+html[data-theme] body[data-skin=portal] .message-composer{padding:10px!important}
+html[data-theme] body[data-skin=portal] .messenger-welcome h1{font-size:23px!important}
+}
+@media(prefers-reduced-motion:no-preference){html[data-theme] body[data-skin=portal] .profile-v3 .profile-genre-track>i,html[data-theme] body[data-skin=portal] .achievement-progress>span{animation:portal-bar-reveal .65s ease both!important;transform-origin:left!important}
+html[data-theme] body[data-skin=portal] .level-orbit{animation:portal-orbit-in .8s ease both!important}
+}
+@keyframes portal-bar-reveal{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes portal-orbit-in{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-summary{grid-column:auto!important;grid-row:auto!important;gap:0!important}
+html[data-theme] body[data-skin=portal] .profile-v2.profile-v3 .profile-summary>*{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;border-right:0!important;min-height:58px!important}
+html[data-theme] body[data-skin=portal] .chat-empty{color:#999!important;font-size:12px!important}
+html[data-theme] body[data-skin=portal] .message-anime strong{color:#eee!important}
+@media(max-width:760px){
+html[data-theme] body[data-skin=portal].messenger-page>header,html[data-theme] body[data-skin=portal].messenger-page>footer{display:none!important}
+html[data-theme] body[data-skin=portal].messenger-page>main{padding:0!important;margin:0!important;top:var(--messenger-top,0px)!important;height:calc(var(--messenger-vh,100dvh) - var(--mobile-nav-height,64px))!important}
+html[data-theme] body[data-skin=portal].messenger-page:has(.has-chat)>main{height:var(--messenger-vh,100dvh)!important}
+html[data-theme] body[data-skin=portal].messenger-page:has(.has-chat)>.mobile-bottom-nav{display:none!important}
+html[data-theme] body[data-skin=portal].messenger-page .panel.messenger{margin:0!important;height:100%!important;max-height:none!important;width:100%!important;border:0!important;border-radius:0!important}
+}
