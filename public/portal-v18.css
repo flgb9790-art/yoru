@@ -1,0 +1,6 @@
+html[data-theme] body[data-skin=portal] .watch-episode>span:last-child strong{display:flex;align-items:center;gap:7px;color:#eef0eb!important}
+html[data-theme] body[data-skin=portal] .watch-episode>span:last-child small{color:#969e90!important;line-height:1.5!important}
+html[data-theme] body[data-skin=portal] .watch-episode[aria-current=true]>span:last-child small{color:#d8c77d!important}
+html[data-theme] body[data-skin=portal] .watch-episode[data-completed=true]>span:last-child small{color:#bfc7b7!important}
+html[data-theme] body[data-skin=portal] .watch-episode .watch-episode-check{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:none;border-radius:50%;background:#e5cc5c14;color:#e4cd72!important}
+html[data-theme] body[data-skin=portal] .watch-episode[data-completed=true]{border-color:#ffffff0b!important}

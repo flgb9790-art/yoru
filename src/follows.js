@@ -19,8 +19,14 @@ export async function notifyEpisodes(client,anime,releaseId,items,{newEdition=fa
  }
 }
 export async function continueWatching(db,userId,{all=false}={}){
- const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.duration_seconds AS resume_duration,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 ${all?'':'AND (position_seconds>0 OR manual_mark=FALSE)'} GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC`,[userId])).rows;
- const seen=new Set();return rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return all||!a.completed&&a.resume_position>0;});
+ const rows=(await db.query(`SELECT a.*,w.episode AS resume_episode,w.season AS resume_season,w.position_seconds AS resume_position,w.duration_seconds AS resume_duration,w.provider AS resume_provider,w.source_release_id AS resume_release,w.completed FROM anime a JOIN watch_history w ON w.anime_id=a.id JOIN (SELECT anime_id,MAX(updated_at) AS last_watch FROM watch_history WHERE user_id=$1 ${all?'':'AND (position_seconds>0 OR manual_mark=FALSE)'} GROUP BY anime_id) recent ON recent.anime_id=w.anime_id AND recent.last_watch=w.updated_at WHERE w.user_id=$1 AND a.blocked=FALSE ORDER BY w.updated_at DESC,w.episode DESC,w.season DESC`,[userId])).rows;
+ const seen=new Set(),latest=rows.filter(a=>{if(seen.has(a.id))return false;seen.add(a.id);return true;});if(all)return latest;
+ const completed=(await db.query('SELECT anime_id,episode,season FROM watch_history WHERE user_id=$1 AND completed=TRUE',[userId])).rows;
+ const releases=(await db.query('SELECT anime_id,provider,release_id,season,episode FROM episode_releases WHERE available=TRUE AND anime_id IN (SELECT anime_id FROM watch_history WHERE user_id=$1)',[userId])).rows;
+ return latest.flatMap(a=>{if(!a.completed)return Number(a.resume_position)>0?[a]:[];if(a.kind==='movie'||Number(a.resume_season)===0)return [];
+ const watched=new Set(completed.filter(h=>h.anime_id===a.id&&Number(h.season)>0).map(h=>Number(h.episode))),known=releases.filter(e=>e.anime_id===a.id&&e.provider===a.resume_provider&&Number(e.season)===Number(a.resume_season)&&(!a.resume_release||Number(e.release_id)===Number(a.resume_release))).map(e=>Number(e.episode));
+ const maximum=Math.min(100000,Math.max(0,Number(a.aired)||0,a.status==='released'?Number(a.episodes)||0:0));let next;if(known.length)next=[...new Set(known)].sort((x,y)=>x-y).find(n=>n>Number(a.resume_episode)&&!watched.has(n));else{next=Number(a.resume_episode)+1;while(next<=maximum&&watched.has(next))next++;if(next>maximum)next=null;}if(!next)return [];
+ return [{...a,resume_episode:next,resume_position:0,resume_duration:0,resume_next:true,completed:false}];});
 }
 export {resumeLink,resumeCard} from './resume-card.js';
 export function mountFollows(app,db){
